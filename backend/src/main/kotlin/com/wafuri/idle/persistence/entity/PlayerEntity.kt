@@ -20,6 +20,12 @@ class PlayerEntity {
   @Column(nullable = false)
   lateinit var name: String
 
+  @Column(nullable = false)
+  var experience: Int = 0
+
+  @Column(nullable = false)
+  var level: Int = 1
+
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(name = "player_owned_characters", joinColumns = [JoinColumn(name = "player_id")])
   @Column(name = "character_key", nullable = false)

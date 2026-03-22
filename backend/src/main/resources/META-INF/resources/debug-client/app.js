@@ -1,7 +1,11 @@
 const state = {
   socket: null,
+  sessionToken: null,
+  sessionExpiresAt: null,
+  starterChoices: [],
   latestPlayerStateMessage: null,
   latestCombatStateMessage: null,
+  recentEvents: [],
   latestInventory: [],
   latestTeams: [],
   latestPlayer: null,
@@ -13,70 +17,73 @@ const ids = {
   baseUrl: document.getElementById("baseUrl"),
   playerId: document.getElementById("playerId"),
   teamId: document.getElementById("teamId"),
+  teamSlotPosition: document.getElementById("teamSlotPosition"),
   ownedCharacterKey: document.getElementById("ownedCharacterKey"),
-  characterKey: document.getElementById("characterKey"),
-  equipCharacterKey: document.getElementById("equipCharacterKey"),
-  unequipCharacterKey: document.getElementById("unequipCharacterKey"),
   watchPlayerId: document.getElementById("watchPlayerId"),
   inventoryItemPicker: document.getElementById("inventoryItemPicker"),
   stateOutput: document.getElementById("stateOutput"),
+  eventOutput: document.getElementById("eventOutput"),
   logOutput: document.getElementById("logOutput"),
   wsStatus: document.getElementById("wsStatus"),
 };
 
 ids.stateOutput.textContent = "Connect WebSocket to watch player-scoped state snapshots.";
+ids.eventOutput.textContent = "Offline progression and gameplay notifications will appear here.";
 ids.logOutput.textContent = "Use the forms above to issue REST commands.";
 
 document.getElementById("createPlayerForm").addEventListener("submit", async (event) => {
   event.preventDefault();
-  const response = await request("/players", "POST", {
+  const response = await request("/auth/signup", "POST", {
     name: document.getElementById("playerName").value.trim(),
+    email: null,
+    password: null,
   });
-  state.latestPlayer = response;
-  setInputValue(ids.playerId, response.id);
-  setInputValue(ids.watchPlayerId, response.id);
-  setSelectValue(ids.teamId, response.activeTeamId);
-  syncOwnedCharacterKeys(response.ownedCharacterKeys);
-  await fetchTeams(response.id);
-  appendLog("Created player", response);
+  state.sessionToken = response.sessionToken;
+  state.sessionExpiresAt = response.sessionExpiresAt;
+  state.latestPlayer = response.player;
+  setInputValue(ids.playerId, response.player.id);
+  setInputValue(ids.watchPlayerId, response.player.id);
+  syncOwnedCharacterKeys(response.player.ownedCharacterKeys);
+  await fetchTeams(response.player.id);
+  appendLog("Signed up guest player", response);
 });
 
 document.getElementById("assignCharacterForm").addEventListener("submit", async (event) => {
   event.preventDefault();
   const teamId = requireValue(ids.teamId.value.trim(), "Current team ID is required.");
+  const position = requireValue(ids.teamSlotPosition.value.trim(), "Current team slot is required.");
   const characterKey = requireValue(ids.ownedCharacterKey.value.trim(), "Owned character is required.");
-  const response = await request(`/teams/${teamId}/characters/${characterKey}`, "POST");
+  const response = await request(`/teams/${teamId}/slots/${position}/characters/${characterKey}`, "POST");
   updateTeam(response);
-  syncCharacterSelection(characterKey);
-  appendLog("Character assigned to team", response);
+  appendLog("Character assigned to team slot", response);
 });
 
 document.getElementById("equipForm").addEventListener("submit", async (event) => {
   event.preventDefault();
-  const characterKey = resolveValue("equipCharacterKey", ids.characterKey);
-  await request(`/characters/${characterKey}/equip`, "POST", {
-    inventoryItemId: document.getElementById("inventoryItemId").value.trim(),
+  const teamId = requireValue(ids.teamId.value.trim(), "Current team ID is required.");
+  const position = requireValue(ids.teamSlotPosition.value.trim(), "Current team slot is required.");
+  const inventoryItemId = requireValue(ids.inventoryItemPicker.value.trim(), "Inventory item is required.");
+  await request(`/teams/${teamId}/slots/${position}/equip`, "POST", {
+    inventoryItemId,
     slot: document.getElementById("equipSlot").value,
   });
-  syncCharacterSelection(characterKey);
-  appendLog("Equip command sent", { characterKey });
+  appendLog("Equip command sent", { teamId, position, inventoryItemId });
 });
 
 document.getElementById("unequipForm").addEventListener("submit", async (event) => {
   event.preventDefault();
-  const characterKey = resolveValue("unequipCharacterKey", ids.characterKey);
-  await request(`/characters/${characterKey}/unequip`, "POST", {
+  const teamId = requireValue(ids.teamId.value.trim(), "Current team ID is required.");
+  const position = requireValue(ids.teamSlotPosition.value.trim(), "Current team slot is required.");
+  await request(`/teams/${teamId}/slots/${position}/unequip`, "POST", {
     slot: document.getElementById("unequipSlot").value,
   });
-  syncCharacterSelection(characterKey);
-  appendLog("Unequip command sent", { characterKey });
+  appendLog("Unequip command sent", { teamId, position });
 });
 
 document.getElementById("fetchPlayer").addEventListener("click", async () => {
   const playerId = requireValue(ids.playerId.value.trim(), "Active player ID is required.");
   const response = await request(`/players/${playerId}`, "GET");
   state.latestPlayer = response;
-  setSelectValue(ids.teamId, response.activeTeamId);
   syncOwnedCharacterKeys(response.ownedCharacterKeys);
   await fetchTeams(playerId);
   appendLog("Fetched player", response);
@@ -96,16 +103,9 @@ document.getElementById("fetchInventory").addEventListener("click", async () => 
 });
 
 document.getElementById("startCombat").addEventListener("click", async () => {
-  const playerId = requireValue(ids.playerId.value.trim(), "Active player ID is required.");
-  const response = await request(`/players/${playerId}/combat/start`, "POST");
-  state.latestCombatStateMessage = {
-    type: "COMBAT_STATE_SYNC",
-    playerId,
-    snapshot: response,
-    serverTime: new Date().toISOString(),
-  };
-  renderStateOutput();
-  appendLog("Combat started", response);
+  requireConnectedSocket();
+  state.socket.send(JSON.stringify({ type: "START_COMBAT" }));
+  appendLog("Combat start command sent over WebSocket");
 });
 
 document.getElementById("activateTeam").addEventListener("click", async () => {
@@ -121,25 +121,6 @@ document.getElementById("activateTeam").addEventListener("click", async () => {
   appendLog("Team activated", response);
 });
 
-ids.inventoryItemPicker.addEventListener("change", () => {
-  if (ids.inventoryItemPicker.value) {
-    setInputValue(ids.inventoryItemId, ids.inventoryItemPicker.value);
-  }
-});
-
-ids.teamId.addEventListener("change", () => {
-  syncCharacterOptions();
-});
-
-ids.characterKey.addEventListener("change", () => {
-  const value = ids.characterKey.value;
-  setSelectValue(ids.equipCharacterKey, "");
-  setSelectValue(ids.unequipCharacterKey, "");
-  if (value) {
-    syncCharacterSelection(value);
-  }
-});
-
 document.getElementById("connectWs").addEventListener("click", () => {
   connectWebSocket();
 });
@@ -150,6 +131,8 @@ document.getElementById("disconnectWs").addEventListener("click", () => {
 
 document.getElementById("clearLog").addEventListener("click", () => {
   ids.logOutput.textContent = "";
+  state.recentEvents = [];
+  renderEventOutput();
 });
 
 document.getElementById("copyState").addEventListener("click", () => {
@@ -166,7 +149,7 @@ function connectWebSocket() {
     (ids.watchPlayerId.value || ids.playerId.value).trim(),
     "Player ID is required to open a WebSocket session.",
   );
-  const wsUrl = buildWsUrl(`/ws/player/${playerId}`);
+  const wsUrl = buildWsUrl(`/ws/player/${playerId}`, { token: requireSessionToken() });
   const socket = new WebSocket(wsUrl);
   state.socket = socket;
 
@@ -182,10 +165,10 @@ function connectWebSocket() {
     appendLog("WebSocket state sync", parsed);
   });
 
-  socket.addEventListener("close", () => {
+  socket.addEventListener("close", (event) => {
     ids.wsStatus.textContent = "Disconnected";
     ids.wsStatus.className = "status disconnected";
-    appendLog("WebSocket disconnected");
+    appendLog("WebSocket disconnected", { code: event.code, reason: event.reason || null });
     if (state.socket === socket) {
       state.socket = null;
     }
@@ -203,6 +186,13 @@ function disconnectWebSocket() {
   }
 }
 
+function requireConnectedSocket() {
+  if (!state.socket || state.socket.readyState !== WebSocket.OPEN) {
+    throw new Error("Connect the player WebSocket before sending combat commands.");
+  }
+  return state.socket;
+}
+
 function handleSocketMessage(message) {
   if (message?.type === "PLAYER_STATE_SYNC") {
     state.latestPlayerStateMessage = message;
@@ -210,6 +200,8 @@ function handleSocketMessage(message) {
     syncOwnedCharacters(message?.snapshot?.ownedCharacters);
   } else if (message?.type === "COMBAT_STATE_SYNC") {
     state.latestCombatStateMessage = message;
+  } else if (message?.type === "ZONE_LEVEL_UP" || message?.type === "OFFLINE_PROGRESSION") {
+    pushRecentEvent(message);
   }
   renderStateOutput();
 }
@@ -218,7 +210,6 @@ async function fetchTeams(playerId) {
   const response = await request(`/players/${playerId}/teams`, "GET");
   state.latestTeams = Array.isArray(response) ? response : [];
   syncTeamOptions();
-  syncCharacterOptions();
   return response;
 }
 
@@ -228,12 +219,23 @@ async function request(path, method, body) {
     method,
     headers: {
       "Content-Type": "application/json",
+      ...(state.sessionToken ? { Authorization: `Bearer ${state.sessionToken}` } : {}),
     },
     body: body ? JSON.stringify(body) : undefined,
   });
 
+  const refreshedToken = response.headers.get("X-Session-Token");
+  if (refreshedToken) {
+    state.sessionToken = refreshedToken;
+    state.sessionExpiresAt = response.headers.get("X-Session-Expires-At");
+  }
+
   const text = await response.text();
   const payload = text ? parseJson(text) : null;
+  if (payload?.sessionToken) {
+    state.sessionToken = payload.sessionToken;
+    state.sessionExpiresAt = payload.sessionExpiresAt;
+  }
   appendLog(`${method} ${path}`, {
     status: response.status,
     body: payload,
@@ -257,12 +259,83 @@ function appendLog(message, payload) {
 function renderStateOutput() {
   ids.stateOutput.textContent = JSON.stringify(
     {
+      session: {
+        expiresAt: state.sessionExpiresAt,
+      },
       playerState: state.latestPlayerStateMessage,
       combatState: state.latestCombatStateMessage,
     },
     null,
     2,
   );
+}
+
+function renderEventOutput() {
+  if (state.recentEvents.length === 0) {
+    ids.eventOutput.textContent = "Offline progression and gameplay notifications will appear here.";
+    return;
+  }
+
+  ids.eventOutput.textContent = state.recentEvents
+    .map((message) => formatEventMessage(message))
+    .join("\n\n");
+}
+
+function pushRecentEvent(message) {
+  state.recentEvents = [message, ...state.recentEvents].slice(0, 12);
+  renderEventOutput();
+}
+
+function formatEventMessage(message) {
+  const serverTime = formatTimestamp(message.serverTime);
+  if (message?.type === "OFFLINE_PROGRESSION") {
+    const rewards = Array.isArray(message.rewards) && message.rewards.length > 0
+      ? message.rewards.map((reward) => `${reward.itemName} x${reward.count}`).join(", ")
+      : "none";
+    return [
+      `[${serverTime}] Offline progression`,
+      `Player: ${message.playerId}`,
+      `Offline duration: ${formatDuration(message.offlineDurationMillis)}`,
+      `Kills: ${message.kills} | EXP: ${message.experienceGained}`,
+      `Player level: ${message.playerLevel} (+${message.playerLevelsGained})`,
+      `Zone: ${message.zoneId} level ${message.zoneLevel} (+${message.zoneLevelsGained})`,
+      `Rewards: ${rewards}`,
+    ].join("\n");
+  }
+  if (message?.type === "ZONE_LEVEL_UP") {
+    return [
+      `[${serverTime}] Zone level up`,
+      `Player: ${message.playerId}`,
+      `Zone: ${message.zoneId}`,
+      `New level: ${message.level}`,
+    ].join("\n");
+  }
+  return JSON.stringify(message, null, 2);
+}
+
+function formatTimestamp(value) {
+  return value ? new Date(value).toLocaleTimeString() : new Date().toLocaleTimeString();
+}
+
+function formatDuration(durationMillis) {
+  if (!Number.isFinite(durationMillis) || durationMillis < 0) {
+    return "0s";
+  }
+
+  const totalSeconds = Math.floor(durationMillis / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  const parts = [];
+
+  if (hours > 0) {
+    parts.push(`${hours}h`);
+  }
+  if (minutes > 0 || hours > 0) {
+    parts.push(`${minutes}m`);
+  }
+  parts.push(`${seconds}s`);
+  return parts.join(" ");
 }
 
 function syncInventoryOptions(inventory) {
@@ -283,31 +356,15 @@ function syncInventoryOptions(inventory) {
   inventory.forEach((item) => {
     const option = document.createElement("option");
     option.value = item.id;
-    const equippedSuffix = item.equippedCharacterKey ? ` | equipped:${item.itemType}` : "";
+    const equippedSuffix = item.equippedTeamId
+      ? ` | equipped:team ${item.equippedTeamId} slot ${item.equippedPosition}`
+      : "";
     option.textContent = `${item.itemDisplayName} [${item.itemName}] (${item.itemType}) | ${item.id}${equippedSuffix}`;
     ids.inventoryItemPicker.appendChild(option);
   });
 
-  const stillExists = state.latestInventory.some((item) => item.id === currentValue);
-  if (stillExists) {
+  if (state.latestInventory.some((item) => item.id === currentValue)) {
     ids.inventoryItemPicker.value = currentValue;
-  } else if (inventory.length === 1) {
-    ids.inventoryItemPicker.value = inventory[0].id;
-    setInputValue(ids.inventoryItemId, inventory[0].id);
-  }
-}
-
-function syncCharacterOptions() {
-  const teamId = ids.teamId.value.trim();
-  const selectedTeam = state.latestTeams.find((team) => team.id === teamId);
-  const characterKeys = selectedTeam?.characterKeys || [];
-
-  populateCharacterSelect(ids.characterKey, characterKeys, "Fetch teams to list characters for the selected team");
-  populateCharacterSelect(ids.equipCharacterKey, characterKeys, "Use current character");
-  populateCharacterSelect(ids.unequipCharacterKey, characterKeys, "Use current character");
-
-  if (characterKeys.length === 1) {
-    syncCharacterSelection(characterKeys[0]);
   }
 }
 
@@ -335,31 +392,6 @@ function syncTeamOptions() {
   }
 }
 
-function populateCharacterSelect(select, characterKeys, placeholderText) {
-  const currentValue = select.value;
-  select.innerHTML = "";
-
-  const placeholder = document.createElement("option");
-  placeholder.value = "";
-  placeholder.textContent = characterKeys.length === 0 ? placeholderText : "Select a character";
-  select.appendChild(placeholder);
-
-  characterKeys.forEach((characterKey) => {
-    const option = document.createElement("option");
-    option.value = characterKey;
-    option.textContent = state.ownedCharactersByKey[characterKey] || characterKey;
-    select.appendChild(option);
-  });
-
-  if (characterKeys.includes(currentValue)) {
-    select.value = currentValue;
-  }
-}
-
-function syncCharacterSelection(characterKey) {
-  setSelectValue(ids.characterKey, characterKey);
-}
-
 function syncOwnedCharacters(ownedCharacters) {
   if (!Array.isArray(ownedCharacters)) {
     return;
@@ -369,7 +401,6 @@ function syncOwnedCharacters(ownedCharacters) {
     ownedCharacters.map((character) => [character.key, `${character.name} (${character.key})`]),
   );
   syncOwnedCharacterOptions();
-  syncCharacterOptions();
 }
 
 function syncOwnedCharacterKeys(ownedCharacterKeys) {
@@ -416,7 +447,6 @@ function updateTeam(updatedTeam) {
     state.latestTeams.push(updatedTeam);
   }
   syncTeamOptions();
-  syncCharacterOptions();
 }
 
 function parseJson(value) {
@@ -431,26 +461,18 @@ function normalizedBaseUrl() {
   return ids.baseUrl.value.trim().replace(/\/+$/, "");
 }
 
-function buildWsUrl(path) {
-  return normalizedBaseUrl().replace(/^http/, "ws") + path;
+function buildWsUrl(path, query = {}) {
+  const url = new URL(normalizedBaseUrl().replace(/^http/, "ws") + path);
+  Object.entries(query).forEach(([key, value]) => {
+    if (value) {
+      url.searchParams.set(key, value);
+    }
+  });
+  return url.toString();
 }
 
 function setInputValue(input, value) {
   input.value = value || "";
-}
-
-function setSelectValue(select, value) {
-  const nextValue = value || "";
-  const optionExists = Array.from(select.options).some((option) => option.value === nextValue);
-  select.value = optionExists ? nextValue : "";
-}
-
-function resolveValue(sourceId, fallbackInput) {
-  const directValue = document.getElementById(sourceId).value.trim();
-  if (directValue) {
-    return directValue;
-  }
-  return requireValue(fallbackInput.value.trim(), `${fallbackInput.previousElementSibling?.textContent || "Value"} is required.`);
 }
 
 function requireValue(value, message) {
@@ -458,6 +480,10 @@ function requireValue(value, message) {
     throw new Error(message);
   }
   return value;
+}
+
+function requireSessionToken() {
+  return requireValue(state.sessionToken, "Sign up or log in first so the WebSocket can authenticate.");
 }
 
 window.addEventListener("error", (event) => {

@@ -52,8 +52,11 @@ class CharacterTemplateEntity {
 
   @Convert(converter = StringListConverter::class)
   @Column(nullable = false)
-  var skillRefs: List<String> = emptyList()
+  var tags: List<String> = emptyList()
 
-  @Column
-  var passiveRef: String? = null
+  @Column(name = "skill_definition", columnDefinition = "text")
+  var skillDefinition: String? = null
+
+  @Column(name = "passive_definition", columnDefinition = "text")
+  var passiveDefinition: String? = null
 }

@@ -37,5 +37,8 @@ class InventoryItemEntity {
   var upgrade: Int = 0
 
   @Column
-  var equippedCharacterKey: String? = null
+  var equippedTeamId: UUID? = null
+
+  @Column
+  var equippedPosition: Int? = null
 }

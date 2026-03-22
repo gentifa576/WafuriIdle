@@ -31,10 +31,10 @@
         <h2>Player</h2>
         <form id="createPlayerForm" class="stack">
           <label>
-            <span>Name</span>
+            <span>Guest Name</span>
             <input id="playerName" name="playerName" type="text" placeholder="Alice" required>
           </label>
-          <button type="submit">Create Player</button>
+          <button type="submit">Sign Up Guest</button>
         </form>
 
         <div class="stack compact">
@@ -58,6 +58,14 @@
             <option value="">Fetch teams to select a team</option>
           </select>
         </label>
+        <label class="stack compact">
+          <span>Current Team Slot</span>
+          <select id="teamSlotPosition">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select>
+        </label>
         <div class="row">
           <button id="activateTeam" type="button" class="ghost">Activate Team</button>
           <button id="startCombat" type="button">Start Combat</button>
@@ -78,33 +86,17 @@
               <option value="">Connect WebSocket or fetch player to list owned characters</option>
             </select>
           </label>
-          <button type="submit">Add To Team</button>
+          <button type="submit">Assign To Selected Slot</button>
         </form>
-        <label class="stack">
-          <span>Current Character</span>
-          <select id="characterKey">
-            <option value="">Fetch teams to list characters for the selected team</option>
-          </select>
-        </label>
       </div>
       <div>
         <h2>Equipment</h2>
         <form id="equipForm" class="stack">
           <label>
-            <span>Character</span>
-            <select id="equipCharacterKey">
-              <option value="">Use current character</option>
-            </select>
-          </label>
-          <label>
             <span>Inventory Item Picker</span>
             <select id="inventoryItemPicker">
               <option value="">Select from fetched inventory or WS state</option>
             </select>
-          </label>
-          <label>
-            <span>Inventory Item ID</span>
-            <input id="inventoryItemId" type="text" placeholder="Existing inventory item UUID" required>
           </label>
           <label>
             <span>Slot</span>
@@ -118,12 +110,6 @@
         </form>
 
         <form id="unequipForm" class="stack compact">
-          <label>
-            <span>Character</span>
-            <select id="unequipCharacterKey">
-              <option value="">Use current character</option>
-            </select>
-          </label>
           <label>
             <span>Slot</span>
             <select id="unequipSlot">
@@ -156,13 +142,13 @@
       <div>
         <h2>Tips</h2>
         <ul class="tips">
-          <li>Create a player first.</li>
+          <li>Sign up a guest player first.</li>
           <li>Players already have team slots after creation. Fetch teams to find the IDs.</li>
-          <li>Add an owned character to a team before activating it.</li>
+          <li>Pick a team and slot, then assign an owned character before activating the team.</li>
           <li>Activate a non-empty team before starting combat.</li>
           <li>Character creation is not exposed through public REST.</li>
           <li>Fetch inventory or connect WebSocket to populate the inventory item picker.</li>
-          <li>Equip uses existing inventory item IDs only. Public REST does not mint items.</li>
+          <li>Equipment is assigned to the selected team slot, not directly to the character.</li>
           <li>Keep WebSocket connected to watch tick-driven player state snapshots.</li>
         </ul>
       </div>
@@ -176,6 +162,15 @@
         </div>
         <pre id="stateOutput" class="code-block"></pre>
       </div>
+      <div>
+        <div class="section-title">
+          <h2>Notifications</h2>
+        </div>
+        <pre id="eventOutput" class="code-block event-feed"></pre>
+      </div>
+    </section>
+
+    <section class="panel outputs">
       <div>
         <div class="section-title">
           <h2>Request Log</h2>

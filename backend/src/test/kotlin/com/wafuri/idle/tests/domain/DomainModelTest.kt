@@ -9,6 +9,7 @@ import com.wafuri.idle.domain.model.InventoryItem
 import com.wafuri.idle.domain.model.LevelRange
 import com.wafuri.idle.domain.model.Player
 import com.wafuri.idle.domain.model.Team
+import com.wafuri.idle.domain.model.TeamMemberSlot
 import com.wafuri.idle.domain.model.ZoneLootEntry
 import com.wafuri.idle.domain.model.ZoneTemplate
 import com.wafuri.idle.tests.support.armorItem
@@ -21,17 +22,21 @@ import java.util.UUID
 
 class DomainModelTest :
   StringSpec({
-    "team max size is three" {
-      val playerId = UUID.randomUUID()
+    "team rejects duplicate characters across slots" {
       val team =
         Team(
           id = UUID.randomUUID(),
-          playerId = playerId,
-          characterKeys = List(3) { "character-$it" },
+          playerId = UUID.randomUUID(),
+          slots =
+            listOf(
+              TeamMemberSlot(position = 1, characterKey = "warrior"),
+              TeamMemberSlot(position = 2, characterKey = "cleric"),
+              TeamMemberSlot(position = 3),
+            ),
         )
 
       shouldThrow<DomainRuleViolationException> {
-        team.addCharacter("warrior")
+        team.assignCharacter(3, "warrior")
       }
     }
 
@@ -45,7 +50,7 @@ class DomainModelTest :
         )
 
       shouldThrow<DomainRuleViolationException> {
-        inventoryItem.equip(playerId, "warrior", EquipmentSlot.WEAPON)
+        inventoryItem.equip(playerId, UUID.randomUUID(), 1, EquipmentSlot.WEAPON)
       }
     }
 
@@ -58,7 +63,7 @@ class DomainModelTest :
         )
 
       shouldThrow<DomainRuleViolationException> {
-        inventoryItem.equip(UUID.randomUUID(), "warrior", EquipmentSlot.WEAPON)
+        inventoryItem.equip(UUID.randomUUID(), UUID.randomUUID(), 1, EquipmentSlot.WEAPON)
       }
     }
 
@@ -69,28 +74,32 @@ class DomainModelTest :
           id = UUID.randomUUID(),
           playerId = playerId,
           item = swordItem(),
-          equippedCharacterKey = "cleric",
+          equippedTeamId = UUID.randomUUID(),
+          equippedPosition = 1,
         )
 
       shouldThrow<DomainRuleViolationException> {
-        inventoryItem.equip(playerId, "warrior", EquipmentSlot.WEAPON)
+        inventoryItem.equip(playerId, UUID.randomUUID(), 1, EquipmentSlot.WEAPON)
       }
     }
 
     "unequip returns item to inventory" {
       val playerId = UUID.randomUUID()
       val itemId = UUID.randomUUID()
+      val teamId = UUID.randomUUID()
       val inventoryItem =
         InventoryItem(
           id = itemId,
           playerId = playerId,
           item = swordItem(),
-          equippedCharacterKey = "warrior",
+          equippedTeamId = teamId,
+          equippedPosition = 1,
         )
 
-      val updatedItem = inventoryItem.unequip("warrior", EquipmentSlot.WEAPON)
+      val updatedItem = inventoryItem.unequip(teamId, 1, EquipmentSlot.WEAPON)
 
-      updatedItem.equippedCharacterKey.shouldBeNull()
+      updatedItem.equippedTeamId.shouldBeNull()
+      updatedItem.equippedPosition.shouldBeNull()
     }
 
     "player grants unique character keys only once" {

@@ -3,6 +3,7 @@ package com.wafuri.idle.transport.rest
 import com.wafuri.idle.application.exception.ResourceNotFoundException
 import com.wafuri.idle.application.exception.ValidationException
 import com.wafuri.idle.transport.rest.dto.ErrorResponse
+import jakarta.ws.rs.NotFoundException
 import jakarta.ws.rs.core.Context
 import jakarta.ws.rs.core.Request
 import jakarta.ws.rs.core.Response
@@ -23,6 +24,7 @@ class ApiExceptionMapper : ExceptionMapper<RuntimeException> {
     val status =
       when (exception) {
         is ResourceNotFoundException -> Response.Status.NOT_FOUND
+        is NotFoundException -> Response.Status.NOT_FOUND
         is ValidationException, is IllegalArgumentException -> Response.Status.BAD_REQUEST
         else -> Response.Status.INTERNAL_SERVER_ERROR
       }

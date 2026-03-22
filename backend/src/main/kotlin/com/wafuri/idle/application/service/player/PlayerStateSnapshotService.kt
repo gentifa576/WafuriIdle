@@ -7,6 +7,7 @@ import com.wafuri.idle.application.model.PlayerStateSnapshot
 import com.wafuri.idle.application.model.toSnapshot
 import com.wafuri.idle.application.port.out.CombatStateRepository
 import com.wafuri.idle.application.port.out.InventoryRepository
+import com.wafuri.idle.application.port.out.PlayerZoneProgressRepository
 import com.wafuri.idle.application.port.out.Repository
 import com.wafuri.idle.application.service.character.CharacterTemplateCatalog
 import com.wafuri.idle.domain.model.Player
@@ -18,6 +19,7 @@ import java.util.UUID
 class PlayerStateSnapshotService(
   private val playerRepository: Repository<Player, UUID>,
   private val inventoryRepository: InventoryRepository,
+  private val playerZoneProgressRepository: PlayerZoneProgressRepository,
   private val combatStateRepository: CombatStateRepository,
   private val characterTemplateCatalog: CharacterTemplateCatalog,
 ) {
@@ -26,17 +28,21 @@ class PlayerStateSnapshotService(
       playerRepository.findById(playerId)
         ?: throw ResourceNotFoundException("Player $playerId was not found.")
     val inventory = inventoryRepository.findByPlayerId(playerId)
+    val zoneProgress = playerZoneProgressRepository.findByPlayerId(playerId)
 
     return PlayerStateSnapshot(
       playerId = player.id,
       playerName = player.name,
+      playerExperience = player.experience,
+      playerLevel = player.level,
       ownedCharacters =
         player.ownedCharacterKeys
           .sorted()
           .map { key ->
             val template = characterTemplateCatalog.require(key)
-            OwnedCharacterSnapshot(key = template.key, name = template.name)
+            OwnedCharacterSnapshot(key = template.key, name = template.name, level = player.level)
           },
+      zoneProgress = zoneProgress.map { it.toSnapshot() },
       inventory =
         inventory.map {
           InventoryItemSnapshot(
@@ -49,7 +55,8 @@ class PlayerStateSnapshotService(
             subStats = it.subStats,
             rarity = it.rarity,
             upgrade = it.upgrade,
-            equippedCharacterKey = it.equippedCharacterKey,
+            equippedTeamId = it.equippedTeamId,
+            equippedPosition = it.equippedPosition,
           )
         },
       serverTime = Instant.now(),

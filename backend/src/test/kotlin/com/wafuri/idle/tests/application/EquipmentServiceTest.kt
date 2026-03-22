@@ -4,10 +4,13 @@ import com.wafuri.idle.application.exception.ValidationException
 import com.wafuri.idle.application.port.out.InventoryRepository
 import com.wafuri.idle.application.port.out.PlayerStateWorkQueue
 import com.wafuri.idle.application.port.out.Repository
+import com.wafuri.idle.application.port.out.TeamRepository
 import com.wafuri.idle.application.service.inventory.EquipmentService
 import com.wafuri.idle.domain.model.EquipmentSlot
 import com.wafuri.idle.domain.model.InventoryItem
 import com.wafuri.idle.domain.model.Player
+import com.wafuri.idle.domain.model.Team
+import com.wafuri.idle.domain.model.TeamMemberSlot
 import com.wafuri.idle.tests.support.swordItem
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
@@ -22,6 +25,7 @@ import java.util.UUID
 class EquipmentServiceTest : StringSpec() {
   private lateinit var playerRepository: Repository<Player, UUID>
   private lateinit var inventoryRepository: InventoryRepository
+  private lateinit var teamRepository: TeamRepository
   private lateinit var playerStateWorkQueue: PlayerStateWorkQueue
   private lateinit var service: EquipmentService
 
@@ -29,14 +33,21 @@ class EquipmentServiceTest : StringSpec() {
     beforeTest {
       playerRepository = mockk()
       inventoryRepository = mockk()
+      teamRepository = mockk()
       playerStateWorkQueue = mockk()
-      service = EquipmentService(playerRepository, inventoryRepository, playerStateWorkQueue)
+      service = EquipmentService(playerRepository, inventoryRepository, teamRepository, playerStateWorkQueue)
     }
 
     "equip validates ownership and slot" {
       val playerId = UUID.randomUUID()
-      val characterKey = "warrior"
-      val player = Player(playerId, "Alice", ownedCharacterKeys = setOf(characterKey))
+      val teamId = UUID.randomUUID()
+      val player = Player(playerId, "Alice", ownedCharacterKeys = setOf("warrior"))
+      val team =
+        Team(
+          teamId,
+          playerId,
+          slots = listOf(TeamMemberSlot(1, "warrior"), TeamMemberSlot(2), TeamMemberSlot(3)),
+        )
       val foreignItem =
         InventoryItem(
           id = UUID.randomUUID(),
@@ -45,38 +56,54 @@ class EquipmentServiceTest : StringSpec() {
         )
 
       every { inventoryRepository.findById(foreignItem.id) } returns foreignItem
+      every { teamRepository.findById(teamId) } returns team
       every { playerRepository.findById(foreignItem.playerId) } returns player
-      every { inventoryRepository.findByCharacterAndSlot(characterKey, EquipmentSlot.WEAPON) } returns null
+      every { inventoryRepository.findByTeamPositionAndSlot(teamId, 1, EquipmentSlot.WEAPON) } returns null
 
       shouldThrow<ValidationException> {
-        service.equip(characterKey, foreignItem.id, EquipmentSlot.WEAPON)
+        service.equip(playerId, teamId, 1, foreignItem.id, EquipmentSlot.WEAPON)
       }
     }
 
     "unequip returns item to inventory" {
       val playerId = UUID.randomUUID()
       val inventoryItemId = UUID.randomUUID()
-      val characterKey = "warrior"
-      val player = Player(playerId, "Alice", ownedCharacterKeys = setOf(characterKey))
+      val teamId = UUID.randomUUID()
+      val player = Player(playerId, "Alice", ownedCharacterKeys = setOf("warrior"))
+      val team =
+        Team(
+          teamId,
+          playerId,
+          slots =
+            listOf(
+              TeamMemberSlot(1, "warrior", weaponItemId = inventoryItemId),
+              TeamMemberSlot(2),
+              TeamMemberSlot(3),
+            ),
+        )
       val inventoryItem =
         InventoryItem(
           id = inventoryItemId,
           playerId = playerId,
           item = swordItem(),
-          equippedCharacterKey = characterKey,
+          equippedTeamId = teamId,
+          equippedPosition = 1,
         )
       val savedItems = mutableListOf<InventoryItem>()
 
-      every { inventoryRepository.findByCharacterAndSlot(characterKey, EquipmentSlot.WEAPON) } returns inventoryItem
+      every { inventoryRepository.findByTeamPositionAndSlot(teamId, 1, EquipmentSlot.WEAPON) } returns inventoryItem
+      every { teamRepository.findById(teamId) } returns team
       every { playerRepository.findById(playerId) } returns player
       every { inventoryRepository.save(any()) } answers {
         firstArg<InventoryItem>().also { savedItems += it }
       }
+      every { teamRepository.save(any()) } answers { firstArg<Team>() }
       every { playerStateWorkQueue.markDirty(playerId) } just runs
 
-      service.unequip(characterKey, EquipmentSlot.WEAPON)
+      service.unequip(playerId, teamId, 1, EquipmentSlot.WEAPON)
 
-      savedItems.last().equippedCharacterKey.shouldBeNull()
+      savedItems.last().equippedTeamId.shouldBeNull()
+      savedItems.last().equippedPosition.shouldBeNull()
       verify(exactly = 1) { playerStateWorkQueue.markDirty(playerId) }
     }
   }

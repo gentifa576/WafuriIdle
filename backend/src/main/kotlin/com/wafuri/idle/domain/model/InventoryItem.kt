@@ -9,7 +9,8 @@ data class InventoryItem(
   val subStats: List<Stat> = emptyList(),
   val rarity: Rarity = Rarity.COMMON,
   val upgrade: Int = 0,
-  val equippedCharacterKey: String? = null,
+  val equippedTeamId: UUID? = null,
+  val equippedPosition: Int? = null,
 ) {
   init {
     require(subStats.map { it.type }.distinct().size == subStats.size) {
@@ -19,35 +20,43 @@ data class InventoryItem(
       "Inventory item sub stats must come from the item sub stat pool."
     }
     require(upgrade >= 0) { "Inventory item upgrade must not be negative." }
+    require((equippedTeamId == null) == (equippedPosition == null)) {
+      "Equipped team and position must either both be set or both be null."
+    }
+    require(equippedPosition == null || equippedPosition in 1..Team.MAX_SIZE) {
+      "Equipped position must be between 1 and ${Team.MAX_SIZE}."
+    }
   }
 
   fun equip(
     playerId: UUID,
-    characterKey: String,
+    teamId: UUID,
+    position: Int,
     slot: EquipmentSlot,
   ): InventoryItem {
     if (this.playerId != playerId) {
       throw DomainRuleViolationException("Items must belong to the player's inventory.")
     }
-    if (characterKey.isBlank()) {
-      throw DomainRuleViolationException("Character key must not be blank.")
+    if (position !in 1..Team.MAX_SIZE) {
+      throw DomainRuleViolationException("Team slot position must be between 1 and ${Team.MAX_SIZE}.")
     }
-    if (equippedCharacterKey != null) {
+    if (equippedTeamId != null) {
       throw DomainRuleViolationException("Items cannot be equipped twice.")
     }
     if (item.type != slot.allowedType) {
       throw DomainRuleViolationException("Item type must match equipment slot.")
     }
-    return copy(equippedCharacterKey = characterKey)
+    return copy(equippedTeamId = teamId, equippedPosition = position)
   }
 
   fun unequip(
-    characterKey: String,
+    teamId: UUID,
+    position: Int,
     slot: EquipmentSlot,
   ): InventoryItem {
-    if (equippedCharacterKey != characterKey || item.type != slot.allowedType) {
+    if (equippedTeamId != teamId || equippedPosition != position || item.type != slot.allowedType) {
       throw DomainRuleViolationException("Item is not equipped in the requested slot.")
     }
-    return copy(equippedCharacterKey = null)
+    return copy(equippedTeamId = null, equippedPosition = null)
   }
 }

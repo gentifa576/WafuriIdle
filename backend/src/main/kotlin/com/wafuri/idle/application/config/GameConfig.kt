@@ -11,6 +11,10 @@ interface GameConfig {
 
   fun combat(): Combat
 
+  fun auth(): Auth
+
+  fun progression(): Progression
+
   fun content(): Content
 
   interface Tick {
@@ -21,6 +25,8 @@ interface GameConfig {
 
   interface Team {
     fun initialSlots(): Int
+
+    fun starterChoices(): List<String>
   }
 
   interface Combat {
@@ -51,5 +57,33 @@ interface GameConfig {
 
   interface Content {
     fun refreshInterval(): Duration
+  }
+
+  interface Auth {
+    fun sessionDuration(): Duration
+
+    fun issuer(): String
+  }
+
+  interface Progression {
+    fun player(): Player
+
+    fun zone(): Zone
+
+    fun offline(): Offline
+  }
+
+  interface Player {
+    fun killExperience(): Int
+
+    fun experiencePerLevel(): Int
+  }
+
+  interface Zone {
+    fun killsPerLevel(): Int
+  }
+
+  interface Offline {
+    fun notifyThreshold(): Duration
   }
 }

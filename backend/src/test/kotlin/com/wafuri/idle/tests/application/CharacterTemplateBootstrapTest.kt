@@ -6,6 +6,8 @@ import com.wafuri.idle.application.service.character.DatabaseCharacterFetcher
 import com.wafuri.idle.application.service.character.ResourceCharacterFetcher
 import com.wafuri.idle.domain.model.CharacterTemplate
 import com.wafuri.idle.domain.model.StatGrowth
+import com.wafuri.idle.tests.support.clericTemplate
+import com.wafuri.idle.tests.support.warriorTemplate
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContainExactly
 import io.mockk.every
@@ -29,6 +31,7 @@ class CharacterTemplateBootstrapTest :
             intelligence = StatGrowth(4f, 0.4f),
             wisdom = StatGrowth(5f, 0.5f),
             vitality = StatGrowth(11f, 1.8f),
+            skill = warriorTemplate().skill,
           ),
           CharacterTemplate(
             key = "cleric",
@@ -38,6 +41,7 @@ class CharacterTemplateBootstrapTest :
             intelligence = StatGrowth(9f, 1.4f),
             wisdom = StatGrowth(12f, 1.9f),
             vitality = StatGrowth(8f, 1.2f),
+            passive = clericTemplate().passive,
           ),
         )
 

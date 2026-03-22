@@ -7,8 +7,9 @@ import java.util.UUID
 interface InventoryRepository : Repository<InventoryItem, UUID> {
   fun findByPlayerId(playerId: UUID): List<InventoryItem>
 
-  fun findByCharacterAndSlot(
-    characterKey: String,
+  fun findByTeamPositionAndSlot(
+    teamId: UUID,
+    position: Int,
     slot: EquipmentSlot,
   ): InventoryItem?
 }

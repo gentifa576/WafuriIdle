@@ -55,6 +55,11 @@ body {
   gap: 20px;
 }
 
+.grid-two > *,
+.outputs > * {
+  min-width: 0;
+}
+
 .outputs {
   align-items: start;
 }
@@ -206,6 +211,12 @@ button.ghost:hover {
   font-family: "IBM Plex Mono", "SFMono-Regular", monospace;
   font-size: 13px;
   line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.event-feed {
+  color: #f4f8e8;
 }
 
 @media (max-width: 900px) {

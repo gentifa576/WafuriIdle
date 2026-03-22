@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.wafuri.idle.application.port.out.CharacterFetcher
 import com.wafuri.idle.domain.model.CharacterTemplate
+import com.wafuri.idle.domain.model.PassiveDefinition
+import com.wafuri.idle.domain.model.SkillDefinition
 import com.wafuri.idle.domain.model.StatGrowth
 import io.quarkus.arc.profile.UnlessBuildProfile
 import jakarta.enterprise.context.ApplicationScoped
@@ -28,8 +30,9 @@ class ResourceCharacterFetcher(
             wisdom = it.wisdom.toStatGrowth("wisdom", it.id),
             vitality = it.vitality.toStatGrowth("vitality", it.id),
             image = it.image,
-            skillRefs = emptyList(),
-            passiveRef = null,
+            tags = it.tags,
+            skill = it.skill,
+            passive = it.passive,
           )
         }
     }
@@ -49,6 +52,9 @@ private data class ResourceCharacterTemplateRecord(
   val wisdom: List<Float>,
   val vitality: List<Float>,
   val image: String? = null,
+  val tags: List<String> = emptyList(),
+  val skill: SkillDefinition? = null,
+  val passive: PassiveDefinition? = null,
 )
 
 private fun List<Float>.toStatGrowth(

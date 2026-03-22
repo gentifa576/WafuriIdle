@@ -11,4 +11,6 @@ interface PlayerStateChangeTracker {
     playerId: UUID,
     snapshot: CombatSnapshot?,
   ): Boolean
+
+  fun invalidate(playerId: UUID)
 }

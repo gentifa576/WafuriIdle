@@ -29,6 +29,8 @@ dependencies {
   implementation("io.quarkus:quarkus-config-yaml")
   implementation("io.quarkus:quarkus-kotlin")
   implementation("io.quarkus:quarkus-rest-jackson")
+  implementation("io.quarkus:quarkus-smallrye-jwt")
+  implementation("io.quarkus:quarkus-smallrye-jwt-build")
   implementation("io.quarkus:quarkus-websockets")
   implementation("io.quarkus:quarkus-hibernate-orm")
   implementation("io.quarkus:quarkus-jdbc-postgresql")

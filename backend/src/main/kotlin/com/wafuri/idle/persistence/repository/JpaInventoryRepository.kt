@@ -31,7 +31,8 @@ class JpaInventoryRepository(
       it.subStats = domain.subStats
       it.rarity = domain.rarity
       it.upgrade = domain.upgrade
-      it.equippedCharacterKey = domain.equippedCharacterKey
+      it.equippedTeamId = domain.equippedTeamId
+      it.equippedPosition = domain.equippedPosition
     }
 
   override fun findByPlayerId(playerId: UUID): List<InventoryItem> =
@@ -43,15 +44,17 @@ class JpaInventoryRepository(
       .resultList
       .map(::toDomain)
 
-  override fun findByCharacterAndSlot(
-    characterKey: String,
+  override fun findByTeamPositionAndSlot(
+    teamId: UUID,
+    position: Int,
     slot: EquipmentSlot,
   ): InventoryItem? =
     entityManager
       .createQuery(
-        "from InventoryItemEntity where equippedCharacterKey = :characterKey",
+        "from InventoryItemEntity where equippedTeamId = :teamId and equippedPosition = :position",
         InventoryItemEntity::class.java,
-      ).setParameter("characterKey", characterKey)
+      ).setParameter("teamId", teamId)
+      .setParameter("position", position)
       .resultList
       .firstOrNull()
       ?.let(::toDomain)
@@ -66,5 +69,6 @@ private fun InventoryItemEntity.toDomain(item: Item): InventoryItem =
     subStats = subStats,
     rarity = rarity,
     upgrade = upgrade,
-    equippedCharacterKey = equippedCharacterKey,
+    equippedTeamId = equippedTeamId,
+    equippedPosition = equippedPosition,
   )

@@ -13,24 +13,38 @@ quarkus:
     log:
       sql: false
 
-"%prod":
-  quarkus:
-    datasource:
-      db-kind: postgresql
-      username: ${DB_USERNAME:wafuri}
-      password: ${DB_PASSWORD:wafuri}
-      jdbc:
-        url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:wafuriidle}
-    hibernate-orm:
-      schema-management:
-        strategy: update
+mp:
+  jwt:
+    verify:
+      issuer: wafuri-idle
+
+smallrye:
+  jwt:
+    path:
+      groups: scope
+    groups-separator: " "
 
 game:
   tick:
     interval: 200ms
     publish-jitter-max: 5ms
+  auth:
+    issuer: wafuri-idle
+    session-duration: 12h
+  progression:
+    player:
+      kill-experience: 10
+      experience-per-level: 100
+    zone:
+      kills-per-level: 10
+    offline:
+      notify-threshold: 5m
   team:
     initial-slots: 3
+    starter-choices:
+      - nimbus
+      - inaho
+      - vyron
   combat:
     enemy-max-hp: 1000
     damage-interval: 1s
@@ -44,3 +58,79 @@ game:
         legendary: 0.02
   content:
     refresh-interval: 1m
+
+cluster:
+  local:
+    instance-id: local-instance
+    internal-base-url: http://127.0.0.1:8080
+  aws:
+    metadata-base-url: http://169.254.169.254
+    metadata-token-ttl-seconds: 21600
+    request-timeout: 1s
+  discovery:
+    heartbeat-interval: 10s
+    stale-after: 30s
+  notify:
+    request-timeout: 500ms
+    max-attempts: 5
+
+"%dev":
+  mp:
+    jwt:
+      verify:
+        publickey:
+          location: jwt/publicKey.pem
+  smallrye:
+    jwt:
+      sign:
+        key:
+          location: jwt/privateKey.pem
+  game:
+    combat:
+      loot:
+        base-item-drop-rate: 1.0
+  cluster:
+    local:
+      internal-base-url: http://127.0.0.1:${quarkus.http.port}
+
+"%test":
+  mp:
+    jwt:
+      verify:
+        publickey:
+          location: jwt/publicKey.pem
+  smallrye:
+    jwt:
+      sign:
+        key:
+          location: jwt/privateKey.pem
+  game:
+    combat:
+      loot:
+        base-item-drop-rate: 1.0
+  cluster:
+    local:
+      instance-id: test-instance
+      internal-base-url: http://127.0.0.1:${quarkus.http.test-port}
+
+"%prod":
+  mp:
+    jwt:
+      verify:
+        publickey:
+          location: ${JWT_PUBLIC_KEY_LOCATION}
+  smallrye:
+    jwt:
+      sign:
+        key:
+          location: ${JWT_PRIVATE_KEY_LOCATION}
+  quarkus:
+    datasource:
+      db-kind: postgresql
+      username: ${DB_USERNAME:wafuri}
+      password: ${DB_PASSWORD:wafuri}
+      jdbc:
+        url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:wafuriidle}
+    hibernate-orm:
+      schema-management:
+        strategy: update

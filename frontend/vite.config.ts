@@ -6,6 +6,7 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
+      '/auth': 'http://localhost:8080',
       '/players': 'http://localhost:8080',
       '/teams': 'http://localhost:8080',
       '/characters': 'http://localhost:8080',

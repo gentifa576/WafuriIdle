@@ -17,6 +17,10 @@ game:
     publish-jitter-max: 0ms
   team:
     initial-slots: 3
+    starter-choices:
+      - nimbus
+      - inaho
+      - vyron
   combat:
     enemy-max-hp: 1000
     damage-interval: 1s
@@ -30,3 +34,18 @@ game:
         legendary: 0.02
   content:
     refresh-interval: 1m
+
+cluster:
+  local:
+    instance-id: test-instance
+    internal-base-url: http://127.0.0.1:${quarkus.http.test-port}
+  aws:
+    metadata-base-url: http://169.254.169.254
+    metadata-token-ttl-seconds: 21600
+    request-timeout: 1s
+  discovery:
+    heartbeat-interval: 10s
+    stale-after: 30s
+  notify:
+    request-timeout: 500ms
+    max-attempts: 5

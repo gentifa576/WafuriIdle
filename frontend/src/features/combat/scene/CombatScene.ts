@@ -101,6 +101,7 @@ export class CombatScene {
   private floatingTexts: FloatingDamageText[] = []
   private cycleElapsedMs = 0
   private previousProgress = 0
+  private previousStatus: CombatSnapshot['status'] | null = null
   private activePathPreset: ActivePathPreset | null = null
   private pathSizeKey = ''
   private enemyFlashMs = 0
@@ -253,14 +254,25 @@ export class CombatScene {
       return
     }
 
-    if (!this.isCombatRunning()) {
+    const snapshot = this.pendingState.snapshot
+    const shouldAnimate = this.shouldAnimateCombat()
+
+    if (!shouldAnimate) {
       this.cycleElapsedMs = 0
       this.previousProgress = 0
       this.leftFlipper.cooldownMs = 0
       this.rightFlipper.cooldownMs = 0
+      this.resetToPathStart()
       this.updateFlippers(0)
       this.renderFrame()
+      this.previousStatus = snapshot?.status ?? null
       return
+    }
+
+    if (snapshot?.status !== this.previousStatus) {
+      this.cycleElapsedMs = 0
+      this.previousProgress = 0
+      this.resetToPathStart()
     }
 
     const deltaMs = this.app.ticker.deltaMS
@@ -280,11 +292,12 @@ export class CombatScene {
     this.enemyFlashMs = Math.max(this.enemyFlashMs - deltaMs, 0)
     this.updateFloatingTexts(deltaMs)
 
-    if (crossedImpact && this.pendingState.snapshot?.members.length) {
+    if (crossedImpact && snapshot?.status === 'FIGHTING' && snapshot.members.length) {
       this.triggerImpact()
     }
 
     this.renderFrame()
+    this.previousStatus = snapshot?.status ?? null
   }
 
   private updateFlippers(deltaMs: number) {
@@ -494,9 +507,17 @@ export class CombatScene {
     }
   }
 
-  private isCombatRunning() {
+  private shouldAnimateCombat() {
     const snapshot = this.pendingState.snapshot
-    return snapshot != null && snapshot.status === 'FIGHTING' && snapshot.members.length > 0
+    return snapshot != null && snapshot.status !== 'IDLE' && snapshot.members.length > 0
+  }
+
+  private resetToPathStart() {
+    const startNode = this.activePath().path[0]
+    if (startNode) {
+      this.ballPosition = { ...startNode }
+      this.recordTrail()
+    }
   }
 
   private selectInitialPath() {

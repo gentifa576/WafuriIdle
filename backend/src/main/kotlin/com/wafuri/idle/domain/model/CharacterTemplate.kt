@@ -9,8 +9,9 @@ data class CharacterTemplate(
   val wisdom: StatGrowth,
   val vitality: StatGrowth,
   val image: String? = null,
-  val skillRefs: List<String> = emptyList(),
-  val passiveRef: String? = null,
+  val tags: List<String> = emptyList(),
+  val skill: SkillDefinition? = null,
+  val passive: PassiveDefinition? = null,
 ) {
   init {
     require(key.isNotBlank()) { "Character template key must not be blank." }

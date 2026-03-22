@@ -1,4 +1,5 @@
 import { env } from '../config/env'
+import { currentSessionToken } from './httpClient'
 import { parsePlayerSocketMessage } from './socketMessages'
 import type { PlayerSocketMessage } from '../types/api'
 
@@ -13,6 +14,10 @@ export function createPlayerSocket(playerId: string, options: PlayerSocketOption
   const baseUrl = env.apiBaseUrl || window.location.origin
   const url = new URL(`/ws/player/${playerId}`, baseUrl)
   url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:'
+  const token = currentSessionToken()
+  if (token) {
+    url.searchParams.set('token', token)
+  }
 
   const socket = new WebSocket(url)
   socket.addEventListener('open', () => options.onOpen?.())
@@ -25,4 +30,8 @@ export function createPlayerSocket(playerId: string, options: PlayerSocketOption
     }
   })
   return socket
+}
+
+export function sendStartCombat(socket: WebSocket) {
+  socket.send(JSON.stringify({ type: 'START_COMBAT' }))
 }

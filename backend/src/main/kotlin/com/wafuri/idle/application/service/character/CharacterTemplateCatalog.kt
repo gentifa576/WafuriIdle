@@ -23,4 +23,6 @@ class CharacterTemplateCatalog {
   fun require(characterKey: String): CharacterTemplate =
     find(characterKey)
       ?: throw ResourceNotFoundException("Character template $characterKey was not found.")
+
+  fun requireAll(characterKeys: List<String>): List<CharacterTemplate> = characterKeys.map(::require)
 }

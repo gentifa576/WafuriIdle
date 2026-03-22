@@ -1,5 +1,6 @@
 package com.wafuri.idle.domain.model
 
+import java.time.Instant
 import java.util.UUID
 
 data class CombatState(
@@ -13,6 +14,7 @@ data class CombatState(
   val members: List<CombatMemberState> = emptyList(),
   val pendingDamageMillis: Long = 0,
   val pendingRespawnMillis: Long = 0,
+  val lastSimulatedAt: Instant? = null,
 ) {
   init {
     require(enemyHp >= 0f) { "Enemy HP must not be negative." }
@@ -73,11 +75,18 @@ data class CombatState(
   }
 
   fun refreshMembers(members: List<CombatMemberState>): CombatState {
+    return refreshTeam(activeTeamId ?: return this, members)
+  }
+
+  fun refreshTeam(
+    teamId: UUID,
+    members: List<CombatMemberState>,
+  ): CombatState {
     if (status == CombatStatus.IDLE) {
       return this
     }
     require(members.isNotEmpty()) { "Active combat must keep at least one member." }
-    return copy(members = members)
+    return copy(activeTeamId = teamId, members = members)
   }
 
   fun advance(

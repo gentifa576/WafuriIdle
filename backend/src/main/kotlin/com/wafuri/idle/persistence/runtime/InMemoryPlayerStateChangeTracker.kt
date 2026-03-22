@@ -46,4 +46,9 @@ class InMemoryPlayerStateChangeTracker : PlayerStateChangeTracker {
     }
     return shouldPublish.get()
   }
+
+  override fun invalidate(playerId: UUID) {
+    lastPublishedContent.remove(playerId)
+    lastPublishedCombat.remove(playerId)
+  }
 }

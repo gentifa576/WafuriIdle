@@ -82,7 +82,9 @@ Items are static template content plus generated inventory state.
   - equip ownership via `equippedCharacterKey`
 
 ## Starting Roster
-- A newly created player starts with the static `warrior` character unlocked.
+- A newly created player starts with no owned characters.
+- The player may later claim one configured starter while their roster is still empty.
+- The allowed starter choices come from `game.team.starter-choices`.
 - A newly created player also starts with `3` empty team slots by default.
 - The initial team-slot count is configured by `game.team.initial-slots`.
 

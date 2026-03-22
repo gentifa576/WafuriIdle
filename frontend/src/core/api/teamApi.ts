@@ -1,8 +1,8 @@
 import { http } from './httpClient'
-import type { Team } from '../types/api'
+import type { EquipmentSlot, Team } from '../types/api'
 
-export function assignCharacterToTeam(teamId: string, characterKey: string) {
-  return http<Team>(`/teams/${teamId}/characters/${characterKey}`, {
+export function assignCharacterToTeam(teamId: string, position: number, characterKey: string) {
+  return http<Team>(`/teams/${teamId}/slots/${position}/characters/${characterKey}`, {
     method: 'POST',
   })
 }
@@ -10,5 +10,19 @@ export function assignCharacterToTeam(teamId: string, characterKey: string) {
 export function activateTeam(teamId: string) {
   return http<Team>(`/teams/${teamId}/activate`, {
     method: 'POST',
+  })
+}
+
+export function equipTeamItem(teamId: string, position: number, inventoryItemId: string, slot: EquipmentSlot) {
+  return http<void>(`/teams/${teamId}/slots/${position}/equip`, {
+    method: 'POST',
+    body: JSON.stringify({ inventoryItemId, slot }),
+  })
+}
+
+export function unequipTeamItem(teamId: string, position: number, slot: EquipmentSlot) {
+  return http<void>(`/teams/${teamId}/slots/${position}/unequip`, {
+    method: 'POST',
+    body: JSON.stringify({ slot }),
   })
 }

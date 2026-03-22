@@ -35,7 +35,9 @@ class TeamService(
 
   @Transactional
   fun assignCharacter(
+    actorPlayerId: UUID,
     teamId: UUID,
+    position: Int,
     characterKey: String,
   ): Team {
     val team =
@@ -44,6 +46,9 @@ class TeamService(
     val player =
       playerRepository.findById(team.playerId)
         ?: throw ResourceNotFoundException("Player ${team.playerId} was not found.")
+    if (player.id != actorPlayerId) {
+      throw ValidationException("Team does not belong to the authenticated player.")
+    }
     if (!player.ownedCharacterKeys.contains(characterKey)) {
       throw ValidationException("Character $characterKey is not owned by the player.")
     }
@@ -51,7 +56,7 @@ class TeamService(
 
     val updatedTeam =
       try {
-        team.addCharacter(characterKey)
+        team.assignCharacter(position, characterKey)
       } catch (exception: DomainRuleViolationException) {
         throw ValidationException(exception.message ?: "Character validation failed.", exception)
       }
@@ -64,13 +69,19 @@ class TeamService(
   fun templates(): List<CharacterTemplate> = characterTemplateCatalog.all()
 
   @Transactional
-  fun activate(teamId: UUID): Team {
+  fun activate(
+    actorPlayerId: UUID,
+    teamId: UUID,
+  ): Team {
     val team =
       teamRepository.findById(teamId)
         ?: throw ResourceNotFoundException("Team $teamId was not found.")
     val player =
       playerRepository.findById(team.playerId)
         ?: throw ResourceNotFoundException("Player ${team.playerId} was not found.")
+    if (player.id != actorPlayerId) {
+      throw ValidationException("Team does not belong to the authenticated player.")
+    }
     if (team.characterKeys.isEmpty()) {
       throw ValidationException("Team must have at least one character before it can be activated.")
     }

@@ -12,6 +12,7 @@ import com.wafuri.idle.domain.model.CombatState
 import com.wafuri.idle.domain.model.Player
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.transaction.Transactional
+import java.time.Instant
 import java.util.UUID
 
 @ApplicationScoped
@@ -30,7 +31,7 @@ class CombatService(
     val teamStats = combatStatService.teamStatsForPlayer(playerId)
     val zone = zoneTemplateCatalog.default()
     val currentState = combatStateRepository.findById(playerId) ?: CombatState(playerId = playerId)
-    val nextState =
+    val startedState =
       currentState.start(
         zoneId = zone.id,
         teamId = teamStats.teamId,
@@ -38,6 +39,7 @@ class CombatService(
         enemyMaxHp = gameConfig.combat().enemyMaxHp(),
         members = teamStats.toCombatMembers(),
       )
+    val nextState = startedState.copy(lastSimulatedAt = Instant.now())
     val savedState = combatStateRepository.save(nextState)
     playerStateWorkQueue.markDirty(playerId)
     return savedState.toSnapshot()

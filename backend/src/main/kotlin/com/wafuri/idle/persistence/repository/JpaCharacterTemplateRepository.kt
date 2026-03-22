@@ -1,7 +1,10 @@
 package com.wafuri.idle.persistence.repository
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.wafuri.idle.application.port.out.CharacterTemplateRepository
 import com.wafuri.idle.domain.model.CharacterTemplate
+import com.wafuri.idle.domain.model.PassiveDefinition
+import com.wafuri.idle.domain.model.SkillDefinition
 import com.wafuri.idle.domain.model.StatGrowth
 import com.wafuri.idle.persistence.entity.CharacterTemplateEntity
 import jakarta.inject.Singleton
@@ -10,6 +13,7 @@ import jakarta.persistence.EntityManager
 @Singleton
 class JpaCharacterTemplateRepository(
   private val entityManager: EntityManager,
+  private val objectMapper: ObjectMapper,
 ) : AbstractJpaRepository<CharacterTemplate, CharacterTemplateEntity, String>(
     entityManager,
     CharacterTemplateEntity::class.java,
@@ -17,7 +21,20 @@ class JpaCharacterTemplateRepository(
   CharacterTemplateRepository {
   override fun entityId(domain: CharacterTemplate): String = domain.key
 
-  override fun toDomain(entity: CharacterTemplateEntity): CharacterTemplate = entity.toDomain()
+  override fun toDomain(entity: CharacterTemplateEntity): CharacterTemplate =
+    CharacterTemplate(
+      key = entity.key,
+      name = entity.name,
+      strength = StatGrowth(base = entity.strengthBase, increment = entity.strengthIncrement),
+      agility = StatGrowth(base = entity.agilityBase, increment = entity.agilityIncrement),
+      intelligence = StatGrowth(base = entity.intelligenceBase, increment = entity.intelligenceIncrement),
+      wisdom = StatGrowth(base = entity.wisdomBase, increment = entity.wisdomIncrement),
+      vitality = StatGrowth(base = entity.vitalityBase, increment = entity.vitalityIncrement),
+      image = entity.image,
+      tags = entity.tags,
+      skill = entity.skillDefinition?.let { objectMapper.readValue(it, SkillDefinition::class.java) },
+      passive = entity.passiveDefinition?.let { objectMapper.readValue(it, PassiveDefinition::class.java) },
+    )
 
   override fun toEntity(
     domain: CharacterTemplate,
@@ -37,8 +54,9 @@ class JpaCharacterTemplateRepository(
       it.vitalityBase = domain.vitality.base
       it.vitalityIncrement = domain.vitality.increment
       it.image = domain.image
-      it.skillRefs = domain.skillRefs
-      it.passiveRef = domain.passiveRef
+      it.tags = domain.tags
+      it.skillDefinition = domain.skill?.let(objectMapper::writeValueAsString)
+      it.passiveDefinition = domain.passive?.let(objectMapper::writeValueAsString)
     }
 
   override fun findAll(): List<CharacterTemplate> =
@@ -47,19 +65,5 @@ class JpaCharacterTemplateRepository(
         "from CharacterTemplateEntity order by name",
         CharacterTemplateEntity::class.java,
       ).resultList
-      .map { it.toDomain() }
+      .map { toDomain(it) }
 }
-
-private fun CharacterTemplateEntity.toDomain(): CharacterTemplate =
-  CharacterTemplate(
-    key = key,
-    name = name,
-    strength = StatGrowth(base = strengthBase, increment = strengthIncrement),
-    agility = StatGrowth(base = agilityBase, increment = agilityIncrement),
-    intelligence = StatGrowth(base = intelligenceBase, increment = intelligenceIncrement),
-    wisdom = StatGrowth(base = wisdomBase, increment = wisdomIncrement),
-    vitality = StatGrowth(base = vitalityBase, increment = vitalityIncrement),
-    image = image,
-    skillRefs = skillRefs,
-    passiveRef = passiveRef,
-  )

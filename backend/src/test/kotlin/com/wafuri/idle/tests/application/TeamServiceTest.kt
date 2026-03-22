@@ -8,6 +8,7 @@ import com.wafuri.idle.application.service.character.CharacterTemplateCatalog
 import com.wafuri.idle.application.service.team.TeamService
 import com.wafuri.idle.domain.model.Player
 import com.wafuri.idle.domain.model.Team
+import com.wafuri.idle.domain.model.TeamMemberSlot
 import com.wafuri.idle.tests.support.warriorTemplate
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
@@ -61,13 +62,23 @@ class TeamServiceTest : StringSpec() {
       every { playerRepository.findById(player.id) } returns player
 
       shouldThrow<ValidationException> {
-        service.activate(team.id)
+        service.activate(player.id, team.id)
       }
     }
 
-    "assign character to team respects team size rules" {
+    "assign character to team rejects duplicates across slots" {
       val player = Player(UUID.randomUUID(), "Alice", ownedCharacterKeys = setOf("warrior"))
-      val team = Team(UUID.randomUUID(), player.id, List(3) { "character-$it" })
+      val team =
+        Team(
+          UUID.randomUUID(),
+          player.id,
+          slots =
+            listOf(
+              TeamMemberSlot(1, "warrior"),
+              TeamMemberSlot(2, "character-1"),
+              TeamMemberSlot(3),
+            ),
+        )
       val characterKey = "warrior"
 
       every { playerRepository.findById(player.id) } returns player
@@ -75,7 +86,7 @@ class TeamServiceTest : StringSpec() {
       every { characterTemplateCatalog.require(characterKey) } returns warriorTemplate(characterKey)
 
       shouldThrow<ValidationException> {
-        service.assignCharacter(team.id, characterKey)
+        service.assignCharacter(player.id, team.id, 3, characterKey)
       }
     }
 
@@ -93,7 +104,7 @@ class TeamServiceTest : StringSpec() {
       }
       every { playerStateWorkQueue.markDirty(player.id) } just runs
 
-      val updatedTeam = service.assignCharacter(team.id, characterKey)
+      val updatedTeam = service.assignCharacter(player.id, team.id, 1, characterKey)
 
       updatedTeam.characterKeys.single() shouldBe characterKey
       savedTeams.last().characterKeys.single() shouldBe characterKey
@@ -102,7 +113,12 @@ class TeamServiceTest : StringSpec() {
 
     "activate team sets player's active team" {
       val player = Player(UUID.randomUUID(), "Alice", ownedCharacterKeys = setOf("warrior"))
-      val team = Team(UUID.randomUUID(), player.id, listOf("warrior"))
+      val team =
+        Team(
+          UUID.randomUUID(),
+          player.id,
+          slots = listOf(TeamMemberSlot(1, "warrior"), TeamMemberSlot(2), TeamMemberSlot(3)),
+        )
       val updatedPlayers = mutableListOf<Player>()
 
       every { teamRepository.findById(team.id) } returns team
@@ -110,7 +126,7 @@ class TeamServiceTest : StringSpec() {
       every { playerRepository.save(any()) } answers { firstArg<Player>().also { updatedPlayers += it } }
       every { playerStateWorkQueue.markDirty(player.id) } just runs
 
-      val activatedTeam = service.activate(team.id)
+      val activatedTeam = service.activate(player.id, team.id)
 
       activatedTeam.id shouldBe team.id
       updatedPlayers.last().activeTeamId shouldBe team.id
