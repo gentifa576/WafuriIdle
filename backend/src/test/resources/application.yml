@@ -1,0 +1,32 @@
+quarkus:
+  datasource:
+    db-kind: h2
+    username: sa
+    password: sa
+    jdbc:
+      url: jdbc:h2:mem:wafuriidle-test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+  hibernate-orm:
+    schema-management:
+      strategy: drop-and-create
+  http:
+    test-port: 0
+
+game:
+  tick:
+    interval: 200ms
+    publish-jitter-max: 0ms
+  team:
+    initial-slots: 3
+  combat:
+    enemy-max-hp: 1000
+    damage-interval: 1s
+    respawn-delay: 1s
+    loot:
+      base-item-drop-rate: 0.01
+      rarity:
+        common: 0.70
+        rare: 0.20
+        epic: 0.08
+        legendary: 0.02
+  content:
+    refresh-interval: 1m

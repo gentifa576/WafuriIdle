@@ -1,0 +1,23 @@
+[
+  {
+    "name": "Sword",
+    "displayName": "Sword",
+    "type": "WEAPON",
+    "baseStat": { "type": "STRENGTH", "value": 12.0 },
+    "subStatPool": ["AGILITY", "VITALITY", "CRIT_CHANCE"]
+  },
+  {
+    "name": "Armor",
+    "displayName": "Armor",
+    "type": "ARMOR",
+    "baseStat": { "type": "VITALITY", "value": 18.0 },
+    "subStatPool": ["STRENGTH", "WISDOM", "CRIT_DAMAGE"]
+  },
+  {
+    "name": "Ring",
+    "displayName": "Ring",
+    "type": "ACCESSORY",
+    "baseStat": { "type": "AGILITY", "value": 7.5 },
+    "subStatPool": ["INTELLIGENCE", "WISDOM", "SKILL_COOLDOWN"]
+  }
+]

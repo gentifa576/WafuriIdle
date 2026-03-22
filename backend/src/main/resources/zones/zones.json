@@ -1,0 +1,12 @@
+[
+  {
+    "id": "starter-plains",
+    "name": "Starter Plains",
+    "levelRange": { "first": 1, "last": 10 },
+    "lootTable": [
+      { "itemName": "Sword", "weight": 70 },
+      { "itemName": "Armor", "weight": 30 }
+    ],
+    "enemies": ["Training Dummy", "Straw Golem"]
+  }
+]

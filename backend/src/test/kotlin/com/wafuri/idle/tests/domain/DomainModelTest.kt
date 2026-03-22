@@ -1,0 +1,189 @@
+package com.wafuri.idle.tests.domain
+
+import com.wafuri.idle.domain.model.CombatMemberState
+import com.wafuri.idle.domain.model.CombatState
+import com.wafuri.idle.domain.model.CombatStatus
+import com.wafuri.idle.domain.model.DomainRuleViolationException
+import com.wafuri.idle.domain.model.EquipmentSlot
+import com.wafuri.idle.domain.model.InventoryItem
+import com.wafuri.idle.domain.model.LevelRange
+import com.wafuri.idle.domain.model.Player
+import com.wafuri.idle.domain.model.Team
+import com.wafuri.idle.domain.model.ZoneLootEntry
+import com.wafuri.idle.domain.model.ZoneTemplate
+import com.wafuri.idle.tests.support.armorItem
+import com.wafuri.idle.tests.support.swordItem
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
+import java.util.UUID
+
+class DomainModelTest :
+  StringSpec({
+    "team max size is three" {
+      val playerId = UUID.randomUUID()
+      val team =
+        Team(
+          id = UUID.randomUUID(),
+          playerId = playerId,
+          characterKeys = List(3) { "character-$it" },
+        )
+
+      shouldThrow<DomainRuleViolationException> {
+        team.addCharacter("warrior")
+      }
+    }
+
+    "item type must match slot" {
+      val playerId = UUID.randomUUID()
+      val inventoryItem =
+        InventoryItem(
+          id = UUID.randomUUID(),
+          playerId = playerId,
+          item = armorItem(),
+        )
+
+      shouldThrow<DomainRuleViolationException> {
+        inventoryItem.equip(playerId, "warrior", EquipmentSlot.WEAPON)
+      }
+    }
+
+    "items must belong to player inventory" {
+      val inventoryItem =
+        InventoryItem(
+          id = UUID.randomUUID(),
+          playerId = UUID.randomUUID(),
+          item = swordItem(),
+        )
+
+      shouldThrow<DomainRuleViolationException> {
+        inventoryItem.equip(UUID.randomUUID(), "warrior", EquipmentSlot.WEAPON)
+      }
+    }
+
+    "item cannot be equipped twice" {
+      val playerId = UUID.randomUUID()
+      val inventoryItem =
+        InventoryItem(
+          id = UUID.randomUUID(),
+          playerId = playerId,
+          item = swordItem(),
+          equippedCharacterKey = "cleric",
+        )
+
+      shouldThrow<DomainRuleViolationException> {
+        inventoryItem.equip(playerId, "warrior", EquipmentSlot.WEAPON)
+      }
+    }
+
+    "unequip returns item to inventory" {
+      val playerId = UUID.randomUUID()
+      val itemId = UUID.randomUUID()
+      val inventoryItem =
+        InventoryItem(
+          id = itemId,
+          playerId = playerId,
+          item = swordItem(),
+          equippedCharacterKey = "warrior",
+        )
+
+      val updatedItem = inventoryItem.unequip("warrior", EquipmentSlot.WEAPON)
+
+      updatedItem.equippedCharacterKey.shouldBeNull()
+    }
+
+    "player grants unique character keys only once" {
+      val player = Player(UUID.randomUUID(), "Alice", ownedCharacterKeys = setOf("warrior"))
+
+      val updated = player.grantCharacter("cleric").grantCharacter("cleric")
+
+      updated.ownedCharacterKeys shouldBe setOf("warrior", "cleric")
+    }
+
+    "combat state advances enemy hp only after enough accumulated elapsed time" {
+      val state =
+        CombatState(
+          playerId = UUID.randomUUID(),
+          status = CombatStatus.FIGHTING,
+          zoneId = "starter-plains",
+          activeTeamId = UUID.randomUUID(),
+          enemyName = "Training Dummy",
+          enemyHp = 10f,
+          enemyMaxHp = 10f,
+          members =
+            listOf(
+              CombatMemberState(
+                characterKey = "warrior",
+                attack = 10f,
+                hit = 3f,
+                currentHp = 15f,
+                maxHp = 15f,
+              ),
+            ),
+        )
+
+      val buffered = state.advance(elapsedMillis = 500L, damageIntervalMillis = 1000L, respawnDelayMillis = 1000L)
+      val updated = buffered.advance(elapsedMillis = 500L, damageIntervalMillis = 1000L, respawnDelayMillis = 1000L)
+
+      buffered.enemyHp shouldBe 10f
+      updated.enemyHp shouldBe 0f
+      updated.status shouldBe CombatStatus.WON
+    }
+
+    "combat state respawns after the configured delay and consumes overflow time" {
+      val state =
+        CombatState(
+          playerId = UUID.randomUUID(),
+          status = CombatStatus.WON,
+          zoneId = "starter-plains",
+          activeTeamId = UUID.randomUUID(),
+          enemyName = "Training Dummy",
+          enemyHp = 0f,
+          enemyMaxHp = 10f,
+          members =
+            listOf(
+              CombatMemberState(
+                characterKey = "warrior",
+                attack = 10f,
+                hit = 3f,
+                currentHp = 15f,
+                maxHp = 15f,
+              ),
+            ),
+        )
+
+      val updated = state.advance(elapsedMillis = 1500L, damageIntervalMillis = 1000L, respawnDelayMillis = 1000L)
+
+      updated.status shouldBe CombatStatus.FIGHTING
+      updated.enemyHp shouldBe 10f
+      updated.pendingDamageMillis shouldBe 500L
+      updated.pendingRespawnMillis shouldBe 0L
+    }
+
+    "zone template requires at least one enemy and positive loot weights" {
+      shouldThrow<IllegalArgumentException> {
+        ZoneTemplate(
+          id = "starter-plains",
+          name = "Starter Plains",
+          levelRange = LevelRange(1, 10),
+          eventRefs = emptyList(),
+          lootTable = listOf(ZoneLootEntry(itemName = "Sword", weight = 0)),
+          enemies = emptyList(),
+        )
+      }
+    }
+
+    "dead combat member contributes no dps" {
+      val member =
+        CombatMemberState(
+          characterKey = "warrior",
+          attack = 10f,
+          hit = 3f,
+          currentHp = 0f,
+          maxHp = 15f,
+        )
+
+      member.dps shouldBe 0f
+    }
+  })

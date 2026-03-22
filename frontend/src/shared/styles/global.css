@@ -1,0 +1,383 @@
+:root {
+  color-scheme: dark;
+  --bg: #0b0c0a;
+  --panel: #171913;
+  --panel-2: #1f221a;
+  --line: #31362a;
+  --text: #f4e9d8;
+  --muted: #a7a18f;
+  --accent: #d8572a;
+  --accent-soft: #f0a35f;
+  --success: #86c17a;
+  --shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+  font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+  background:
+    radial-gradient(circle at top, rgba(216, 87, 42, 0.16), transparent 26%),
+    linear-gradient(180deg, #141611 0%, #0b0c0a 100%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  color: var(--text);
+  background: transparent;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.8rem 1.1rem;
+  color: var(--text);
+  background: linear-gradient(135deg, var(--accent), var(--accent-soft));
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+input,
+select {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 0.85rem 0.95rem;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.app-shell {
+  max-width: 1680px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.panel-header h2 {
+  margin: 0.2rem 0 0;
+}
+
+.eyebrow,
+.label {
+  margin: 0;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-size: 0.74rem;
+}
+
+.header-chip {
+  padding: 0.55rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.game-shell {
+  display: grid;
+  gap: 1rem;
+}
+
+.panel {
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 1.2rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+  box-shadow: var(--shadow);
+}
+
+.game-topbar {
+  display: grid;
+  grid-template-columns: minmax(220px, 320px) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: center;
+}
+
+.topbar-brand h1 {
+  margin: 0.2rem 0 0;
+}
+
+.topbar-status {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.top-stat {
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.top-stat strong {
+  display: block;
+  margin-top: 0.35rem;
+}
+
+.game-body {
+  display: grid;
+  grid-template-columns: 230px minmax(0, 1fr) 340px;
+  gap: 1rem;
+  min-height: calc(100vh - 7rem);
+}
+
+.left-rail,
+.right-column,
+.center-column {
+  display: grid;
+  gap: 1rem;
+}
+
+.left-rail {
+  align-content: start;
+}
+
+.field {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.rail-nav,
+.stack,
+.list-block,
+.event-log,
+.inventory-list,
+.member-grid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.rail-link {
+  justify-content: flex-start;
+  border-radius: 18px;
+  padding: 0.9rem 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid transparent;
+}
+
+.rail-link.active {
+  border-color: rgba(216, 87, 42, 0.45);
+  background: rgba(216, 87, 42, 0.16);
+}
+
+.rail-card {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1rem;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+}
+
+.command-bar {
+  display: grid;
+  gap: 1rem;
+}
+
+.command-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.button-row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.battle-panel {
+  min-height: 0;
+}
+
+.panel-subheader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.panel-subheader h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.pill-list {
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+}
+
+.pill {
+  padding: 0.75rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
+  text-align: center;
+}
+
+.pill.dim {
+  color: var(--muted);
+}
+
+.inventory-card,
+.member-card {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--panel-2);
+}
+
+.inventory-card span,
+.member-card span {
+  color: var(--muted);
+}
+
+.member-grid {
+  margin-top: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.right-column .detail-panel {
+  min-height: 0;
+}
+
+.combat-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.combat-summary > div {
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.combat-summary strong {
+  display: block;
+  margin-top: 0.35rem;
+}
+
+.error-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 16px;
+  border: 1px solid rgba(216, 87, 42, 0.45);
+  background: rgba(216, 87, 42, 0.12);
+}
+
+.ghost-button {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.combat-viewport {
+  margin-top: 1rem;
+  aspect-ratio: 9 / 19;
+  min-height: 52vh;
+  max-height: 68vh;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  overflow: hidden;
+  background: #11130f;
+}
+
+.log-entry,
+.muted {
+  color: var(--muted);
+}
+
+.log-entry {
+  padding: 0.75rem 0.9rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.bottom-strip {
+  min-height: 0;
+}
+
+.event-log.compact,
+.compact-scroll {
+  max-height: 24rem;
+  overflow: auto;
+  padding-right: 0.25rem;
+}
+
+@media (max-width: 1280px) {
+  .game-body {
+    grid-template-columns: 210px minmax(0, 1fr) 300px;
+  }
+
+  .command-fields {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 1120px) {
+  .game-topbar,
+  .game-body {
+    grid-template-columns: 1fr;
+  }
+
+  .topbar-status {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .battle-panel {
+    min-height: auto;
+  }
+
+  .combat-viewport {
+    min-height: 50vh;
+    max-height: none;
+  }
+
+  .combat-summary {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .app-shell {
+    padding: 0.75rem;
+  }
+
+  .panel,
+  .combat-viewport {
+    border-radius: 20px;
+  }
+
+  .topbar-status {
+    grid-template-columns: 1fr;
+  }
+}

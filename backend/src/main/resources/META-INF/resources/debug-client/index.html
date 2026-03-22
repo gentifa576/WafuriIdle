@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WafuriIdle Debug Client</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="layout">
+    <section class="panel hero">
+      <div>
+        <p class="eyebrow">Debug Client</p>
+        <h1>WafuriIdle Local Test Harness</h1>
+        <p class="lede">
+          Drive REST commands from the browser and watch player-scoped WebSocket state updates without adding any frontend dependency.
+        </p>
+      </div>
+      <div class="server-config">
+        <label>
+          <span>Base URL</span>
+          <input id="baseUrl" type="text" value="http://localhost:8080">
+        </label>
+        <button id="clearLog" type="button" class="ghost">Clear Log</button>
+      </div>
+    </section>
+
+    <section class="panel grid-two">
+      <div>
+        <h2>Player</h2>
+        <form id="createPlayerForm" class="stack">
+          <label>
+            <span>Name</span>
+            <input id="playerName" name="playerName" type="text" placeholder="Alice" required>
+          </label>
+          <button type="submit">Create Player</button>
+        </form>
+
+        <div class="stack compact">
+          <label>
+            <span>Active Player ID</span>
+            <input id="playerId" type="text" placeholder="Player UUID">
+          </label>
+          <div class="row">
+            <button id="fetchPlayer" type="button" class="ghost">Fetch Player</button>
+            <button id="fetchTeams" type="button" class="ghost">Fetch Teams</button>
+            <button id="fetchInventory" type="button" class="ghost">Fetch Inventory</button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h2>Team</h2>
+        <label class="stack compact">
+          <span>Current Team ID</span>
+          <select id="teamId">
+            <option value="">Fetch teams to select a team</option>
+          </select>
+        </label>
+        <div class="row">
+          <button id="activateTeam" type="button" class="ghost">Activate Team</button>
+          <button id="startCombat" type="button">Start Combat</button>
+        </div>
+        <p class="hint">
+          Players receive team slots automatically. Fetch teams to populate the selector, then choose one here for character setup.
+        </p>
+      </div>
+    </section>
+
+    <section class="panel grid-two">
+      <div>
+        <h2>Character</h2>
+        <form id="assignCharacterForm" class="stack compact">
+          <label>
+            <span>Owned Character</span>
+            <select id="ownedCharacterKey">
+              <option value="">Connect WebSocket or fetch player to list owned characters</option>
+            </select>
+          </label>
+          <button type="submit">Add To Team</button>
+        </form>
+        <label class="stack">
+          <span>Current Character</span>
+          <select id="characterKey">
+            <option value="">Fetch teams to list characters for the selected team</option>
+          </select>
+        </label>
+      </div>
+      <div>
+        <h2>Equipment</h2>
+        <form id="equipForm" class="stack">
+          <label>
+            <span>Character</span>
+            <select id="equipCharacterKey">
+              <option value="">Use current character</option>
+            </select>
+          </label>
+          <label>
+            <span>Inventory Item Picker</span>
+            <select id="inventoryItemPicker">
+              <option value="">Select from fetched inventory or WS state</option>
+            </select>
+          </label>
+          <label>
+            <span>Inventory Item ID</span>
+            <input id="inventoryItemId" type="text" placeholder="Existing inventory item UUID" required>
+          </label>
+          <label>
+            <span>Slot</span>
+            <select id="equipSlot">
+              <option value="WEAPON">WEAPON</option>
+              <option value="ARMOR">ARMOR</option>
+              <option value="ACCESSORY">ACCESSORY</option>
+            </select>
+          </label>
+          <button type="submit">Equip Item</button>
+        </form>
+
+        <form id="unequipForm" class="stack compact">
+          <label>
+            <span>Character</span>
+            <select id="unequipCharacterKey">
+              <option value="">Use current character</option>
+            </select>
+          </label>
+          <label>
+            <span>Slot</span>
+            <select id="unequipSlot">
+              <option value="WEAPON">WEAPON</option>
+              <option value="ARMOR">ARMOR</option>
+              <option value="ACCESSORY">ACCESSORY</option>
+            </select>
+          </label>
+          <button type="submit" class="ghost">Unequip Item</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="panel grid-two">
+      <div>
+        <h2>WebSocket</h2>
+        <div class="stack">
+          <label>
+            <span>Watch Player ID</span>
+            <input id="watchPlayerId" type="text" placeholder="Defaults to active player">
+          </label>
+          <div class="row">
+            <button id="connectWs" type="button">Connect WS</button>
+            <button id="disconnectWs" type="button" class="ghost">Disconnect WS</button>
+          </div>
+          <p id="wsStatus" class="status disconnected">Disconnected</p>
+        </div>
+      </div>
+
+      <div>
+        <h2>Tips</h2>
+        <ul class="tips">
+          <li>Create a player first.</li>
+          <li>Players already have team slots after creation. Fetch teams to find the IDs.</li>
+          <li>Add an owned character to a team before activating it.</li>
+          <li>Activate a non-empty team before starting combat.</li>
+          <li>Character creation is not exposed through public REST.</li>
+          <li>Fetch inventory or connect WebSocket to populate the inventory item picker.</li>
+          <li>Equip uses existing inventory item IDs only. Public REST does not mint items.</li>
+          <li>Keep WebSocket connected to watch tick-driven player state snapshots.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="panel grid-two outputs">
+      <div>
+        <div class="section-title">
+          <h2>State Output</h2>
+          <button id="copyState" type="button" class="ghost">Copy</button>
+        </div>
+        <pre id="stateOutput" class="code-block"></pre>
+      </div>
+      <div>
+        <div class="section-title">
+          <h2>Request Log</h2>
+          <button id="copyLog" type="button" class="ghost">Copy</button>
+        </div>
+        <pre id="logOutput" class="code-block"></pre>
+      </div>
+    </section>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>

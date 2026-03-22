@@ -1,0 +1,32 @@
+[
+  {
+    "id": "warrior",
+    "name": "Warrior",
+    "strength": [12.0, 2.0],
+    "agility": [7.0, 1.1],
+    "intelligence": [4.0, 0.4],
+    "wisdom": [5.0, 0.5],
+    "vitality": [11.0, 1.8],
+    "image": "https://example.com/images/warrior.png"
+  },
+  {
+    "id": "cleric",
+    "name": "Cleric",
+    "strength": [5.0, 0.6],
+    "agility": [6.0, 0.7],
+    "intelligence": [9.0, 1.4],
+    "wisdom": [12.0, 1.9],
+    "vitality": [8.0, 1.2],
+    "image": "https://example.com/images/cleric.png"
+  },
+  {
+    "id": "ranger",
+    "name": "Ranger",
+    "strength": [8.0, 1.0],
+    "agility": [12.0, 1.8],
+    "intelligence": [6.0, 0.8],
+    "wisdom": [7.0, 0.9],
+    "vitality": [9.0, 1.3],
+    "image": "https://example.com/images/ranger.png"
+  }
+]
