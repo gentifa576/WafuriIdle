@@ -1,23 +1,5420 @@
 [
   {
-    "name": "Sword",
-    "displayName": "Sword",
-    "type": "WEAPON",
-    "baseStat": { "type": "STRENGTH", "value": 12.0 },
-    "subStatPool": ["AGILITY", "VITALITY", "CRIT_CHANCE"]
-  },
-  {
-    "name": "Armor",
-    "displayName": "Armor",
-    "type": "ARMOR",
-    "baseStat": { "type": "VITALITY", "value": 18.0 },
-    "subStatPool": ["STRENGTH", "WISDOM", "CRIT_DAMAGE"]
-  },
-  {
-    "name": "Ring",
-    "displayName": "Ring",
+    "name": "main_chapter_orb_1",
+    "displayName": "Smiles of the Forest",
     "type": "ACCESSORY",
-    "baseStat": { "type": "AGILITY", "value": 7.5 },
-    "subStatPool": ["INTELLIGENCE", "WISDOM", "SKILL_COOLDOWN"]
+    "baseStat": {
+      "type": "VITALITY",
+      "value": 24.0
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "WISDOM",
+      "CRIT_DAMAGE"
+    ]
+  },
+  {
+    "name": "main_chapter_orb_10",
+    "displayName": "Reaching Out",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 14.6
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "main_chapter_orb_11",
+    "displayName": "The Golden Path",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 14.6
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "main_chapter_orb_12",
+    "displayName": "We Walk, Not Knowing the Way",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 16.2
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "main_chapter_orb_2",
+    "displayName": "Memory Mirage",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 18.3
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "main_chapter_orb_3",
+    "displayName": "Buccaneer's Banquet",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 16.7
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "main_chapter_orb_4",
+    "displayName": "Canyon Consul",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 20.0
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "main_chapter_orb_5",
+    "displayName": "Song of the Golden Canary",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 12.9
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "main_chapter_orb_6",
+    "displayName": "Nurarihyon",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "VITALITY",
+      "value": 19.2
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "WISDOM",
+      "CRIT_DAMAGE"
+    ]
+  },
+  {
+    "name": "main_chapter_orb_7",
+    "displayName": "Bonds Forged in Flame",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "VITALITY",
+      "value": 18.8
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "WISDOM",
+      "CRIT_DAMAGE"
+    ]
+  },
+  {
+    "name": "main_chapter_orb_8",
+    "displayName": "The Heir",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 19.2
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "main_chapter_orb_9",
+    "displayName": "Unwavering Rebellion",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 18.8
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "trophy_maou_hunt",
+    "displayName": "The Savior",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 8
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "practice_trophy_1",
+    "displayName": "Shield Shaker",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "VITALITY",
+      "value": 8
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "WISDOM",
+      "CRIT_DAMAGE"
+    ]
+  },
+  {
+    "name": "practice_trophy_2",
+    "displayName": "Curse Crusher",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 8
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "practice_trophy_3",
+    "displayName": "Magnificent Might",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 8
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "practice_trophy_4",
+    "displayName": "Swifter than Sound",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 8
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "practice_trophy_5",
+    "displayName": "Rugged Rebel",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 8
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0001",
+    "displayName": "Old Dagger",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 10.8
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0002",
+    "displayName": "Uninscribed Longsword",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 21.7
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0003",
+    "displayName": "Serpentsbane",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 61.7
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0004",
+    "displayName": "Ame-no-Habakiri",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 82.5
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0005",
+    "displayName": "Durendal",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 89.6
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0006",
+    "displayName": "Flux Blade",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 39.2
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0007",
+    "displayName": "Cutlass",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 44.2
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0008",
+    "displayName": "Glass Blade",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 43.3
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0010",
+    "displayName": "Ilhoon",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 58.8
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0011",
+    "displayName": "Heimdall's Sword",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 89.6
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0012",
+    "displayName": "Prometheus Blade",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 89.6
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0013",
+    "displayName": "Flammenschwert",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 42.9
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0014",
+    "displayName": "Woodsprite Greatsword",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 59.6
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0015",
+    "displayName": "Calamity Blade",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 58.8
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0017",
+    "displayName": "Encrusted Sword",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 60.8
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0018",
+    "displayName": "Conviction",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 59.6
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0019",
+    "displayName": "Shadowflash Sword",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 86.7
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0020_coop",
+    "displayName": "Prismatic Dual Blades",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 92.1
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0022_boss_unique",
+    "displayName": "Death's Sword",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 86.7
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0023_april",
+    "displayName": "The Carrot Sword of Imagination",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 43.8
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0024_coop",
+    "displayName": "Tree of Bronze",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 62.5
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0025_boss_unique",
+    "displayName": "Spine of the Deep",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 85.4
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0026_PCollab",
+    "displayName": "Princess Sword",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 82.9
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0027",
+    "displayName": "Electric Dagger",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 45.4
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0028",
+    "displayName": "Tyrfing",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 86.2
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0029_boss_unique",
+    "displayName": "Cardinal",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 88.3
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0030_coop",
+    "displayName": "Tail of the Ox Demon",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 84.2
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0031_storyevent",
+    "displayName": "Covenant Blade",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 85.4
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0032_score",
+    "displayName": "Blade of Celestial Wealth",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 96.2
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0033_decay",
+    "displayName": "Skoll's Blade",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 89.6
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0034_raid",
+    "displayName": "Windwrath Blade",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 90.8
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0035",
+    "displayName": "Heatwave Blade",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 45.0
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0036_storyevent",
+    "displayName": "Dawnbringer",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 86.7
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0037_coop",
+    "displayName": "Sabre d'Eau",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 90.4
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0038_storyevent",
+    "displayName": "Genome Slicer",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 92.1
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0039_Gcollab",
+    "displayName": "Gram",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 93.3
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0040_boss_unique",
+    "displayName": "Sessho-seki Dagger",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 96.2
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0041_storyevent",
+    "displayName": "Prism Blade",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 87.9
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0042_decay",
+    "displayName": "Juturna's Fan",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 92.1
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0043_boss_unique",
+    "displayName": "Grom",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 85.0
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0044_storyevent",
+    "displayName": "Violet Storm",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 90.8
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0045_score",
+    "displayName": "Polis Whip",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 90.8
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0046_haniwa",
+    "displayName": "Hanipaneus",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 89.2
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0048_raid_revival",
+    "displayName": "Flamewing Blade",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 61.7
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0049_raid_revival",
+    "displayName": "Seafang Whip",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 57.9
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0050_boss_unique",
+    "displayName": "Beared Fang",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 77.5
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0051_storyevent",
+    "displayName": "Sword of Eternal Sin",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 95.8
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0052_raid_revival",
+    "displayName": "Darkbane Blade",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 64.2
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0053",
+    "displayName": "Camping Knife",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 45.4
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0054_coop",
+    "displayName": "Fission Blade",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 79.2
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0055_story_event",
+    "displayName": "WBR-01",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 90.4
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0056_score",
+    "displayName": "Blade of Celestial Wisdom",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 92.5
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0057_newbie",
+    "displayName": "Protostar Harpe",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 50.0
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0058_PCollab",
+    "displayName": "Big Bunny Blade",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 91.7
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0059_storyevent",
+    "displayName": "Sheep Scimitar",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 79.2
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0060_raid",
+    "displayName": "Nevermind",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 91.7
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0061",
+    "displayName": "First Light",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 63.3
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0062_storyevent",
+    "displayName": "Equalizer",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 88.3
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0063_storyevent",
+    "displayName": "The Victorious",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 64.6
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0064_raid",
+    "displayName": "Acid Fang",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 93.8
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0065_raid",
+    "displayName": "Berdreyminn",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 77.9
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0068_coop",
+    "displayName": "\u00c9p\u00e9e de Rafale",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 87.1
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0070_epuration",
+    "displayName": "Liberator",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 87.5
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0071_storyevent",
+    "displayName": "Innocence",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 56.7
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0072_storyevent",
+    "displayName": "Nouin 1.0",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 74.2
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0073_raid",
+    "displayName": "Juanrico",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 83.8
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_0074",
+    "displayName": "Wicked Wood Edge",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 78.3
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "sword_rare4_phl_blade",
+    "displayName": "PHL Blade",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 63.3
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "axe_0001",
+    "displayName": "Uninscribed Axe",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 22.9
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "axe_0003",
+    "displayName": "Warrior's Axe",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 39.2
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "axe_0006",
+    "displayName": "War Scythe",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 45.4
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "axe_0007",
+    "displayName": "Tomahawk",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 61.7
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "axe_0008",
+    "displayName": "Ukonvasara",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 83.8
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "axe_0009",
+    "displayName": "Thor's Hammer",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 90.8
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "axe_0010",
+    "displayName": "Death's Sickle",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 85.0
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "axe_0011",
+    "displayName": "Viking Axe",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 45.0
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "axe_0012",
+    "displayName": "Oxhead Axe",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 44.2
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "axe_0013",
+    "displayName": "Axe of the Ancients",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 61.7
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "axe_0014",
+    "displayName": "Foxshade Axe",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 62.5
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "axe_0016",
+    "displayName": "Cursed Axe",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 61.7
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "axe_0017",
+    "displayName": "Whitetail's Axe",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 85.0
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "axe_0018_boss_unique",
+    "displayName": "Death's Axe",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 88.3
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "axe_0019_coop",
+    "displayName": "Maestro's Mallet",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 62.5
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "axe_0020_raid",
+    "displayName": "Darkbane Scythe",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 89.2
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "axe_0021_storyevent",
+    "displayName": "Golden Rake",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 60.8
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "axe_0022_storyevent",
+    "displayName": "Big Ogre's Axe",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 85.4
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "axe_0023_RCollab",
+    "displayName": "Morning Star",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 95.0
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "axe_0024",
+    "displayName": "Parashu",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 93.8
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "axe_0025_decay",
+    "displayName": "Aegaeon's Axe",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 92.1
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "axe_0026_raid",
+    "displayName": "Windwrath Axe",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 87.9
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "axe_0027_coop",
+    "displayName": "Ballastaff",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 89.2
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "axe_0028_boss_unique",
+    "displayName": "Suppression",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 89.6
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "axe_0029_storyevent",
+    "displayName": "Axe of Oblivion",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 93.3
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "axe_0030",
+    "displayName": "Infernal Axe",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 83.8
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "axe_0031_haniwa",
+    "displayName": "Hanithales",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 93.8
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "axe_0032_raid",
+    "displayName": "Painkiller",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 89.2
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "axe_0033_boss_unique",
+    "displayName": "Topor",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 63.3
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "axe_0034_raid_revival",
+    "displayName": "Shadowflash Axe",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 59.6
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "axe_0035_boss_unique",
+    "displayName": "Stitch the Bear",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 95.0
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "axe_0036_haniwa",
+    "displayName": "Hanitin",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 108.3
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "axe_0037",
+    "displayName": "Grim Scythe",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 98.8
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "axe_0038_haniwa",
+    "displayName": "Haniscythe",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 82.9
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "axe_0039_haniwa",
+    "displayName": "Haniflail",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 94.6
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "axe_0040_raid",
+    "displayName": "Badly Broken",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 79.2
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "axe_0041",
+    "displayName": "Adamas",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 89.2
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "spear_0001",
+    "displayName": "Uninscribed Spear",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 21.2
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "spear_0003",
+    "displayName": "Javelin",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 58.8
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "spear_0004",
+    "displayName": "Twisted Lance",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 59.6
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "spear_0005",
+    "displayName": "Maltet",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 90.8
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "spear_0006",
+    "displayName": "Flux Spear",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 37.9
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "spear_0007",
+    "displayName": "Pike",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 43.3
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "spear_0008",
+    "displayName": "Partizan",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 59.6
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "spear_0009",
+    "displayName": "Coral Spear",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 60.8
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "spear_0011",
+    "displayName": "Spear of Okeanos",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 88.3
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "spear_0012",
+    "displayName": "Couse",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 45.0
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "spear_0013",
+    "displayName": "Crescent Blade",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 44.2
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "spear_0014",
+    "displayName": "Destroyer",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 60.8
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "spear_0016",
+    "displayName": "Spear of the Life Tree",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 81.2
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "spear_0017",
+    "displayName": "Poseidon's Spear",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 82.5
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "spear_0018",
+    "displayName": "Beast General's Halberd",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 83.8
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "spear_0019",
+    "displayName": "Shadowflash Spear",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 60.8
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "spear_0020_boss_unique",
+    "displayName": "Spear of the Ancient King",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 90.8
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "spear_0021_boss_unique",
+    "displayName": "The Spear of Gluttony",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 92.1
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "spear_0022_coop",
+    "displayName": "General's Halberd",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 90.4
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "spear_0023_boss_unique",
+    "displayName": "Ancestral Staff",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 93.3
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "spear_0024",
+    "displayName": "Wind Chariot",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 62.5
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "spear_0025",
+    "displayName": "Storm Trident",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 86.2
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "spear_0026_storyevent",
+    "displayName": "Tengu Brush",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 87.9
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "spear_0027",
+    "displayName": "Laser Pilum",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 45.0
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "spear_0028_score",
+    "displayName": "Trident of Celestial Fortune",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 93.8
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "spear_0029_raid",
+    "displayName": "Seafang Spear",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 89.6
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "spear_0030_boss_unique",
+    "displayName": "Vigilance",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 88.3
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "spear_0032_storyevent",
+    "displayName": "Kingdom Spear",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 62.5
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "spear_0033_Gcollab",
+    "displayName": "Brionac",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 90.8
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "spear_0034_haniwa",
+    "displayName": "Haniclitus",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 90.8
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "spear_0035_boss_unique",
+    "displayName": "Iwatoshi",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 92.1
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "spear_0036_raid",
+    "displayName": "Moon Dance",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 77.5
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "spear_0037_newbie",
+    "displayName": "Protostar Bident",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 55.8
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "spear_0038_boss_unique",
+    "displayName": "Spiteful Bident",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 92.5
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "spear_0039_boss_unique",
+    "displayName": "Spiteful Spear",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 53.3
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "spear_0040_raid",
+    "displayName": "Doolittle",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 79.2
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "spear_0041_haniwa",
+    "displayName": "Haniclub",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "STRENGTH",
+      "value": 84.6
+    },
+    "subStatPool": [
+      "AGILITY",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "bow_0001",
+    "displayName": "Uninscribed Bow",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 17.5
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "bow_0003",
+    "displayName": "Longbow",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 35.4
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "bow_0006",
+    "displayName": "Crossbow",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 36.2
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "bow_0007",
+    "displayName": "Compound Bow",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 50.4
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "bow_0008",
+    "displayName": "Azusa Bow",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 51.7
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "bow_0009",
+    "displayName": "Aeolian Bow",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 76.2
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "bow_0010",
+    "displayName": "Meteora",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 37.5
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "bow_0012",
+    "displayName": "Dire Bow",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 50.4
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "bow_0014",
+    "displayName": "The Fool's Bow",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 70.0
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "bow_0016",
+    "displayName": "Predator",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 70.0
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "bow_0017_raid",
+    "displayName": "Lightcrest Bow",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 75.0
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "bow_0018_coop",
+    "displayName": "Stormhorse Bow",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 76.2
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "bow_0019_raid",
+    "displayName": "Flamewing Bow",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 76.2
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "bow_0020_score",
+    "displayName": "Bow of Celestial Service",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 82.5
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "bow_0021",
+    "displayName": "Ocean Blue Bow",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 53.3
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "bow_0022",
+    "displayName": "Mistilteinn",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 78.8
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "bow_0023_coop",
+    "displayName": "Bow of Supplication",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 52.5
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "bow_0024_raid",
+    "displayName": "Windwrath Bow",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 54.2
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "bow_0025_raid",
+    "displayName": "One More Time",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 76.2
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "bow_0026_decay",
+    "displayName": "Hyperion Bow",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 80.0
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "bow_0027_boss_unique",
+    "displayName": "Peijainen",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 55.0
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "bow_0028_boss_unique",
+    "displayName": "Aero Heavy Bow",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 106.7
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "bow_0029_decay",
+    "displayName": "Harp of Orpheus",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 78.8
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "bow_0030_haniwa",
+    "displayName": "Hanicrow",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 90.4
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "bow_0031_newbie",
+    "displayName": "Protostar Bow",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 52.5
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "bow_0032",
+    "displayName": "Wrist-Mounted Catapult",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 47.9
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "bow_0033_raid",
+    "displayName": "Tyr",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 89.6
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "bow_0034_raid",
+    "displayName": "Snakeskin Bow",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 50.4
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "bow_0035_haniwa",
+    "displayName": "Hanibow",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 87.9
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "bow_0036",
+    "displayName": "Sea Emperor's Bow",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 87.5
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "book_0001",
+    "displayName": "Uninscribed Tome",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 15.7
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "book_0002",
+    "displayName": "Rohonc Codex",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 30.4
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "book_0004",
+    "displayName": "A Treatise on War",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 43.2
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "book_0005",
+    "displayName": "The Book of Lies",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 31.1
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "book_0007",
+    "displayName": "Der Nibelunge Liet",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "INTELLIGENCE",
+      "value": 41.8
+    },
+    "subStatPool": [
+      "WISDOM",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "book_0009",
+    "displayName": "Senji Ryakketsu",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "INTELLIGENCE",
+      "value": 60.0
+    },
+    "subStatPool": [
+      "WISDOM",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "book_0010",
+    "displayName": "Philebus",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 32.1
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "book_0011",
+    "displayName": "Commands for the Stone Soldier",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "INTELLIGENCE",
+      "value": 43.2
+    },
+    "subStatPool": [
+      "WISDOM",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "book_0013",
+    "displayName": "The Scriptures",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 60.0
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "book_0014",
+    "displayName": "100 Yokai Tales",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 58.9
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "book_0015_storyevent",
+    "displayName": "Count Valentine's Journal",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 58.9
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "book_0016_boss_unique",
+    "displayName": "Death's Tomb",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 65.4
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "book_0017_boss_unique",
+    "displayName": "The Book of Pride",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 66.4
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "book_0018_PCollab",
+    "displayName": "Chaos Grimoire",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 68.6
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "book_0019_coop",
+    "displayName": "A Pirate's Life for Me",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 46.4
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "book_0020_raid",
+    "displayName": "Seafang Tome",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "INTELLIGENCE",
+      "value": 65.4
+    },
+    "subStatPool": [
+      "WISDOM",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "book_0021_storyevent",
+    "displayName": "100 Supernatural Tales",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "INTELLIGENCE",
+      "value": 42.5
+    },
+    "subStatPool": [
+      "WISDOM",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "book_0022_raid",
+    "displayName": "Shadowflash Treatise",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 67.5
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "book_0023_raid",
+    "displayName": "Halloween Journal",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 45.7
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "book_0024_RCollab",
+    "displayName": "Lugunican Fairy Tale Anthology",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 64.3
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "book_0025_decay",
+    "displayName": "Daphnis' Tablet",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "INTELLIGENCE",
+      "value": 70.0
+    },
+    "subStatPool": [
+      "WISDOM",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "book_0026",
+    "displayName": "Taipingjing",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 70.7
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "book_0027_haniwa",
+    "displayName": "Haniximenes",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 65.0
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "book_0028_storyevent",
+    "displayName": "Lost Tome of Archeus",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 63.2
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "book_0030_raid",
+    "displayName": "Paranoia",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 39.3
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "book_0031_raid_revival",
+    "displayName": "Lightcrest Tome",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "INTELLIGENCE",
+      "value": 48.2
+    },
+    "subStatPool": [
+      "WISDOM",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "book_0032_story_event",
+    "displayName": "Dream Journal",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 62.1
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "book_0033_newbie",
+    "displayName": "Protostar Tome",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "INTELLIGENCE",
+      "value": 37.9
+    },
+    "subStatPool": [
+      "WISDOM",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "book_0034_haniwa",
+    "displayName": "Haniradamus",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 57.1
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "book_0036_storyevent",
+    "displayName": "Magia Fest Guide",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "INTELLIGENCE",
+      "value": 61.4
+    },
+    "subStatPool": [
+      "WISDOM",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "book_0037_storyevent",
+    "displayName": "Records of a King",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "INTELLIGENCE",
+      "value": 50.0
+    },
+    "subStatPool": [
+      "WISDOM",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "book_0038_storyevent",
+    "displayName": "Oxtan Report",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "INTELLIGENCE",
+      "value": 77.5
+    },
+    "subStatPool": [
+      "WISDOM",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "book_0039",
+    "displayName": "Graduation Diploma",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 78.6
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "staff_0001",
+    "displayName": "Old Staff",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 7.9
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "staff_0002",
+    "displayName": "Flux Staff",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 27.1
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "staff_0003",
+    "displayName": "Priest's Staff",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "INTELLIGENCE",
+      "value": 31.4
+    },
+    "subStatPool": [
+      "WISDOM",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "staff_0005",
+    "displayName": "Holy Scepter",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 44.3
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "staff_0007",
+    "displayName": "Magic Cane",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "INTELLIGENCE",
+      "value": 31.4
+    },
+    "subStatPool": [
+      "WISDOM",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "staff_0009",
+    "displayName": "Astrolabe Staff",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 58.9
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "staff_0010",
+    "displayName": "Warrior's Cudgel",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "INTELLIGENCE",
+      "value": 28.2
+    },
+    "subStatPool": [
+      "WISDOM",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "staff_0011",
+    "displayName": "Blooming Yokai Staff",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 43.2
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "staff_0013",
+    "displayName": "Nether Khakkhara",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "INTELLIGENCE",
+      "value": 60.0
+    },
+    "subStatPool": [
+      "WISDOM",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "staff_0015",
+    "displayName": "Eldtide Staff",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "INTELLIGENCE",
+      "value": 61.1
+    },
+    "subStatPool": [
+      "WISDOM",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "staff_0016_raid",
+    "displayName": "Flamewing Staff",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "INTELLIGENCE",
+      "value": 63.2
+    },
+    "subStatPool": [
+      "WISDOM",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "staff_0017_boss_unique",
+    "displayName": "Staff of the Ancient King",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "INTELLIGENCE",
+      "value": 66.4
+    },
+    "subStatPool": [
+      "WISDOM",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "staff_0019_boss_unique",
+    "displayName": "The Scepter of Sloth",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "INTELLIGENCE",
+      "value": 61.8
+    },
+    "subStatPool": [
+      "WISDOM",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "staff_0020_boss_unique",
+    "displayName": "Ancestral Scepter",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 67.5
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "staff_0021_storyevent",
+    "displayName": "Mosnian Baton",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 64.3
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "staff_0022",
+    "displayName": "Blood Staff",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 44.3
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "staff_0023_raid",
+    "displayName": "Darkbane Staff",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 45.7
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "staff_0024_raid",
+    "displayName": "Treat Wand",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 68.6
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "staff_0025",
+    "displayName": "Blaugandr",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 57.9
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "staff_0026_raid",
+    "displayName": "Mistletoe Wand",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 64.3
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "staff_0027_boss_unique",
+    "displayName": "Restraint",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "INTELLIGENCE",
+      "value": 64.3
+    },
+    "subStatPool": [
+      "WISDOM",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "staff_0028",
+    "displayName": "Lava Scepter",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "INTELLIGENCE",
+      "value": 46.4
+    },
+    "subStatPool": [
+      "WISDOM",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "staff_0029_boss_unique",
+    "displayName": "Nakigitsune Staff",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 65.4
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "staff_0030_haniwa",
+    "displayName": "Haninone",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "INTELLIGENCE",
+      "value": 62.9
+    },
+    "subStatPool": [
+      "WISDOM",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "staff_0031_raid_revival",
+    "displayName": "Windwrath Staff",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "INTELLIGENCE",
+      "value": 48.9
+    },
+    "subStatPool": [
+      "WISDOM",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "staff_0032",
+    "displayName": "Staff of the Enlightened",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 61.1
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "staff_0033_Pcollab",
+    "displayName": "Cosmo Blue Rod",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 80.4
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "staff_0034_boss_unique",
+    "displayName": "Spiteful Staff",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 82.5
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "staff_0035",
+    "displayName": "Protective Parasol",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "INTELLIGENCE",
+      "value": 48.6
+    },
+    "subStatPool": [
+      "WISDOM",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "staff_0036_storyevent",
+    "displayName": "Lacrima Veritas",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "INTELLIGENCE",
+      "value": 25.0
+    },
+    "subStatPool": [
+      "WISDOM",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "staff_0037_decay",
+    "displayName": "Osiris's Staff",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 8
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "staff_0040_raid",
+    "displayName": "Lunacy Fringe",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "INTELLIGENCE",
+      "value": 73.2
+    },
+    "subStatPool": [
+      "WISDOM",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "staff_0041_storyevent",
+    "displayName": "Dreamwalker",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 75.0
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "staff_0042_haniwa",
+    "displayName": "Hanicane",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 50.4
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "staff_0044",
+    "displayName": "Thyrsos",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 70.4
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "staff_0045",
+    "displayName": "Tidal Lord",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 71.1
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "staff_rare5_24_7",
+    "displayName": "24/7",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 65.4
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "fist_0001",
+    "displayName": "Uninscribed Gauntlet",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 18.8
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "fist_0004",
+    "displayName": "Crimson Orcfist",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 50.4
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "fist_0006",
+    "displayName": "Moonblade Knuckles",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 37.5
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "fist_0007",
+    "displayName": "Force Fist",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 50.4
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "fist_0009",
+    "displayName": "The Hand of Orcus",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 77.5
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "fist_0010",
+    "displayName": "Dragonfist",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 38.3
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "fist_0011",
+    "displayName": "Calamari Claw",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 51.7
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "fist_0012",
+    "displayName": "Beastlord's Fist",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 52.5
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "fist_0016_raid",
+    "displayName": "Flamewing Gauntlet",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 51.7
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "fist_0017_boss_unique",
+    "displayName": "Gauntlet of the Ancient King",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 78.8
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "fist_0018",
+    "displayName": "Brass Knuckle",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 38.8
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "fist_0019_boss_unique",
+    "displayName": "Ancestral Claw",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 80.0
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "fist_0020_boss_unique",
+    "displayName": "Claws of the Deep",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 76.2
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "fist_0021_storyevent",
+    "displayName": "Empty Bastion",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 76.2
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "fist_0022",
+    "displayName": "Chaos Knuckles",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 38.3
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "fist_0023",
+    "displayName": "Totemic Cestus",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 73.8
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "fist_0024_raid",
+    "displayName": "Trick or Claw",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 73.8
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "fist_0025_storyevent",
+    "displayName": "Wallbreaker",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 77.5
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "fist_0026_raid",
+    "displayName": "Holly Gauntlet",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 75.0
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "fist_0027",
+    "displayName": "Pollux",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 80.0
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "fist_0028_storyevent",
+    "displayName": "Walwardein",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 75.0
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "fist_0029_boss_unique",
+    "displayName": "Golova Akuly",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 82.9
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "fist_0030_haniwa",
+    "displayName": "Hanihector",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 77.5
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "fist_0031_storyevent",
+    "displayName": "Faux Paw",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 49.6
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "fist_0032_boss_unique",
+    "displayName": "Beared Claws",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 93.3
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "fist_0033_raid",
+    "displayName": "Zlata Lalas",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 86.7
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "fist_0034_storyevent",
+    "displayName": "Lion Gauntlet",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 54.2
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "fist_0035_newbie",
+    "displayName": "Protostar Knuckles",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 45.8
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "fist_0036",
+    "displayName": "Noblesse Oblige",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 58.3
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "fist_0037_storyevent",
+    "displayName": "Savant\u2019s Doll",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 62.5
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "fist_0038_raid",
+    "displayName": "Loveless",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 64.6
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "fist_0039_raid",
+    "displayName": "Relentless",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 78.3
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "fist_0040_haniwa",
+    "displayName": "Haniray",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 60.8
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "fist_0041_raid",
+    "displayName": "Johnny Ringo",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 63.8
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "fist_0042",
+    "displayName": "Ancient Glove",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 73.3
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "shield_0001",
+    "displayName": "Old Shield",
+    "type": "ARMOR",
+    "baseStat": {
+      "type": "VITALITY",
+      "value": 9.2
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "WISDOM",
+      "CRIT_DAMAGE"
+    ]
+  },
+  {
+    "name": "shield_0002",
+    "displayName": "Warrior's Shield",
+    "type": "ARMOR",
+    "baseStat": {
+      "type": "VITALITY",
+      "value": 33.8
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "WISDOM",
+      "CRIT_DAMAGE"
+    ]
+  },
+  {
+    "name": "shield_0003",
+    "displayName": "Diamond Shield",
+    "type": "ARMOR",
+    "baseStat": {
+      "type": "VITALITY",
+      "value": 52.2
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "WISDOM",
+      "CRIT_DAMAGE"
+    ]
+  },
+  {
+    "name": "shield_0007",
+    "displayName": "Amanoiwa Shield",
+    "type": "ARMOR",
+    "baseStat": {
+      "type": "VITALITY",
+      "value": 68.8
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "WISDOM",
+      "CRIT_DAMAGE"
+    ]
+  },
+  {
+    "name": "shield_0008",
+    "displayName": "Lapis Buckler",
+    "type": "ARMOR",
+    "baseStat": {
+      "type": "VITALITY",
+      "value": 37.3
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "WISDOM",
+      "CRIT_DAMAGE"
+    ]
+  },
+  {
+    "name": "shield_0009",
+    "displayName": "Knight's Shield",
+    "type": "ARMOR",
+    "baseStat": {
+      "type": "VITALITY",
+      "value": 36.0
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "WISDOM",
+      "CRIT_DAMAGE"
+    ]
+  },
+  {
+    "name": "shield_0011",
+    "displayName": "Guardian's Greatshield",
+    "type": "ARMOR",
+    "baseStat": {
+      "type": "VITALITY",
+      "value": 70.0
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "WISDOM",
+      "CRIT_DAMAGE"
+    ]
+  },
+  {
+    "name": "shield_0012",
+    "displayName": "Mythical Shield",
+    "type": "ARMOR",
+    "baseStat": {
+      "type": "VITALITY",
+      "value": 68.8
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "WISDOM",
+      "CRIT_DAMAGE"
+    ]
+  },
+  {
+    "name": "shield_0013",
+    "displayName": "Obstructor",
+    "type": "ARMOR",
+    "baseStat": {
+      "type": "VITALITY",
+      "value": 67.5
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "WISDOM",
+      "CRIT_DAMAGE"
+    ]
+  },
+  {
+    "name": "shield_0014_xmas",
+    "displayName": "Sleighbell Buckler",
+    "type": "ARMOR",
+    "baseStat": {
+      "type": "VITALITY",
+      "value": 74.9
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "WISDOM",
+      "CRIT_DAMAGE"
+    ]
+  },
+  {
+    "name": "shield_0015",
+    "displayName": "Lindwurm",
+    "type": "ARMOR",
+    "baseStat": {
+      "type": "VITALITY",
+      "value": 51.3
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "WISDOM",
+      "CRIT_DAMAGE"
+    ]
+  },
+  {
+    "name": "shield_0016_raid",
+    "displayName": "Lightcrest Shield",
+    "type": "ARMOR",
+    "baseStat": {
+      "type": "VITALITY",
+      "value": 48.6
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "WISDOM",
+      "CRIT_DAMAGE"
+    ]
+  },
+  {
+    "name": "shield_0017",
+    "displayName": "Wind Aegis",
+    "type": "ARMOR",
+    "baseStat": {
+      "type": "VITALITY",
+      "value": 37.3
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "WISDOM",
+      "CRIT_DAMAGE"
+    ]
+  },
+  {
+    "name": "shield_0018_boss_unique",
+    "displayName": "Shell of the Deep",
+    "type": "ARMOR",
+    "baseStat": {
+      "type": "VITALITY",
+      "value": 70.7
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "WISDOM",
+      "CRIT_DAMAGE"
+    ]
+  },
+  {
+    "name": "shield_0019",
+    "displayName": "Thundercrest Shield",
+    "type": "ARMOR",
+    "baseStat": {
+      "type": "VITALITY",
+      "value": 47.7
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "WISDOM",
+      "CRIT_DAMAGE"
+    ]
+  },
+  {
+    "name": "shield_0020_boss_unique",
+    "displayName": "Nostalgia",
+    "type": "ARMOR",
+    "baseStat": {
+      "type": "VITALITY",
+      "value": 74.5
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "WISDOM",
+      "CRIT_DAMAGE"
+    ]
+  },
+  {
+    "name": "shield_0021",
+    "displayName": "Record Scratcher",
+    "type": "ARMOR",
+    "baseStat": {
+      "type": "VITALITY",
+      "value": 47.7
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "WISDOM",
+      "CRIT_DAMAGE"
+    ]
+  },
+  {
+    "name": "shield_0022_storyevent",
+    "displayName": "Shield of Spite",
+    "type": "ARMOR",
+    "baseStat": {
+      "type": "VITALITY",
+      "value": 69.8
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "WISDOM",
+      "CRIT_DAMAGE"
+    ]
+  },
+  {
+    "name": "shield_0023_storyevent",
+    "displayName": "JIT Buckler",
+    "type": "ARMOR",
+    "baseStat": {
+      "type": "VITALITY",
+      "value": 51.3
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "WISDOM",
+      "CRIT_DAMAGE"
+    ]
+  },
+  {
+    "name": "shield_0024_raid",
+    "displayName": "The Reason",
+    "type": "ARMOR",
+    "baseStat": {
+      "type": "VITALITY",
+      "value": 50.4
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "WISDOM",
+      "CRIT_DAMAGE"
+    ]
+  },
+  {
+    "name": "shield_0025_boss_unique",
+    "displayName": "Aero Bone Shield",
+    "type": "ARMOR",
+    "baseStat": {
+      "type": "VITALITY",
+      "value": 76.0
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "WISDOM",
+      "CRIT_DAMAGE"
+    ]
+  },
+  {
+    "name": "shield_0026_storyevent",
+    "displayName": "Shield of the Ideal King",
+    "type": "ARMOR",
+    "baseStat": {
+      "type": "VITALITY",
+      "value": 38.8
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "WISDOM",
+      "CRIT_DAMAGE"
+    ]
+  },
+  {
+    "name": "shield_0027",
+    "displayName": "Handheld Bunker",
+    "type": "ARMOR",
+    "baseStat": {
+      "type": "VITALITY",
+      "value": 50.4
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "WISDOM",
+      "CRIT_DAMAGE"
+    ]
+  },
+  {
+    "name": "shield_0028_haniwa",
+    "displayName": "Hanihoplon",
+    "type": "ARMOR",
+    "baseStat": {
+      "type": "VITALITY",
+      "value": 40.0
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "WISDOM",
+      "CRIT_DAMAGE"
+    ]
+  },
+  {
+    "name": "shield_0029_newbie",
+    "displayName": "Protostar Shield",
+    "type": "ARMOR",
+    "baseStat": {
+      "type": "VITALITY",
+      "value": 41.7
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "WISDOM",
+      "CRIT_DAMAGE"
+    ]
+  },
+  {
+    "name": "shield_0031_haniwa",
+    "displayName": "Haniblaze",
+    "type": "ARMOR",
+    "baseStat": {
+      "type": "VITALITY",
+      "value": 57.5
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "WISDOM",
+      "CRIT_DAMAGE"
+    ]
+  },
+  {
+    "name": "acce_0001_total",
+    "displayName": "Kaleido Drop Pendant",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 38.6
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "acce_0002",
+    "displayName": "Ignition Piece",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 39.6
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "acce_0003",
+    "displayName": "Crossed Fang Necklace",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 42.5
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "acce_0004",
+    "displayName": "Spirit Tree Dew",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 33.2
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "acce_0005_PCollab",
+    "displayName": "Ameth Amulet",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 42.9
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "acce_0006_storyevent",
+    "displayName": "Gate Key Necklace",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 25.4
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "acce_0007_total",
+    "displayName": "Kaleido Drop Bracelet",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 43.8
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "acce_0008_ZCollab",
+    "displayName": "Maiden's Ribbon",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 49.6
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "acce_0009_ZCollab",
+    "displayName": "Familiar Sunglasses",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "VITALITY",
+      "value": 97.6
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "WISDOM",
+      "CRIT_DAMAGE"
+    ]
+  },
+  {
+    "name": "acce_0010_ZCollab",
+    "displayName": "Handy Bandages",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "VITALITY",
+      "value": 104.0
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "WISDOM",
+      "CRIT_DAMAGE"
+    ]
+  },
+  {
+    "name": "acce_0011_storyevent",
+    "displayName": "Genome Piercer",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 41.1
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "acce_0012_storyevent",
+    "displayName": "Ceremonial Medallion",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "VITALITY",
+      "value": 72.6
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "WISDOM",
+      "CRIT_DAMAGE"
+    ]
+  },
+  {
+    "name": "acce_0013_RCollab",
+    "displayName": "Replica Insignia",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "VITALITY",
+      "value": 102.4
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "WISDOM",
+      "CRIT_DAMAGE"
+    ]
+  },
+  {
+    "name": "acce_0014_boss_unique",
+    "displayName": "Yata-no-Kagami",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 74.3
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "acce_0015_boss_unique",
+    "displayName": "Yasakani-no-Magatama",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 90.8
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "acce_0016_total",
+    "displayName": "Dewdrop Choker",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 47.5
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "acce_0017_total",
+    "displayName": "Engagement Pendant",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 36.4
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "acce_0018_decay",
+    "displayName": "Deimos' Bangle",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 51.4
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "acce_0019_total",
+    "displayName": "Fellowship Bracelet",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 41.4
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "acce_0020_boss_unique",
+    "displayName": "Zub Akuly",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 37.5
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "acce_0021_storyevent",
+    "displayName": "Seaside Ribbon",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 85.4
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "acce_0023_boss_unique",
+    "displayName": "Aero Bomb Bag",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 52.1
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "acce_0024_raid_revival",
+    "displayName": "Lightcrest Crown",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 88.3
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "acce_0025_haniwa",
+    "displayName": "Hanileon",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 96.2
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "acce_0026_storyevent",
+    "displayName": "Ebony Handbag",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "VITALITY",
+      "value": 99.0
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "WISDOM",
+      "CRIT_DAMAGE"
+    ]
+  },
+  {
+    "name": "acce_0027_newbie",
+    "displayName": "Protostar Gauntlet",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 49.2
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "acce_0028_newbie",
+    "displayName": "Protostar Belt",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 37.1
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "acce_0029_newbie",
+    "displayName": "Protostar Diadem",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "VITALITY",
+      "value": 49.0
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "WISDOM",
+      "CRIT_DAMAGE"
+    ]
+  },
+  {
+    "name": "acce_0030_storyevent",
+    "displayName": "Amulet of Ruin",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 79.2
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "acce_0031_Pcollab",
+    "displayName": "Trick Gift",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "VITALITY",
+      "value": 102.5
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "WISDOM",
+      "CRIT_DAMAGE"
+    ]
+  },
+  {
+    "name": "acce_0032_boss_unique",
+    "displayName": "Spiteful Cloak",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 59.6
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "acce_0033_boss_unique",
+    "displayName": "Spiteful Necklace",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 63.3
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "acce_0034_storyevent",
+    "displayName": "Square Glasses",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 84.2
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "acce_0035_total",
+    "displayName": "Earrings of Amity",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 51.2
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "acce_0036",
+    "displayName": "Polychromatic Earrings",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 38.6
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "acce_0037_raid",
+    "displayName": "Luna Womb",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 56.4
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "acce_0038_storyevent",
+    "displayName": "Proto Fluffer NR",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 75.0
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "acce_0039_storyevent",
+    "displayName": "Special Dreamer",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 73.3
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "acce_0040_storyevent",
+    "displayName": "Silent Innocence",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 92.1
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "acce_0041_storyevent",
+    "displayName": "Red Strife",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 82.1
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "acce_0042_storyevent",
+    "displayName": "Striped Lifesaver",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "VITALITY",
+      "value": 83.5
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "WISDOM",
+      "CRIT_DAMAGE"
+    ]
+  },
+  {
+    "name": "acce_0043_storyevent",
+    "displayName": "Memorial Camera",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 52.1
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "acce_0044_haniwa",
+    "displayName": "Hanibaal",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 79.6
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "acce_0045_total",
+    "displayName": "Engagement Brooch",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 52.9
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "acce_0048",
+    "displayName": "Wicked Wood Strap",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 80.0
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "acce_0049",
+    "displayName": "Outstanding Achievement Award",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 83.3
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "acce_0050",
+    "displayName": "Barrel of Fun (Celebratory)",
+    "type": "ACCESSORY",
+    "baseStat": {
+      "type": "WISDOM",
+      "value": 53.6
+    },
+    "subStatPool": [
+      "INTELLIGENCE",
+      "AGILITY",
+      "SKILL_COOLDOWN"
+    ]
+  },
+  {
+    "name": "gun_0002",
+    "displayName": "Warship 343",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 95.0
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "gun_0003_raid",
+    "displayName": "Seafang Rifle",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 70.8
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "gun_0004_boss_unique",
+    "displayName": "Insanity",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 105.4
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "gun_0005_storyevent",
+    "displayName": "MM28",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 103.3
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "gun_0006_raid",
+    "displayName": "Darkbane Gun",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 104.2
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "gun_0007",
+    "displayName": "Iris Blaster",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 50.8
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "gun_0008_raid",
+    "displayName": "Aurora Rifle",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 71.7
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "gun_0009_coop",
+    "displayName": "Kadoma-II",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 102.1
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "gun_0010_storyevent",
+    "displayName": "Altered Destroyer",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 103.3
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "gun_0011_score",
+    "displayName": "Gun of Celestial Insight",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 107.5
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "gun_0012_boss_unique",
+    "displayName": "SK509",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 106.7
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "gun_0013_boss_unique",
+    "displayName": "Hunter\u2019s Rifle",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 87.5
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "gun_0014_story_event",
+    "displayName": "SG21",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 62.9
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "gun_0015_haniwa",
+    "displayName": "Hanizooka",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 86.7
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "gun_0016_newbie",
+    "displayName": "Protostar Rifle",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 46.7
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "gun_0017_storyevent",
+    "displayName": "Smuggler's Gun",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 96.7
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "gun_0018_haniwa",
+    "displayName": "Hanihayha",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 80.4
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "gun_0019",
+    "displayName": "Ancient Stick",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 77.1
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
+  },
+  {
+    "name": "gun_rare5_positron_shooter",
+    "displayName": "Positron Shooter",
+    "type": "WEAPON",
+    "baseStat": {
+      "type": "AGILITY",
+      "value": 100.8
+    },
+    "subStatPool": [
+      "STRENGTH",
+      "VITALITY",
+      "CRIT_CHANCE"
+    ]
   }
 ]
