@@ -1,5 +1,5 @@
 import { startTransition, useEffect, useMemo, useRef, useState } from 'react'
-import { currentSessionExpiresAt, setSession } from '../../../core/api/httpClient'
+import { currentSessionExpiresAt, currentSessionPlayerId, setSession } from '../../../core/api/httpClient'
 import {
   claimStarterCharacter,
   createGuestPlayer,
@@ -72,6 +72,7 @@ export function useGameClient() {
   const [latestPullResult, setLatestPullResult] = useState<PullResult | null>(null)
   const socketRef = useRef<WebSocket | null>(null)
   const activitySequenceRef = useRef(0)
+  const restoreAttemptedRef = useRef(false)
 
   useEffect(() => {
     void Promise.all([getCharacterTemplates(), getStarterCharacterTemplates()])
@@ -82,6 +83,38 @@ export function useGameClient() {
       .catch(() => {
         setTemplates([])
         setStarterTemplates([])
+      })
+  }, [])
+
+  useEffect(() => {
+    if (restoreAttemptedRef.current) {
+      return
+    }
+    restoreAttemptedRef.current = true
+
+    const playerId = currentSessionPlayerId()
+    if (!playerId) {
+      return
+    }
+
+    setLoading(true)
+    setSessionExpiresAt(currentSessionExpiresAt())
+    void refreshPlayerState(playerId)
+      .catch(() => {
+        setSession(null)
+        setSessionExpiresAt(null)
+        setPlayer(null)
+        setTeams([])
+        setInventory([])
+        setOwnedCharacters([])
+        setZoneProgress([])
+        setCombat(null)
+        setNotifications([])
+        setLatestPullResult(null)
+        setError('Saved session could not be restored. Please sign in again.')
+      })
+      .finally(() => {
+        setLoading(false)
       })
   }, [])
 
@@ -185,7 +218,7 @@ export function useGameClient() {
         setError(null)
         try {
           const response = await signUpPlayer(name, email, password)
-          setSession(response)
+          setSession(response, response.player.id)
           setSessionExpiresAt(response.sessionExpiresAt)
           setPlayer(response.player)
           setCombat(null)
@@ -207,7 +240,7 @@ export function useGameClient() {
             trimmedIdentity.includes('@')
               ? await loginPlayer({ email: trimmedIdentity, password })
               : await loginPlayer({ name: trimmedIdentity, password })
-          setSession(response)
+          setSession(response, response.player.id)
           setSessionExpiresAt(response.sessionExpiresAt)
           setPlayer(response.player)
           setCombat(null)
@@ -225,7 +258,7 @@ export function useGameClient() {
         setError(null)
         try {
           const response = await createGuestPlayer(name)
-          setSession(response)
+          setSession(response, response.player.id)
           setSessionExpiresAt(response.sessionExpiresAt)
           setPlayer(response.player)
           setCombat(null)

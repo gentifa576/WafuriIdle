@@ -148,7 +148,6 @@ If you need a different backend origin, set `VITE_API_BASE_URL`.
 - Render the combat scene in the frontend while backend combat remains authoritative.
 
 ## Current Limitations
-- The frontend currently relies on in-memory session state; refreshing the browser loses the active session token.
 - The only automated frontend gate today is `npm run build`.
 - `/debug-client/` is still useful for backend-oriented QA and transport inspection.
 

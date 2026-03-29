@@ -1,12 +1,18 @@
 import { env } from '../config/env'
 import type { AuthResponse } from '../types/api'
+import { loadPersistedSession, persistSession } from './sessionPersistence'
 
-let sessionToken: string | null = null
-let sessionExpiresAt: string | null = null
+const persistedSession = loadPersistedSession()
 
-export function setSession(auth: Pick<AuthResponse, 'sessionToken' | 'sessionExpiresAt'> | null) {
+let sessionToken: string | null = persistedSession?.sessionToken ?? null
+let sessionExpiresAt: string | null = persistedSession?.sessionExpiresAt ?? null
+let sessionPlayerId: string | null = persistedSession?.playerId ?? null
+
+export function setSession(auth: Pick<AuthResponse, 'sessionToken' | 'sessionExpiresAt'> | null, playerId: string | null = sessionPlayerId) {
   sessionToken = auth?.sessionToken ?? null
   sessionExpiresAt = auth?.sessionExpiresAt ?? null
+  sessionPlayerId = auth ? playerId : null
+  syncPersistedSession()
 }
 
 export function currentSessionToken() {
@@ -15,6 +21,10 @@ export function currentSessionToken() {
 
 export function currentSessionExpiresAt() {
   return sessionExpiresAt
+}
+
+export function currentSessionPlayerId() {
+  return sessionPlayerId
 }
 
 export async function http<T>(path: string, init?: RequestInit): Promise<T> {
@@ -30,8 +40,13 @@ export async function http<T>(path: string, init?: RequestInit): Promise<T> {
 
   const refreshedToken = response.headers.get('X-Session-Token')
   if (refreshedToken) {
-    sessionToken = refreshedToken
-    sessionExpiresAt = response.headers.get('X-Session-Expires-At')
+    setSession(
+      {
+        sessionToken: refreshedToken,
+        sessionExpiresAt: response.headers.get('X-Session-Expires-At') ?? sessionExpiresAt ?? '',
+      },
+      sessionPlayerId,
+    )
   }
 
   if (!response.ok) {
@@ -66,7 +81,25 @@ function maybeCaptureSession(payload: unknown) {
     'sessionExpiresAt' in payload &&
     typeof payload.sessionExpiresAt === 'string'
   ) {
-    sessionToken = payload.sessionToken
-    sessionExpiresAt = payload.sessionExpiresAt
+    setSession(
+      {
+        sessionToken: payload.sessionToken,
+        sessionExpiresAt: payload.sessionExpiresAt,
+      },
+      sessionPlayerId,
+    )
   }
+}
+
+function syncPersistedSession() {
+  if (!sessionToken || !sessionExpiresAt || !sessionPlayerId) {
+    persistSession(null)
+    return
+  }
+
+  persistSession({
+    sessionToken,
+    sessionExpiresAt,
+    playerId: sessionPlayerId,
+  })
 }
