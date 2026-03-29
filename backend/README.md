@@ -37,6 +37,14 @@ Dev and test use H2 in PostgreSQL compatibility mode. Production is configured f
 
 The app starts on `http://localhost:8080`.
 
+Basic health check:
+
+```text
+GET http://localhost:8080/health
+```
+
+Returns `204 No Content` when the server is reachable.
+
 ## Character Templates
 Characters are static templates, not freeform player-authored definitions.
 

@@ -152,6 +152,14 @@ class ControllerTest {
   private fun firstTeamId(token: String): String = teamsResponse(token, playerIdFromToken(token)).first().id.toString()
 
   @Test
+  fun `health endpoint returns ok without authentication`() {
+    given()
+      .get("/health")
+      .then()
+      .statusCode(204)
+  }
+
+  @Test
   fun `auth endpoints signup login and fetch current player`() {
     val signupResponse = signup("Alice", "alice@example.com")
     val playerId = signupResponse.player.id.toString()

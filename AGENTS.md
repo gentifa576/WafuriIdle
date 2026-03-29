@@ -109,6 +109,7 @@
 ## Current Capabilities
 | Endpoint | Request | Response | Notes |
 | --- | --- | --- | --- |
+| `GET /health` | none | `204 No Content` | Public health check for local/dev/prod reachability checks. |
 | `POST /auth/signup` | `{ name, email?, password? }` | `{ player, sessionToken, sessionExpiresAt, guestAccount }` | Creates an account or guest player session. |
 | `POST /auth/login` | `{ name?, email?, password }` | `{ player, sessionToken, sessionExpiresAt, guestAccount }` | Authenticates by `name + password` or `email + password`. |
 | `POST /players/{id}/starter` | `{ characterKey }` | `204 No Content` | Grants one configured starter to a player that currently owns no characters. |
