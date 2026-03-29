@@ -102,6 +102,22 @@ class CombatStatServiceTest : StringSpec() {
         )
     }
 
+    "existing combat members preserve their hp ratio when max hp changes" {
+      val teamId = UUID.randomUUID()
+      val stats =
+        expectedTeamCombatStats(
+          teamId = teamId,
+          characterStats = listOf(expectedCharacterCombatStats(characterKey = "warrior", attack = 16f, hit = 9.2f, maxHp = 14.6f)),
+        )
+
+      stats.toCombatMembers(
+        existingMembers = listOf(expectedCombatMemberState("warrior", 14f, 8f, currentHp = 5f, maxHp = 10f)),
+      ) shouldBe
+        listOf(
+          expectedCombatMemberState("warrior", 16f, 9.2f, currentHp = 7.3f, maxHp = 14.6f),
+        )
+    }
+
     "leader aura passive buffs team attack when condition matches" {
       val player = expectedPlayer(id = UUID.randomUUID(), name = "Alice", ownedCharacterKeys = setOf("cleric", "ranger"), level = 2)
       val teamId = UUID.randomUUID()

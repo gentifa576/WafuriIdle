@@ -185,6 +185,7 @@ Current loop direction:
 - enemies respawn after a delay
 - combat auto-continues after respawn
 - zone is the unit that groups combat processing
+- when team stat refresh changes a combat member's max HP, current HP preserves the existing current-to-max ratio instead of keeping the old flat HP value
 
 ## Zones
 

@@ -26,11 +26,20 @@ data class TeamCombatStats(
         characterKey = stats.characterKey,
         attack = stats.attack,
         hit = stats.hit,
-        currentHp = existing?.currentHp?.coerceAtMost(stats.maxHp) ?: stats.maxHp,
+        currentHp = existing?.preserveHpRatio(stats.maxHp) ?: stats.maxHp,
         maxHp = stats.maxHp,
       )
     }
   }
+}
+
+private fun CombatMemberState.preserveHpRatio(nextMaxHp: Float): Float {
+  if (maxHp <= 0f) {
+    return nextMaxHp
+  }
+
+  val hpRatio = (currentHp / maxHp).coerceIn(0f, 1f)
+  return nextMaxHp * hpRatio
 }
 
 data class CombatSnapshot(
