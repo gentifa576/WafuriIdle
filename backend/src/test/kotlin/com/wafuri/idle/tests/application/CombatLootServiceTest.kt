@@ -55,16 +55,16 @@ class CombatLootServiceTest : StringSpec() {
           levelRange = LevelRange(1, 10),
           lootTable =
             listOf(
-              ZoneLootEntry(itemName = "Sword", weight = 70),
-              ZoneLootEntry(itemName = "Armor", weight = 30),
+              ZoneLootEntry(itemName = "sword_0001", weight = 70),
+              ZoneLootEntry(itemName = "shield_0001", weight = 30),
             ),
           enemies = listOf("Training Dummy"),
           eventRefs = emptyList(),
         )
       val sword =
         Item(
-          name = "Sword",
-          displayName = "Sword",
+          name = "sword_0001",
+          displayName = "Old Dagger",
           type = ItemType.WEAPON,
           baseStat = Stat(StatType.STRENGTH, 12f),
           subStatPool = listOf(StatType.AGILITY),
@@ -73,12 +73,12 @@ class CombatLootServiceTest : StringSpec() {
       every { randomSource.nextFloat() } returnsMany listOf(0.001f, 0.75f)
       every { randomSource.nextInt(100) } returns 20
       every { zoneTemplateCatalog.require("starter-plains") } returns zone
-      every { itemTemplateCatalog.require("Sword") } returns sword
-      every { inventoryService.addGeneratedItem(playerId, "Sword", Rarity.COMMON) } answers { mockk() }
+      every { itemTemplateCatalog.require("sword_0001") } returns sword
+      every { inventoryService.addGeneratedItem(playerId, "sword_0001", Rarity.COMMON) } answers { mockk() }
 
       service.rollLoot(playerId, "starter-plains")
 
-      verify(exactly = 1) { inventoryService.addGeneratedItem(playerId, "Sword", Rarity.COMMON) }
+      verify(exactly = 1) { inventoryService.addGeneratedItem(playerId, "sword_0001", Rarity.COMMON) }
     }
 
     "roll loot does nothing when the base drop rate misses" {

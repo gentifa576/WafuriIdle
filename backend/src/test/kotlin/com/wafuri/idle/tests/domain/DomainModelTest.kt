@@ -110,6 +110,19 @@ class DomainModelTest :
       updated.ownedCharacterKeys shouldBe setOf("warrior", "cleric")
     }
 
+    "player currencies support rewards spending and duplicate compensation" {
+      val player = Player(UUID.randomUUID(), "Alice", gold = 100, essence = 3)
+
+      val updated =
+        player
+          .grantGold(25)
+          .spendGold(40)
+          .grantEssence(15)
+
+      updated.gold shouldBe 85
+      updated.essence shouldBe 18
+    }
+
     "combat state advances enemy hp only after enough accumulated elapsed time" {
       val state =
         CombatState(
@@ -177,7 +190,7 @@ class DomainModelTest :
           name = "Starter Plains",
           levelRange = LevelRange(1, 10),
           eventRefs = emptyList(),
-          lootTable = listOf(ZoneLootEntry(itemName = "Sword", weight = 0)),
+          lootTable = listOf(ZoneLootEntry(itemName = "sword_0001", weight = 0)),
           enemies = emptyList(),
         )
       }

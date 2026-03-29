@@ -64,6 +64,7 @@ class ProgressionServiceTest : StringSpec() {
 
       savedPlayer?.experience shouldBe 25
       savedPlayer?.level shouldBe 1
+      savedPlayer?.gold shouldBe 25
       savedProgress?.killCount shouldBe 1
       savedProgress?.level shouldBe 1
       verify(exactly = 0) { playerEventQueue.enqueue(any()) }
@@ -97,6 +98,7 @@ class ProgressionServiceTest : StringSpec() {
 
       savedPlayer?.experience shouldBe 115
       savedPlayer?.level shouldBe 2
+      savedPlayer?.gold shouldBe 25
       savedProgress?.killCount shouldBe 3
       savedProgress?.level shouldBe 2
       verify(exactly = 1) {

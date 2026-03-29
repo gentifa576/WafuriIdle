@@ -5,6 +5,8 @@ export interface Player {
   activeTeamId: string | null
   experience: number
   level: number
+  gold: number
+  essence: number
 }
 
 export interface TeamMemberSlot {
@@ -88,10 +90,19 @@ export interface PlayerStateSnapshot {
   playerName: string
   playerExperience: number
   playerLevel: number
+  playerGold: number
+  playerEssence: number
   ownedCharacters: OwnedCharacterSnapshot[]
   zoneProgress: ZoneProgressSnapshot[]
   inventory: InventoryItemSnapshot[]
   serverTime: string
+}
+
+export interface CharacterPullResult {
+  player: Player
+  pulledCharacterKey: string
+  grantedCharacterKey: string | null
+  essenceGranted: number
 }
 
 export interface AuthResponse {
@@ -133,6 +144,7 @@ export interface OfflineProgressionMessage {
   offlineDurationMillis: number
   kills: number
   experienceGained: number
+  goldGained: number
   playerLevel: number
   playerLevelsGained: number
   zoneId: string

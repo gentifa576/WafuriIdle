@@ -4,8 +4,8 @@
     "name": "Starter Plains",
     "levelRange": { "first": 1, "last": 10 },
     "lootTable": [
-      { "itemName": "Sword", "weight": 70 },
-      { "itemName": "Armor", "weight": 30 }
+      { "itemName": "sword_0001", "weight": 70 },
+      { "itemName": "shield_0001", "weight": 30 }
     ],
     "enemies": ["Training Dummy", "Straw Golem"]
   }

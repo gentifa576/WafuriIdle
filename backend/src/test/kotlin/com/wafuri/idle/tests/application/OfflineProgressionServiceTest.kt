@@ -111,8 +111,8 @@ class OfflineProgressionServiceTest : StringSpec() {
           members = listOf(CombatMemberState("warrior", 10f, 1f, 10f, 10f)),
           lastSimulatedAt = Instant.now().minus(Duration.ofMinutes(6)),
         )
-      val beforePlayer = Player(id = playerId, name = "Alice", experience = 0, level = 1)
-      val afterPlayer = Player(id = playerId, name = "Alice", experience = 320, level = 4)
+      val beforePlayer = Player(id = playerId, name = "Alice", experience = 0, level = 1, gold = 0)
+      val afterPlayer = Player(id = playerId, name = "Alice", experience = 320, level = 4, gold = 800)
       val beforeZone = PlayerZoneProgress(playerId = playerId, zoneId = zoneId, killCount = 0, level = 1)
       val afterZone = PlayerZoneProgress(playerId = playerId, zoneId = zoneId, killCount = 32, level = 4)
       val item =
@@ -142,11 +142,12 @@ class OfflineProgressionServiceTest : StringSpec() {
 
       result?.kills shouldBe 32
       result?.experienceGained shouldBe 320
+      result?.goldGained shouldBe 800
       result?.playerLevel shouldBe 4
       result?.playerLevelsGained shouldBe 3
       result?.zoneLevel shouldBe 4
       result?.zoneLevelsGained shouldBe 3
-      result?.rewards shouldContainExactly listOf(OfflineRewardSummary(itemName = "Sword", count = 32))
+      result?.rewards shouldContainExactly listOf(OfflineRewardSummary(itemName = "sword_0001", count = 32))
       savedState?.status shouldBe CombatStatus.FIGHTING
       savedState?.enemyHp shouldBe 20f
       savedState?.lastSimulatedAt?.isAfter(state.lastSimulatedAt) shouldBe true
@@ -160,12 +161,13 @@ class OfflineProgressionServiceTest : StringSpec() {
               it.playerId == playerId &&
               it.kills == 32 &&
               it.experienceGained == 320 &&
+              it.goldGained == 800 &&
               it.playerLevel == 4 &&
               it.playerLevelsGained == 3 &&
               it.zoneId == zoneId &&
               it.zoneLevel == 4 &&
               it.zoneLevelsGained == 3 &&
-              it.rewards == listOf(OfflineRewardSummary(itemName = "Sword", count = 32)) &&
+              it.rewards == listOf(OfflineRewardSummary(itemName = "sword_0001", count = 32)) &&
               it.offlineDurationMillis >= Duration.ofMinutes(5).toMillis()
           },
         )
@@ -188,8 +190,8 @@ class OfflineProgressionServiceTest : StringSpec() {
           members = listOf(CombatMemberState("warrior", 10f, 1f, 10f, 10f)),
           lastSimulatedAt = Instant.now().minus(Duration.ofMinutes(4)),
         )
-      val beforePlayer = Player(id = playerId, name = "Alice", experience = 0, level = 1)
-      val afterPlayer = Player(id = playerId, name = "Alice", experience = 210, level = 3)
+      val beforePlayer = Player(id = playerId, name = "Alice", experience = 0, level = 1, gold = 0)
+      val afterPlayer = Player(id = playerId, name = "Alice", experience = 210, level = 3, gold = 525)
       val beforeZone = PlayerZoneProgress(playerId = playerId, zoneId = zoneId, killCount = 0, level = 1)
       val afterZone = PlayerZoneProgress(playerId = playerId, zoneId = zoneId, killCount = 21, level = 3)
 
@@ -210,6 +212,7 @@ class OfflineProgressionServiceTest : StringSpec() {
 
       result?.kills shouldBe 21
       result?.experienceGained shouldBe 210
+      result?.goldGained shouldBe 525
       result?.rewards shouldBe emptyList()
       verify(exactly = 0) { playerEventQueue.enqueue(any()) }
     }
@@ -285,6 +288,7 @@ class OfflineProgressionServiceTest : StringSpec() {
           name = "Alice",
           experience = offlineKills * 10,
           level = 1 + (offlineKills / 10),
+          gold = offlineKills * 25,
         )
       }
       every { offlineProgressionServicePort.requireZoneProgress(playerId, zoneId) } answers {
@@ -322,6 +326,7 @@ class OfflineProgressionServiceTest : StringSpec() {
 
       offlineResult.kills shouldBe liveKills
       offlineResult.experienceGained shouldBe liveKills * 10
+      offlineResult.goldGained shouldBe liveKills * 25
       offlineResult.zoneLevelsGained shouldBe liveKills / 10
       offlineResult.rewards shouldBe emptyList()
       offlineSavedState.copy(lastSimulatedAt = null) shouldBe liveCurrentState.copy(lastSimulatedAt = null)

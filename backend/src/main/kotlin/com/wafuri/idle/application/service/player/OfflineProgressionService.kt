@@ -75,6 +75,7 @@ class OfflineProgressionService(
         offlineDuration = offlineDuration,
         kills = projection.kills,
         experienceGained = afterPlayer.experience - beforePlayer.experience,
+        goldGained = afterPlayer.gold - beforePlayer.gold,
         playerLevel = afterPlayer.level,
         playerLevelsGained = afterPlayer.level - beforePlayer.level,
         zoneId = zoneId,
@@ -90,6 +91,7 @@ class OfflineProgressionService(
           offlineDurationMillis = offlineDuration.toMillis(),
           kills = result.kills,
           experienceGained = result.experienceGained,
+          goldGained = result.goldGained,
           playerLevel = result.playerLevel,
           playerLevelsGained = result.playerLevelsGained,
           zoneId = result.zoneId,
@@ -210,6 +212,7 @@ data class OfflineProgressionResult(
   val offlineDuration: Duration,
   val kills: Int,
   val experienceGained: Int,
+  val goldGained: Int,
   val playerLevel: Int,
   val playerLevelsGained: Int,
   val zoneId: String,
@@ -220,6 +223,7 @@ data class OfflineProgressionResult(
   fun hasGains(): Boolean =
     kills > 0 ||
       experienceGained > 0 ||
+      goldGained > 0 ||
       playerLevelsGained > 0 ||
       zoneLevelsGained > 0 ||
       rewards.isNotEmpty()

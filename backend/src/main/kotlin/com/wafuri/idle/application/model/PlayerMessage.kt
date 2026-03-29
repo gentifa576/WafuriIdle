@@ -46,6 +46,7 @@ data class OfflineProgressionMessage(
   val offlineDurationMillis: Long,
   val kills: Int,
   val experienceGained: Int,
+  val goldGained: Int,
   val playerLevel: Int,
   val playerLevelsGained: Int,
   val zoneId: String,

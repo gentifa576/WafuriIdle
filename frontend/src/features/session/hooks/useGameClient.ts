@@ -9,6 +9,7 @@ import {
   getPlayerTeams,
   getStarterCharacterTemplates,
   loginPlayer,
+  pullCharacter,
   signUpPlayer,
 } from '../../../core/api/playerApi'
 import { sendStartCombat, createPlayerSocket } from '../../../core/api/wsClient'
@@ -47,6 +48,12 @@ export interface ActivityEntry {
   label: string
 }
 
+export interface PullResult {
+  pulledCharacterKey: string
+  grantedCharacterKey: string | null
+  essenceGranted: number
+}
+
 export function useGameClient() {
   const [player, setPlayer] = useState<Player | null>(null)
   const [teams, setTeams] = useState<Team[]>([])
@@ -62,6 +69,7 @@ export function useGameClient() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [sessionExpiresAt, setSessionExpiresAt] = useState<string | null>(null)
+  const [latestPullResult, setLatestPullResult] = useState<PullResult | null>(null)
   const socketRef = useRef<WebSocket | null>(null)
   const activitySequenceRef = useRef(0)
 
@@ -242,6 +250,32 @@ export function useGameClient() {
           setLoading(false)
         }
       },
+      async pullCharacter() {
+        if (!player) {
+          return
+        }
+        setLoading(true)
+        setError(null)
+        try {
+          const result = await pullCharacter(player.id)
+          setPlayer(result.player)
+          setLatestPullResult({
+            pulledCharacterKey: result.pulledCharacterKey,
+            grantedCharacterKey: result.grantedCharacterKey,
+            essenceGranted: result.essenceGranted,
+          })
+          await refreshPlayerState(player.id)
+          appendActivity(
+            result.grantedCharacterKey
+              ? `Pulled ${result.grantedCharacterKey}`
+              : `Pulled duplicate ${result.pulledCharacterKey} for +${result.essenceGranted} essence`,
+          )
+        } catch (caught) {
+          setError(extractMessage(caught))
+        } finally {
+          setLoading(false)
+        }
+      },
       async refreshPlayer() {
         if (!player) {
           return
@@ -360,6 +394,7 @@ export function useGameClient() {
     notifications,
     activity,
     sessionExpiresAt,
+    latestPullResult,
     loading,
     error,
     actions,
@@ -386,6 +421,8 @@ function updatePlayerFromSnapshot(player: Player, snapshot: PlayerStateSnapshot)
     player.name === snapshot.playerName &&
     player.experience === snapshot.playerExperience &&
     player.level === snapshot.playerLevel &&
+    player.gold === snapshot.playerGold &&
+    player.essence === snapshot.playerEssence &&
     stringArrayEquals(player.ownedCharacterKeys, nextOwnedCharacterKeys)
   ) {
     return player
@@ -398,6 +435,8 @@ function updatePlayerFromSnapshot(player: Player, snapshot: PlayerStateSnapshot)
     ownedCharacterKeys: nextOwnedCharacterKeys,
     experience: snapshot.playerExperience,
     level: snapshot.playerLevel,
+    gold: snapshot.playerGold,
+    essence: snapshot.playerEssence,
   }
 }
 
@@ -516,7 +555,7 @@ function offlineProgressionNotification(message: OfflineProgressionMessage): Hud
   return {
     id: `offline-${message.playerId}-${message.serverTime ?? timestampLabel()}`,
     title: 'Offline progression',
-    detail: `${formatDuration(message.offlineDurationMillis)} away · ${message.kills} kills · +${message.experienceGained} EXP · ${rewards}`,
+    detail: `${formatDuration(message.offlineDurationMillis)} away · ${message.kills} kills · +${message.experienceGained} EXP · +${message.goldGained} gold · ${rewards}`,
     tone: 'accent',
     at: message.serverTime ?? new Date().toISOString(),
   }

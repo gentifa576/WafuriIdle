@@ -2,6 +2,7 @@ package com.wafuri.idle.tests.transport.rest
 
 import com.wafuri.idle.application.service.auth.JwtTokenService
 import com.wafuri.idle.application.service.inventory.InventoryService
+import com.wafuri.idle.application.service.player.ProgressionService
 import com.wafuri.idle.application.service.team.TeamService
 import com.wafuri.idle.domain.model.EquipmentSlot
 import com.wafuri.idle.domain.model.Rarity
@@ -23,6 +24,9 @@ class ControllerTest {
 
   @Inject
   lateinit var teamService: TeamService
+
+  @Inject
+  lateinit var progressionService: ProgressionService
 
   @Inject
   lateinit var jwtTokenService: JwtTokenService
@@ -82,6 +86,8 @@ class ControllerTest {
       .body("name", equalTo("Alice"))
       .body("experience", equalTo(0))
       .body("level", equalTo(1))
+      .body("gold", equalTo(0))
+      .body("essence", equalTo(0))
       .body("ownedCharacterKeys.size()", equalTo(0))
       .body("activeTeamId", nullValue())
 
@@ -94,6 +100,8 @@ class ControllerTest {
       .body("player.name", equalTo("Alice"))
       .body("player.experience", equalTo(0))
       .body("player.level", equalTo(1))
+      .body("player.gold", equalTo(0))
+      .body("player.essence", equalTo(0))
       .body("guestAccount", equalTo(false))
   }
 
@@ -147,10 +155,42 @@ class ControllerTest {
   }
 
   @Test
+  fun `character gacha pull spends gold and grants a character or essence`() {
+    val (playerId, token) = signup("GachaUser", password = null)
+    repeat(20) {
+      progressionService.recordKill(UUID.fromString(playerId), "starter-plains")
+    }
+
+    auth(token)
+      .contentType("application/json")
+      .body("""{"characterKey":"nimbus"}""")
+      .post("/players/$playerId/starter")
+      .then()
+      .statusCode(204)
+
+    repeat(2) {
+      auth(token)
+        .noContentType()
+        .post("/players/$playerId/gacha/characters/pull")
+        .then()
+        .statusCode(200)
+    }
+
+    auth(token)
+      .get("/players/$playerId")
+      .then()
+      .statusCode(200)
+      .body("gold", equalTo(0))
+      .body("essence", equalTo(15))
+      .body("ownedCharacterKeys.size()", equalTo(2))
+      .body("ownedCharacterKeys", org.hamcrest.Matchers.hasItem("nimbus"))
+  }
+
+  @Test
   fun `inventory endpoint returns owned items`() {
     val (playerId, token) = signup("Bob", password = null)
 
-    inventoryService.addGeneratedItem(UUID.fromString(playerId), "Sword", Rarity.COMMON)
+    inventoryService.addGeneratedItem(UUID.fromString(playerId), "sword_0001", Rarity.COMMON)
 
     auth(token)
       .get("/players/$playerId/inventory")
@@ -173,7 +213,7 @@ class ControllerTest {
     val teamId = firstTeamId(token)
     teamService.assignCharacter(UUID.fromString(playerId), UUID.fromString(teamId), 1, characterKey)
     val inventoryItemId =
-      inventoryService.addGeneratedItem(UUID.fromString(playerId), "Sword", Rarity.COMMON).id.toString()
+      inventoryService.addGeneratedItem(UUID.fromString(playerId), "sword_0001", Rarity.COMMON).id.toString()
 
     auth(token)
       .contentType("application/json")

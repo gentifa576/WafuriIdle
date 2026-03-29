@@ -180,8 +180,8 @@ fun characterTemplate(
 
 fun swordItem(): Item =
   Item(
-    name = "Sword",
-    displayName = "Sword",
+    name = "sword_0001",
+    displayName = "Old Dagger",
     type = ItemType.WEAPON,
     baseStat = Stat(StatType.STRENGTH, 12f),
     subStatPool = listOf(StatType.AGILITY, StatType.VITALITY, StatType.CRIT_CHANCE),
@@ -189,8 +189,8 @@ fun swordItem(): Item =
 
 fun armorItem(): Item =
   Item(
-    name = "Armor",
-    displayName = "Armor",
+    name = "shield_0001",
+    displayName = "Old Shield",
     type = ItemType.ARMOR,
     baseStat = Stat(StatType.VITALITY, 18f),
     subStatPool = listOf(StatType.STRENGTH, StatType.WISDOM, StatType.CRIT_DAMAGE),

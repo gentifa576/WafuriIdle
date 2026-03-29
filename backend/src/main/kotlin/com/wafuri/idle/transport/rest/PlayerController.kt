@@ -1,5 +1,6 @@
 package com.wafuri.idle.transport.rest
 
+import com.wafuri.idle.application.model.CharacterPullResult
 import com.wafuri.idle.application.service.inventory.InventoryService
 import com.wafuri.idle.application.service.player.PlayerService
 import com.wafuri.idle.application.service.player.ProgressionService
@@ -8,6 +9,7 @@ import com.wafuri.idle.domain.model.InventoryItem
 import com.wafuri.idle.domain.model.Player
 import com.wafuri.idle.domain.model.PlayerZoneProgress
 import com.wafuri.idle.domain.model.Team
+import com.wafuri.idle.transport.rest.dto.ClaimStarterRequest
 import jakarta.annotation.security.RolesAllowed
 import jakarta.ws.rs.Consumes
 import jakarta.ws.rs.GET
@@ -15,10 +17,9 @@ import jakarta.ws.rs.POST
 import jakarta.ws.rs.Path
 import jakarta.ws.rs.PathParam
 import jakarta.ws.rs.Produces
-import jakarta.ws.rs.core.Response
 import jakarta.ws.rs.core.MediaType
+import jakarta.ws.rs.core.Response
 import java.util.UUID
-import com.wafuri.idle.transport.rest.dto.ClaimStarterRequest
 
 @Path("/players")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -67,4 +68,10 @@ class PlayerController(
     playerService.claimStarter(playerId, request.characterKey)
     return Response.noContent().build()
   }
+
+  @POST
+  @Path("/{id}/gacha/characters/pull")
+  fun pullCharacter(
+    @PathParam("id") playerId: UUID,
+  ): CharacterPullResult = playerService.pullCharacter(playerId)
 }

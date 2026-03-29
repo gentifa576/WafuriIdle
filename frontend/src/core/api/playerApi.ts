@@ -1,6 +1,7 @@
 import { http } from './httpClient'
 import type {
   AuthResponse,
+  CharacterPullResult,
   CharacterTemplate,
   InventoryItemSnapshot,
   Player,
@@ -64,5 +65,11 @@ export function claimStarterCharacter(playerId: string, characterKey: string) {
   return http<void>(`/players/${playerId}/starter`, {
     method: 'POST',
     body: JSON.stringify({ characterKey }),
+  })
+}
+
+export function pullCharacter(playerId: string) {
+  return http<CharacterPullResult>(`/players/${playerId}/gacha/characters/pull`, {
+    method: 'POST',
   })
 }

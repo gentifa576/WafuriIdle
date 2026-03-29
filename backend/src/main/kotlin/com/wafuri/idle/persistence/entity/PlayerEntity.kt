@@ -26,6 +26,12 @@ class PlayerEntity {
   @Column(nullable = false)
   var level: Int = 1
 
+  @Column(nullable = false)
+  var gold: Int = 0
+
+  @Column(nullable = false)
+  var essence: Int = 0
+
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(name = "player_owned_characters", joinColumns = [JoinColumn(name = "player_id")])
   @Column(name = "character_key", nullable = false)

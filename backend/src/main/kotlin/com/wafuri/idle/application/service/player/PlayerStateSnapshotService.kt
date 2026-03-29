@@ -35,6 +35,8 @@ class PlayerStateSnapshotService(
       playerName = player.name,
       playerExperience = player.experience,
       playerLevel = player.level,
+      playerGold = player.gold,
+      playerEssence = player.essence,
       ownedCharacters =
         player.ownedCharacterKeys
           .sorted()

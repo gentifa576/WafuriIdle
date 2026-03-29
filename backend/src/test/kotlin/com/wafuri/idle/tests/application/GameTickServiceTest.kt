@@ -253,12 +253,13 @@ class GameTickServiceTest : StringSpec() {
             offlineDurationMillis = 360_000,
             kills = 32,
             experienceGained = 320,
+            goldGained = 800,
             playerLevel = 4,
             playerLevelsGained = 3,
             zoneId = "starter-plains",
             zoneLevel = 4,
             zoneLevelsGained = 3,
-            rewards = listOf(OfflineRewardSummary(itemName = "Sword", count = 32)),
+            rewards = listOf(OfflineRewardSummary(itemName = "sword_0001", count = 32)),
           ),
         )
 
@@ -306,6 +307,7 @@ class GameTickServiceTest : StringSpec() {
             offlineDurationMillis = 360_000,
             kills = 20,
             experienceGained = 200,
+            goldGained = 500,
             playerLevel = 3,
             playerLevelsGained = 2,
             zoneId = "starter-plains",

@@ -313,6 +313,27 @@ select {
   color: var(--muted);
 }
 
+.gacha-card {
+  gap: 1rem;
+}
+
+.gacha-stats,
+.gacha-result {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.gacha-result {
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.gacha-result p {
+  margin: 0;
+}
+
 .combat-stage {
   display: grid;
   gap: 1rem;

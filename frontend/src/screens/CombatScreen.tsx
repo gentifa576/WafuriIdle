@@ -4,7 +4,7 @@ import { CombatViewport } from '../features/combat/components/CombatViewport'
 import { toCombatHud } from '../features/combat/model/combatHud'
 import { useGameClient } from '../features/session/hooks/useGameClient'
 
-type WorkspaceView = 'combat' | 'characters' | 'team' | 'inventory'
+type WorkspaceView = 'combat' | 'characters' | 'team' | 'inventory' | 'gacha'
 type AuthMode = 'guest' | 'signup' | 'login'
 
 export function CombatScreen() {
@@ -29,6 +29,7 @@ export function CombatScreen() {
     notifications,
     activity,
     sessionExpiresAt,
+    latestPullResult,
     loading,
     error,
     actions,
@@ -188,7 +189,7 @@ export function CombatScreen() {
           <p className="eyebrow">Active Adventurer</p>
           <h1>{player.name}</h1>
           <p>
-            Level {player.level} · {player.experience} EXP
+            Level {player.level} · {player.experience} EXP · {player.gold} gold · {player.essence} essence
             {topZone ? ` · ${topZone.zoneId} Lv.${topZone.level}` : ' · No zone progress yet'}
           </p>
         </div>
@@ -273,6 +274,10 @@ export function CombatScreen() {
               <span>Inventory</span>
               <small>{inventory.length} items</small>
             </button>
+            <button className={navClass(activeView, 'gacha')} onClick={() => setActiveView('gacha')}>
+              <span>Gacha</span>
+              <small>{player.gold} gold ready</small>
+            </button>
           </nav>
 
           <section className="nav-footnote">
@@ -333,6 +338,45 @@ export function CombatScreen() {
                   </article>
                 ))}
               </div>
+            </section>
+          ) : null}
+
+          {activeView === 'gacha' ? (
+            <section className="workspace-section">
+              <div className="section-heading">
+                <div>
+                  <p className="eyebrow">Recruitment</p>
+                  <h2>Character Pull</h2>
+                </div>
+                <div className="header-chip">250 gold</div>
+              </div>
+
+              <article className="workspace-card gacha-card">
+                <p>Every loaded character currently has an even pull chance. Duplicate pulls convert into essence.</p>
+                <div className="gacha-stats">
+                  <strong>Gold: {player.gold}</strong>
+                  <strong>Essence: {player.essence}</strong>
+                </div>
+                <div className="button-row">
+                  <button className="primary-cta" disabled={loading} onClick={() => void actions.pullCharacter()}>
+                    {loading ? 'Pulling...' : 'Pull Character'}
+                  </button>
+                </div>
+                {latestPullResult ? (
+                  <div className="gacha-result">
+                    <strong>Result</strong>
+                    <p>Pulled: {latestPullResult.pulledCharacterKey}</p>
+                    <p>
+                      Outcome:{' '}
+                      {latestPullResult.grantedCharacterKey
+                        ? `Unlocked ${latestPullResult.grantedCharacterKey}`
+                        : `Duplicate converted into ${latestPullResult.essenceGranted} essence`}
+                    </p>
+                  </div>
+                ) : (
+                  <p className="muted">No pull yet.</p>
+                )}
+              </article>
             </section>
           ) : null}
 

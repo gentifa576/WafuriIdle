@@ -10,6 +10,8 @@ fun gameConfig(
   publishJitterMax: Duration = Duration.ZERO,
   initialTeamSlots: Int = 3,
   starterChoices: List<String> = listOf("nimbus", "inaho", "vyron"),
+  characterPullGoldCost: Int = 250,
+  duplicateEssence: Int = 15,
   enemyMaxHp: Float = 1000f,
   damageInterval: Duration = Duration.ofSeconds(1),
   respawnDelay: Duration = Duration.ofSeconds(1),
@@ -22,6 +24,7 @@ fun gameConfig(
   authIssuer: String = "wafuri-idle-test",
   killExperience: Int = 10,
   experiencePerLevel: Int = 100,
+  killGold: Int = 25,
   zoneKillsPerLevel: Int = 10,
   offlineNotifyThreshold: Duration = Duration.ofMinutes(5),
   contentRefreshInterval: Duration = Duration.ofMinutes(1),
@@ -29,6 +32,8 @@ fun gameConfig(
   val tickConfig = mockk<GameConfig.Tick>()
   val teamConfig = mockk<GameConfig.Team>()
   val combatConfig = mockk<GameConfig.Combat>()
+  val gachaConfig = mockk<GameConfig.Gacha>()
+  val characterPullConfig = mockk<GameConfig.CharacterPull>()
   val lootConfig = mockk<GameConfig.Loot>()
   val rarityConfig = mockk<GameConfig.Rarity>()
   val authConfig = mockk<GameConfig.Auth>()
@@ -43,6 +48,9 @@ fun gameConfig(
   every { tickConfig.publishJitterMax() } returns publishJitterMax
   every { teamConfig.initialSlots() } returns initialTeamSlots
   every { teamConfig.starterChoices() } returns starterChoices
+  every { gachaConfig.characterPull() } returns characterPullConfig
+  every { characterPullConfig.goldCost() } returns characterPullGoldCost
+  every { characterPullConfig.duplicateEssence() } returns duplicateEssence
   every { combatConfig.enemyMaxHp() } returns enemyMaxHp
   every { combatConfig.damageInterval() } returns damageInterval
   every { combatConfig.respawnDelay() } returns respawnDelay
@@ -60,11 +68,13 @@ fun gameConfig(
   every { progressionConfig.offline() } returns offlineProgressionConfig
   every { playerProgressionConfig.killExperience() } returns killExperience
   every { playerProgressionConfig.experiencePerLevel() } returns experiencePerLevel
+  every { playerProgressionConfig.killGold() } returns killGold
   every { zoneProgressionConfig.killsPerLevel() } returns zoneKillsPerLevel
   every { offlineProgressionConfig.notifyThreshold() } returns offlineNotifyThreshold
   every { contentConfig.refreshInterval() } returns contentRefreshInterval
   every { gameConfig.tick() } returns tickConfig
   every { gameConfig.team() } returns teamConfig
+  every { gameConfig.gacha() } returns gachaConfig
   every { gameConfig.combat() } returns combatConfig
   every { gameConfig.auth() } returns authConfig
   every { gameConfig.progression() } returns progressionConfig

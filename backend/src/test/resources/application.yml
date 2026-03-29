@@ -15,6 +15,19 @@ game:
   tick:
     interval: 200ms
     publish-jitter-max: 0ms
+  progression:
+    player:
+      kill-experience: 10
+      experience-per-level: 100
+      kill-gold: 25
+    zone:
+      kills-per-level: 10
+    offline:
+      notify-threshold: 5m
+  gacha:
+    character-pull:
+      gold-cost: 250
+      duplicate-essence: 15
   team:
     initial-slots: 3
     starter-choices:

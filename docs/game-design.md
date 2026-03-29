@@ -40,11 +40,16 @@ Intended purpose:
 Current planned model:
 - `experience`
 - `level`
+- `gold`
+- `essence`
 
 Current implementation:
 - players start at level `1`
 - players start at `0` EXP
+- players start at `0` gold
+- players start at `0` essence
 - each kill grants `10` player EXP
+- each kill grants `25` gold
 - player level currently advances every `100` EXP
 - player level directly scales all owned character combat stats through template stat growth
 
@@ -92,11 +97,13 @@ Current implementation:
 Each enemy kill should currently do three things:
 
 1. grant player EXP
-2. advance zone progression for the current zone
-3. roll item drops
+2. grant player gold
+3. advance zone progression for the current zone
+4. roll item drops
 
 So on kill:
 - player EXP increases
+- player gold increases
 - player level may increase
 - zone kill count increases for that player in that zone
 - zone level may increase for that player in that zone
@@ -115,9 +122,29 @@ Current implementation:
 - reconnect catch-up analytically projects kills and combat state from elapsed time instead of replaying server ticks
 - each projected kill currently grants the same rewards as an active kill:
   - player EXP
+  - player gold
   - zone kill progression
   - loot rolls
-- if offline progression covers at least `5m`, the server pushes a player-scoped WebSocket summary of gains on reconnect
+- if offline progression covers at least `5m`, the server pushes a player-scoped WebSocket summary of gains on reconnect, including earned gold
+
+## Character Acquisition
+
+Current direction:
+- starter choice is the initial guaranteed roster entry
+- additional characters come from a gold-funded gacha pull
+- all loaded character templates currently share equal pull odds
+- duplicate pulls do not create another copy of the same character
+- duplicate pulls convert into `essence` compensation
+
+Current implementation:
+- one character pull currently costs `250` gold
+- duplicate pulls currently grant `15` essence
+- the pull pool is every loaded character template, including starter characters
+- because characters are unique by `characterKey`, pulling an already-owned character leaves the roster unchanged and only grants essence
+
+Open questions:
+- future uses for essence
+- whether different banners or weighted pools should replace the global even-odds pool later
 
 Open questions:
 - whether offline progression should eventually be capped

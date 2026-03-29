@@ -31,11 +31,12 @@ class ProgressionService(
         ?: throw ResourceNotFoundException("Player $playerId was not found.")
 
     val playerProgressionConfig = gameConfig.progression().player()
-    val updatedPlayer =
+    val rewardedPlayer =
       player.grantExperience(
         amount = playerProgressionConfig.killExperience(),
         experiencePerLevel = playerProgressionConfig.experiencePerLevel(),
       )
+    val updatedPlayer = rewardedPlayer.grantGold(playerProgressionConfig.killGold())
     if (updatedPlayer != player) {
       playerRepository.save(updatedPlayer)
     }

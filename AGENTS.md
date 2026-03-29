@@ -109,6 +109,7 @@
 | `POST /auth/signup` | `{ name, email?, password? }` | `{ player, sessionToken, sessionExpiresAt, guestAccount }` | Creates an account or guest player session. |
 | `POST /auth/login` | `{ name?, email?, password }` | `{ player, sessionToken, sessionExpiresAt, guestAccount }` | Authenticates by `name + password` or `email + password`. |
 | `POST /players/{id}/starter` | `{ characterKey }` | `204 No Content` | Grants one configured starter to a player that currently owns no characters. |
+| `POST /players/{id}/gacha/characters/pull` | none | `{ player, pulledCharacterKey, grantedCharacterKey?, essenceGranted }` | Spends configured gold for one even-odds character pull across all loaded character templates; duplicate pulls convert into essence instead of granting another copy. |
 | `POST /internal/players/{id}/dirty` | none | `202 Accepted` | Internal node-to-node endpoint only; requires the `InternalNode` JWT role and marks a player dirty on the receiving node. |
 | `POST /teams/{id}/slots/{position}/characters/{characterKey}` | none | `Team` | Assigns an owned character to the selected team position. |
 | `POST /teams/{id}/activate` | none | `Team` | Activates a non-empty team for its owning player. |
@@ -116,7 +117,7 @@
 | `POST /teams/{id}/slots/{position}/unequip` | `{ slot }` | `204 No Content` | Unequips the selected team position equipment slot. |
 | `GET /characters/starters` | none | `[{ key, name, strength, agility, intelligence, wisdom, vitality, image, tags, skill, passive }]` | Returns the configured starter character choices in config order. |
 | `GET /characters/templates` | none | `[{ key, name, strength, agility, intelligence, wisdom, vitality, image, tags, skill, passive }]` | Returns the currently loaded character templates. |
-| `GET /players/{id}` | none | `Player` | Returns the player domain model directly, including player EXP and level. Owned character level is implicitly the same as player level. |
+| `GET /players/{id}` | none | `Player` | Returns the player domain model directly, including player EXP, level, gold, and essence. Owned character level is implicitly the same as player level. |
 | `GET /players/{id}/teams` | none | `[Team]` | Returns all player teams; active team is inferred from `Player.activeTeamId`. |
 | `GET /players/{id}/inventory` | none | `[InventoryItem]` | Returns inventory state for the player with nested `item` data and team-slot assignment state. |
 | `GET /players/{id}/zone-progress` | none | `[PlayerZoneProgress]` | Returns per-player per-zone kill and level progression. |
@@ -134,6 +135,7 @@
 | Skill auto use | Skill auto-use behavior must not be authored in static character content; treat it as player/runtime configuration. |
 | Character identity | Player-owned characters are unique by `characterKey`; do not introduce per-player character instance IDs unless duplicate ownership becomes a real requirement. |
 | Starting roster | New players begin with no owned characters and may claim exactly one configured starter while their roster is empty. |
+| Character acquisition | Public REST may spend configured gold for a character pull across all loaded character templates with equal odds. If the pulled character is already owned, grant configured essence compensation instead of a duplicate character. |
 | Team slots | New players begin with a configured number of empty team slots. |
 | Team assignment | Public REST may assign an owned character to a player-owned team position by `characterKey`. The same owned character may appear across multiple teams, but not twice in the same team. |
 | Equipment assignment | Public REST equips generated inventory items to team positions, not directly to characters. |
@@ -145,7 +147,7 @@
 | Combat team refresh | Ongoing combat must refresh its active team id and member snapshot from the player's currently active team each combat tick so team edits and active-team switches are reflected in combat sync. |
 | Combat timing | Use real elapsed server tick time to correct drift; do not assume every loop executes exactly on schedule. |
 | Offline progression | When a player reconnects after combat continued while they were disconnected, progression catch-up must be calculated from timestamp difference, not by replaying server ticks. |
-| Player progression | Players gain EXP from kills and level globally based on configured thresholds. |
+| Player progression | Players gain EXP and gold from kills and level globally based on configured thresholds. |
 | Zone progression | Zone progression is tracked per player and per zone through kill counts and zone level thresholds. |
 | Offline summary threshold | If offline progression covers at least `5m`, enqueue a player-scoped summary notification of gained rewards and progression. |
 | Loot config | Combat loot settings are config-driven. Base item drop rate is `1%` per kill, then rarity rolls use `common 70%`, `rare 20%`, `epic 8%`, `legendary 2%`. |
@@ -163,9 +165,9 @@
 | Tick rate | The default state-sync tick cadence is 200ms. |
 | Jitter | Publish timing includes a small jitter window before sending. |
 | Publish rule | Tick processing skips WebSocket publish when the player's state content did not change. |
-| Payload | Event payloads are player-scoped messages `{ type, playerId, snapshot }` for player-state sync, `{ type, playerId, snapshot, serverTime }` for combat-state sync, `{ type, playerId, zoneId, level, serverTime }` for zone level-up notifications, and `{ type, playerId, offlineDurationMillis, kills, experienceGained, playerLevel, playerLevelsGained, zoneId, zoneLevel, zoneLevelsGained, rewards, serverTime }` for offline progression summaries. `START_COMBAT` may also return an immediate combat-state sync payload on the player channel. |
+| Payload | Event payloads are player-scoped messages `{ type, playerId, snapshot }` for player-state sync, `{ type, playerId, snapshot, serverTime }` for combat-state sync, `{ type, playerId, zoneId, level, serverTime }` for zone level-up notifications, and `{ type, playerId, offlineDurationMillis, kills, experienceGained, goldGained, playerLevel, playerLevelsGained, zoneId, zoneLevel, zoneLevelsGained, rewards, serverTime }` for offline progression summaries. `START_COMBAT` may also return an immediate combat-state sync payload on the player channel. |
 | Event dedupe | If an offline progression summary for a zone is present in a player publish batch, separate zone level-up notifications for that same zone are suppressed because the summary already carries the final zone level and levels gained. |
-| Snapshot | Player-state `snapshot` contains player identity, player EXP/level, owned character roster with shared character level, per-zone progression, inventory with static item and generated item data, and server time. Combat state is sent as a separate sync message. |
+| Snapshot | Player-state `snapshot` contains player identity, player EXP/level, gold, essence, owned character roster with shared character level, per-zone progression, inventory with static item and generated item data, and server time. Combat state is sent as a separate sync message. |
 | Player snapshot | Player state includes the player's owned character roster so unlock changes can be observed over WebSocket. |
 
 ## Testing Requirements

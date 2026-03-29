@@ -25,6 +25,8 @@ class JpaPlayerRepository(
       it.name = domain.name
       it.experience = domain.experience
       it.level = domain.level
+      it.gold = domain.gold
+      it.essence = domain.essence
       it.ownedCharacterKeys = domain.ownedCharacterKeys.toMutableSet()
       it.activeTeamId = domain.activeTeamId
     }
@@ -36,6 +38,8 @@ private fun PlayerEntity.toDomain(): Player =
     name = name,
     experience = experience,
     level = level,
+    gold = gold,
+    essence = essence,
     ownedCharacterKeys = ownedCharacterKeys.toSet(),
     activeTeamId = activeTeamId,
   )

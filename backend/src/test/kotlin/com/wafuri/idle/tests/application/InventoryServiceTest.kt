@@ -38,11 +38,11 @@ class InventoryServiceTest : StringSpec() {
       val player = Player(UUID.randomUUID(), "Alice")
 
       every { playerRepository.findById(player.id) } returns player
-      every { itemTemplateCatalog.require("Sword") } returns swordItem()
+      every { itemTemplateCatalog.require("sword_0001") } returns swordItem()
       every { inventoryRepository.save(any()) } answers { firstArg<InventoryItem>() }
       every { playerStateWorkQueue.markDirty(player.id) } just runs
 
-      val inventoryItem = service.addGeneratedItem(player.id, "Sword", Rarity.COMMON)
+      val inventoryItem = service.addGeneratedItem(player.id, "sword_0001", Rarity.COMMON)
 
       inventoryItem.playerId shouldBe player.id
       inventoryItem.rarity shouldBe Rarity.COMMON

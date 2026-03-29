@@ -9,6 +9,8 @@ interface GameConfig {
 
   fun team(): Team
 
+  fun gacha(): Gacha
+
   fun combat(): Combat
 
   fun auth(): Auth
@@ -37,6 +39,16 @@ interface GameConfig {
     fun respawnDelay(): Duration
 
     fun loot(): Loot
+  }
+
+  interface Gacha {
+    fun characterPull(): CharacterPull
+  }
+
+  interface CharacterPull {
+    fun goldCost(): Int
+
+    fun duplicateEssence(): Int
   }
 
   interface Loot {
@@ -77,6 +89,8 @@ interface GameConfig {
     fun killExperience(): Int
 
     fun experiencePerLevel(): Int
+
+    fun killGold(): Int
   }
 
   interface Zone {
