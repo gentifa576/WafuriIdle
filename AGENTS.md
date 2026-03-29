@@ -26,6 +26,7 @@
 | Tech stack changes | Update the `Stack` section in the same change. |
 | New, changed, or removed endpoint | Update `Current Capabilities` in the same change. |
 | WebSocket contract changes | Update `WebSocket Rules` and `WebSocket Capability` in the same change. |
+| Documentation drift found | Update the affected `.md` files in the same change; do not leave repo docs stale relative to code. |
 | Rule changes affecting domain, inventory, or testing | Update the matching rules table in the same change. |
 | Tooling changes such as linting or formatting | Update `Stack` and any affected workflow/testing rules in the same change. |
 | Any capability change | Do not leave `AGENTS.md` stale relative to code. |
@@ -42,6 +43,7 @@
 | Area | Rule |
 | --- | --- |
 | Markdown links | When writing repo `.md` files, use relative links instead of absolute filesystem paths. |
+| Drift handling | When implementation changes or existing doc drift is discovered, update the affected repo docs in the same change instead of deferring it. |
 
 ## Collaboration Rules
 | Area | Rule |
@@ -96,6 +98,7 @@
 | Scope | Channels are player-scoped. |
 | Usage | WebSocket messages push player-scoped state sync and gameplay notifications only. |
 | Command input | WebSocket may also accept selected player-scoped commands when the command must execute on the socket-owning node. |
+| Authentication | Player WebSocket sessions must present a valid session JWT, and the authenticated JWT subject must match the `{playerId}` path before the session is treated as active or commands are accepted. |
 | Authority | Authoritative game logic must not depend on WebSocket transport. |
 | Tick source | Ongoing WebSocket state updates are emitted from the server tick loop; explicit WebSocket commands may return an immediate command-specific acknowledgement payload. |
 | Loop separation | WebSocket state sync must not be responsible for advancing combat simulation. |
@@ -160,6 +163,7 @@
 | Area | Capability |
 | --- | --- |
 | Channel | `/ws/player/{playerId}` is the only WebSocket channel. |
+| Auth binding | `/ws/player/{playerId}` requires a valid session token and only authorizes the socket-owning player for that same `{playerId}`. |
 | Incoming commands | `/ws/player/{playerId}` accepts `{ type: "START_COMBAT" }` to start combat on the socket-owning node. |
 | Source | State sync is driven by the server tick loop. |
 | Tick rate | The default state-sync tick cadence is 200ms. |

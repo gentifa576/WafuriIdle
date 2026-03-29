@@ -34,4 +34,22 @@ http://localhost:8080/debug-client/
 Backend details live in [backend/README.md](backend/README.md).
 
 ### Frontend
-`frontend/` is reserved for the real client app. The bundled `/debug-client/` remains backend-only tooling and is not the product frontend.
+The product frontend lives in `frontend/`. The bundled `/debug-client/` remains backend-only tooling and is not the product frontend.
+
+Run the frontend from `frontend/`:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The Vite dev server starts at:
+
+```text
+http://localhost:5173
+```
+
+Local development expects the backend on `http://localhost:8080`. By default, Vite proxies REST routes and `/ws/player/{playerId}` to the backend, so the browser client can use the same origin during development.
+
+Frontend details live in [frontend/README.md](frontend/README.md).

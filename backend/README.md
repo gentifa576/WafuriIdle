@@ -90,7 +90,8 @@ Items are static template content plus generated inventory state.
 
 ## Combat Loop
 - Combat is server-authoritative and progresses on the existing `200ms` game tick.
-- Players start combat with `POST /players/{id}/combat/start`.
+- Players start combat by connecting to `/ws/player/{playerId}` with a valid session token and sending `{ "type": "START_COMBAT" }`.
+- The authenticated session token must belong to the same `{playerId}` in the WebSocket path.
 - The server uses the player's active team from persistence for combat.
 - If the player has no active team, combat start returns `400 Bad Request`.
 - Team combat output is currently derived from character template base stats only:
