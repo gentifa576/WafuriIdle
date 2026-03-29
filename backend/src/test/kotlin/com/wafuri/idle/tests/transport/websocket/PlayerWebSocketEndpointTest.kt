@@ -2,6 +2,7 @@ package com.wafuri.idle.tests.transport.websocket
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.wafuri.idle.application.exception.AuthorizationException
 import com.wafuri.idle.application.model.CombatSnapshot
 import com.wafuri.idle.application.port.out.PlayerStateChangeTracker
 import com.wafuri.idle.application.port.out.PlayerStateWorkQueue
@@ -12,15 +13,18 @@ import com.wafuri.idle.transport.websocket.PlayerSocketCommand
 import com.wafuri.idle.transport.websocket.PlayerSocketCommandType
 import com.wafuri.idle.transport.websocket.PlayerWebSocketEndpoint
 import com.wafuri.idle.transport.websocket.PlayerWebSocketRegistry
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verifyOrder
+import io.smallrye.jwt.auth.principal.JWTParser
 import jakarta.websocket.RemoteEndpoint
 import jakarta.websocket.Session
 import org.eclipse.microprofile.context.ManagedExecutor
+import org.eclipse.microprofile.jwt.JsonWebToken
 import java.util.UUID
 
 class PlayerWebSocketEndpointTest :
@@ -34,6 +38,8 @@ class PlayerWebSocketEndpointTest :
       val offlineProgressionService = mockk<OfflineProgressionService>()
       val backgroundExecutor = mockk<ManagedExecutor>()
       val combatService = mockk<CombatService>()
+      val jwtParser = mockk<JWTParser>()
+      val jwt = mockk<JsonWebToken>()
       val endpoint =
         PlayerWebSocketEndpoint().apply {
           this.registry = registry
@@ -43,9 +49,13 @@ class PlayerWebSocketEndpointTest :
           this.backgroundExecutor = backgroundExecutor
           this.combatService = combatService
           this.objectMapper = jacksonObjectMapper()
+          this.jwtParser = jwtParser
         }
 
       every { offlineProgressionService.applyIfNeeded(playerId) } returns null
+      every { session.requestParameterMap } returns mapOf("token" to listOf("session-token"))
+      every { jwtParser.parse("session-token") } returns jwt
+      every { jwt.subject } returns playerId.toString()
       every { playerStateChangeTracker.invalidate(playerId) } just runs
       every { registry.register(playerId, session) } just runs
       every { playerStateWorkQueue.markDirty(playerId) } just runs
@@ -77,6 +87,7 @@ class PlayerWebSocketEndpointTest :
           backgroundExecutor = mockk()
           combatService = mockk()
           this.objectMapper = objectMapper
+          this.jwtParser = mockk()
         }
 
       every { endpoint.combatService.start(playerId) } returns
@@ -94,6 +105,10 @@ class PlayerWebSocketEndpointTest :
       val session = mockk<Session>()
       val basicRemote = mockk<RemoteEndpoint.Basic>()
       every { session.pathParameters } returns mapOf("playerId" to playerId.toString())
+      every { session.requestParameterMap } returns mapOf("token" to listOf("session-token"))
+      val jwt = mockk<JsonWebToken>()
+      every { endpoint.jwtParser.parse("session-token") } returns jwt
+      every { jwt.subject } returns playerId.toString()
       every { session.basicRemote } returns basicRemote
       every { basicRemote.sendText(any()) } just runs
       every {
@@ -116,6 +131,36 @@ class PlayerWebSocketEndpointTest :
         endpoint.combatService.start(playerId)
         endpoint.playerStateChangeTracker.invalidate(playerId)
         endpoint.playerStateWorkQueue.markDirty(playerId)
+      }
+    }
+
+    "requireAuthorizedPlayer rejects sessions without an authenticated player principal" {
+      val endpoint = PlayerWebSocketEndpoint()
+      endpoint.jwtParser = mockk()
+      val session = mockk<Session>()
+      every { session.requestParameterMap } returns emptyMap()
+
+      shouldThrow<AuthorizationException> {
+        endpoint.requireAuthorizedPlayer(session = session, playerId = UUID.randomUUID().toString())
+      }
+    }
+
+    "requireAuthorizedPlayer rejects sessions for a different player id" {
+      val endpoint = PlayerWebSocketEndpoint()
+      endpoint.jwtParser = mockk()
+      val session = mockk<Session>()
+      val authenticatedPlayerId = UUID.randomUUID()
+      val requestedPlayerId = UUID.randomUUID()
+      val jwt = mockk<JsonWebToken>()
+      every { session.requestParameterMap } returns mapOf("token" to listOf("session-token"))
+      every { endpoint.jwtParser.parse("session-token") } returns jwt
+      every { jwt.subject } returns authenticatedPlayerId.toString()
+
+      shouldThrow<AuthorizationException> {
+        endpoint.requireAuthorizedPlayer(
+          session = session,
+          playerId = requestedPlayerId.toString(),
+        )
       }
     }
   })

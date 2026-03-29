@@ -16,6 +16,7 @@ import com.wafuri.idle.tests.support.expectedPlayerStateMessage
 import com.wafuri.idle.tests.support.expectedPlayerStateSnapshot
 import com.wafuri.idle.transport.rest.dto.AuthResponse
 import com.wafuri.idle.transport.websocket.PlayerWebSocketRegistry
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.quarkus.test.common.http.TestHTTPResource
@@ -138,6 +139,7 @@ class PlayerWebSocketTest {
     val session = connect(collector, playerId, token)
     try {
       collector.opened.await(5, TimeUnit.SECONDS) shouldBe true
+      waitForActivePlayer(signupResponse.player.id)
       playerWebSocketRegistry.activePlayerIds() shouldBe setOf(signupResponse.player.id)
 
       val initialMessage = collector.messages.poll(5, TimeUnit.SECONDS)
@@ -177,9 +179,30 @@ class PlayerWebSocketTest {
           enemyHp = 1000f,
           enemyMaxHp = 1000f,
           members = listOf(expectedCombatMemberState("nimbus", 13.7f, 9.8f, 9.3f, 9.3f)),
-          pendingDamageMillis = 200L,
+          pendingDamageMillis = combatState.pendingDamageMillis,
           lastSimulatedAt = combatState.lastSimulatedAt,
         )
+    } finally {
+      session.close()
+    }
+  }
+
+  @Test
+  fun `player websocket rejects connections for a different player id`() {
+    val playerA = signupGuest("SocketOwnerA")
+    val playerB = signupGuest("SocketOwnerB")
+    val targetPlayerId = playerB.player.id.toString()
+    val attackerToken = playerA.sessionToken
+    val collector = MessageCollector()
+    val session = connect(collector, targetPlayerId, attackerToken)
+    try {
+      collector.opened.await(5, TimeUnit.SECONDS) shouldBe true
+      playerWebSocketRegistry.activePlayerIds() shouldBe emptySet()
+
+      session.asyncRemote.sendText("""{"type":"START_COMBAT"}""")
+
+      collector.messages.poll(1, TimeUnit.SECONDS).shouldBeNull()
+      combatStateRepository.findById(UUID.fromString(targetPlayerId)).shouldBeNull()
     } finally {
       session.close()
     }
@@ -207,6 +230,16 @@ class PlayerWebSocketTest {
       Thread.sleep(200)
     }
     error("Timed out waiting for combat state for player $playerId.")
+  }
+
+  private fun waitForActivePlayer(playerId: UUID) {
+    repeat(25) {
+      if (playerWebSocketRegistry.activePlayerIds().contains(playerId)) {
+        return
+      }
+      Thread.sleep(200)
+    }
+    error("Timed out waiting for websocket registration for player $playerId.")
   }
 
   @ClientEndpoint

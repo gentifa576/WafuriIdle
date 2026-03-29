@@ -1,11 +1,14 @@
 package com.wafuri.idle.transport.websocket
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.wafuri.idle.application.exception.AuthorizationException
 import com.wafuri.idle.application.model.CombatStateMessage
 import com.wafuri.idle.application.port.out.PlayerStateChangeTracker
 import com.wafuri.idle.application.port.out.PlayerStateWorkQueue
 import com.wafuri.idle.application.service.combat.CombatService
 import com.wafuri.idle.application.service.player.OfflineProgressionService
+import io.smallrye.jwt.auth.principal.JWTParser
+import io.smallrye.jwt.auth.principal.ParseException
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
 import jakarta.websocket.OnClose
@@ -16,6 +19,7 @@ import jakarta.websocket.Session
 import jakarta.websocket.server.PathParam
 import jakarta.websocket.server.ServerEndpoint
 import org.eclipse.microprofile.context.ManagedExecutor
+import org.eclipse.microprofile.jwt.JsonWebToken
 import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.util.UUID
@@ -46,12 +50,15 @@ class PlayerWebSocketEndpoint {
   @Inject
   lateinit var objectMapper: ObjectMapper
 
+  @Inject
+  lateinit var jwtParser: JWTParser
+
   @OnOpen
   fun onOpen(
     session: Session,
     @PathParam("playerId") playerId: String,
   ) {
-    val parsedPlayerId = UUID.fromString(playerId)
+    val parsedPlayerId = requireAuthorizedPlayer(session, playerId)
     registry.register(parsedPlayerId, session)
     playerStateChangeTracker.invalidate(parsedPlayerId)
     playerStateWorkQueue.markDirty(parsedPlayerId)
@@ -95,7 +102,7 @@ class PlayerWebSocketEndpoint {
       when (command.type) {
         PlayerSocketCommandType.START_COMBAT -> {
           logger.atInfo().addKeyValue("playerId", playerId).log("Received websocket combat start command.")
-          val parsedPlayerId = UUID.fromString(playerId)
+          val parsedPlayerId = requireAuthorizedPlayer(session, playerId)
           backgroundExecutor.execute {
             runCatching {
               val snapshot = combatService.start(parsedPlayerId)
@@ -131,6 +138,30 @@ class PlayerWebSocketEndpoint {
     @Suppress("UNUSED_PARAMETER") throwable: Throwable,
   ) {
     registry.unregister(UUID.fromString(playerId), session)
+  }
+
+  internal fun requireAuthorizedPlayer(
+    session: Session,
+    playerId: String,
+  ): UUID {
+    val requestedPlayerId = UUID.fromString(playerId)
+    val authenticatedPlayerId = UUID.fromString(requireAuthenticatedToken(session).subject)
+    if (requestedPlayerId != authenticatedPlayerId) {
+      throw AuthorizationException("WebSocket player access is forbidden.")
+    }
+    return requestedPlayerId
+  }
+
+  private fun requireAuthenticatedToken(session: Session): JsonWebToken {
+    val token =
+      session.requestParameterMap["token"]
+        ?.firstOrNull()
+        ?: throw AuthorizationException("WebSocket player access requires a session token.")
+    return try {
+      jwtParser.parse(token)
+    } catch (_: ParseException) {
+      throw AuthorizationException("WebSocket player access requires a valid session token.")
+    }
   }
 }
 

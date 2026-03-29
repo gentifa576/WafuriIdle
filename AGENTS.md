@@ -179,6 +179,7 @@
 | Inventory ownership | Inventory ownership rules must be covered by tests. |
 | Unit test framework | Use Kotest. |
 | Mocking | Use MockK instead of manual fake repositories or publishers. |
+| Kotlin lint fixes | When Kotlin lint/style issues need autofix, run `cd backend && ./gradlew ktlintFormat` instead of manually formatting by hand unless a specific exception is necessary. |
 | Build gate | `./gradlew check` must include lint and tests. |
 
 ## Out of Scope
