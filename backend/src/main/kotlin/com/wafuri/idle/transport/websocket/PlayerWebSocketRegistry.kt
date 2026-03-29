@@ -1,25 +1,25 @@
 package com.wafuri.idle.transport.websocket
 
 import com.wafuri.idle.application.port.out.ActivePlayerRegistry
+import io.quarkus.websockets.next.WebSocketConnection
 import jakarta.enterprise.context.ApplicationScoped
-import jakarta.websocket.Session
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
 @ApplicationScoped
 class PlayerWebSocketRegistry : ActivePlayerRegistry {
-  private val sessionsByPlayer: MutableMap<UUID, MutableSet<Session>> = ConcurrentHashMap()
+  private val sessionsByPlayer: MutableMap<UUID, MutableSet<WebSocketConnection>> = ConcurrentHashMap()
 
   fun register(
     playerId: UUID,
-    session: Session,
+    session: WebSocketConnection,
   ) {
     sessionsByPlayer.computeIfAbsent(playerId) { ConcurrentHashMap.newKeySet() }.add(session)
   }
 
   fun unregister(
     playerId: UUID,
-    session: Session,
+    session: WebSocketConnection,
   ) {
     sessionsByPlayer.computeIfPresent(playerId) { _, sessions ->
       sessions.remove(session)
@@ -27,7 +27,7 @@ class PlayerWebSocketRegistry : ActivePlayerRegistry {
     }
   }
 
-  fun sessions(playerId: UUID): Set<Session> = sessionsByPlayer[playerId]?.toSet() ?: emptySet()
+  fun sessions(playerId: UUID): Set<WebSocketConnection> = sessionsByPlayer[playerId]?.toSet() ?: emptySet()
 
   override fun activePlayerIds(): Set<UUID> = sessionsByPlayer.keys.toSet()
 }

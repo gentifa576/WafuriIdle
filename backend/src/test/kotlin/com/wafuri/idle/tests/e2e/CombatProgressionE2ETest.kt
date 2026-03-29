@@ -19,9 +19,10 @@ import io.restassured.RestAssured.given
 import io.restassured.common.mapper.TypeRef
 import io.restassured.specification.RequestSpecification
 import jakarta.inject.Inject
-import jakarta.websocket.ClientEndpoint
+import jakarta.websocket.ClientEndpointConfig
 import jakarta.websocket.ContainerProvider
-import jakarta.websocket.OnMessage
+import jakarta.websocket.Endpoint
+import jakarta.websocket.EndpointConfig
 import org.junit.jupiter.api.Test
 import java.net.URI
 import java.util.UUID
@@ -240,9 +241,9 @@ class CombatProgressionE2ETest {
         wsBaseUri
           .toString()
           .replaceFirst("http", "ws")
-          .trimEnd('/') + "/$playerId?token=$token",
+          .trimEnd('/') + "/$playerId",
       )
-    val session = client.connectToServer(collector, endpointUri)
+    val session = client.connectToServer(clientEndpoint(collector), clientConfig(token), endpointUri)
     try {
       session.asyncRemote.sendText("""{"type":"START_COMBAT"}""")
       collector.messages.poll(5, TimeUnit.SECONDS).shouldNotBeNull()
@@ -273,11 +274,30 @@ class CombatProgressionE2ETest {
     error("Timed out waiting for combat state for player $playerId.")
   }
 
-  @ClientEndpoint
+  private fun clientConfig(token: String): ClientEndpointConfig =
+    ClientEndpointConfig
+      .Builder
+      .create()
+      .preferredSubprotocols(
+        listOf(
+          "bearer-token-carrier",
+          "quarkus-http-upgrade#Authorization#Bearer%20$token",
+        ),
+      ).build()
+
+  private fun clientEndpoint(collector: MessageCollector): Endpoint =
+    object : Endpoint() {
+      override fun onOpen(
+        session: jakarta.websocket.Session,
+        config: EndpointConfig,
+      ) {
+        session.addMessageHandler(String::class.java) { message -> collector.onMessage(message) }
+      }
+    }
+
   class MessageCollector {
     val messages = LinkedBlockingQueue<String>()
 
-    @OnMessage
     fun onMessage(message: String) {
       messages.offer(message)
     }

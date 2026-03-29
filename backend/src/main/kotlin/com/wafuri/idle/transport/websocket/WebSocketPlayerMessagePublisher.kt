@@ -42,9 +42,10 @@ class WebSocketPlayerMessagePublisher(
     payload: String,
   ) {
     registry.sessions(playerId).forEach { session ->
-      if (session.isOpen) {
-        session.asyncRemote.sendText(payload)
-      }
+      session
+        .sendText(payload)
+        .subscribe()
+        .with({}, {})
     }
   }
 }

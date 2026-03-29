@@ -5,6 +5,7 @@ import com.wafuri.idle.application.model.EventType
 import com.wafuri.idle.application.model.PlayerStateMessage
 import com.wafuri.idle.application.port.out.CombatStateRepository
 import com.wafuri.idle.application.service.character.CharacterTemplateCatalog
+import com.wafuri.idle.domain.model.AuthScope
 import com.wafuri.idle.domain.model.CombatStatus
 import com.wafuri.idle.domain.model.Team
 import com.wafuri.idle.tests.support.expectedAuthResponse
@@ -23,14 +24,16 @@ import io.quarkus.test.common.http.TestHTTPResource
 import io.quarkus.test.junit.QuarkusTest
 import io.restassured.RestAssured.given
 import io.restassured.common.mapper.TypeRef
+import io.smallrye.jwt.build.Jwt
 import jakarta.inject.Inject
-import jakarta.websocket.ClientEndpoint
+import jakarta.websocket.ClientEndpointConfig
 import jakarta.websocket.ContainerProvider
-import jakarta.websocket.OnMessage
-import jakarta.websocket.OnOpen
+import jakarta.websocket.Endpoint
+import jakarta.websocket.EndpointConfig
 import jakarta.websocket.Session
 import org.junit.jupiter.api.Test
 import java.net.URI
+import java.time.Instant
 import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.LinkedBlockingQueue
@@ -96,9 +99,9 @@ class PlayerWebSocketTest {
         wsBaseUri
           .toString()
           .replaceFirst("http", "ws")
-          .trimEnd('/') + "/$playerId?token=$token",
+          .trimEnd('/') + "/$playerId",
       )
-    val session: Session = client.connectToServer(collector, endpointUri)
+    val session: Session = client.connectToServer(clientEndpoint(collector), clientConfig(token), endpointUri)
     try {
       collector.opened.await(5, TimeUnit.SECONDS) shouldBe true
       session.isOpen shouldBe true
@@ -194,24 +197,53 @@ class PlayerWebSocketTest {
     val targetPlayerId = playerB.player.id.toString()
     val attackerToken = playerA.sessionToken
     val collector = MessageCollector()
-    val session = connect(collector, targetPlayerId, attackerToken)
+    val attemptedSession = runCatching { connect(collector, targetPlayerId, attackerToken) }.getOrNull()
     try {
-      collector.opened.await(5, TimeUnit.SECONDS) shouldBe true
-      playerWebSocketRegistry.activePlayerIds() shouldBe emptySet()
-
-      session.asyncRemote.sendText("""{"type":"START_COMBAT"}""")
+      attemptedSession?.let { session ->
+        collector.opened.await(5, TimeUnit.SECONDS) shouldBe true
+        session.asyncRemote.sendText("""{"type":"START_COMBAT"}""")
+      }
 
       collector.messages.poll(1, TimeUnit.SECONDS).shouldBeNull()
+      playerWebSocketRegistry.activePlayerIds() shouldBe emptySet()
       combatStateRepository.findById(UUID.fromString(targetPlayerId)).shouldBeNull()
     } finally {
-      session.close()
+      attemptedSession?.close()
     }
+  }
+
+  @Test
+  fun `player websocket rejects connections without a token`() {
+    val signupResponse = signupGuest("SocketNoToken")
+    assertUnauthorizedSocket(
+      playerId = signupResponse.player.id.toString(),
+      token = null,
+    )
+  }
+
+  @Test
+  fun `player websocket rejects connections with a malformed token`() {
+    val signupResponse = signupGuest("SocketBadToken")
+    assertUnauthorizedSocket(
+      playerId = signupResponse.player.id.toString(),
+      token = "not-a-jwt",
+    )
+  }
+
+  @Test
+  fun `player websocket rejects connections with an expired token`() {
+    val signupResponse = signupGuest("SocketExpiredToken")
+    val playerId = signupResponse.player.id
+    assertUnauthorizedSocket(
+      playerId = playerId.toString(),
+      token = expiredToken(playerId, "SocketExpiredToken"),
+    )
   }
 
   private fun connect(
     collector: MessageCollector,
     playerId: String,
-    token: String,
+    token: String?,
   ): Session {
     val client = ContainerProvider.getWebSocketContainer()
     val endpointUri =
@@ -219,9 +251,53 @@ class PlayerWebSocketTest {
         wsBaseUri
           .toString()
           .replaceFirst("http", "ws")
-          .trimEnd('/') + "/$playerId?token=$token",
+          .trimEnd('/') + "/$playerId",
       )
-    return client.connectToServer(collector, endpointUri)
+    return client.connectToServer(clientEndpoint(collector), clientConfig(token), endpointUri)
+  }
+
+  private fun assertUnauthorizedSocket(
+    playerId: String,
+    token: String?,
+  ) {
+    val collector = MessageCollector()
+    val attemptedSession = runCatching { connect(collector, playerId, token) }.getOrNull()
+    try {
+      attemptedSession?.let { session ->
+        collector.opened.await(5, TimeUnit.SECONDS) shouldBe true
+        session.asyncRemote.sendText("""{"type":"START_COMBAT"}""")
+      }
+
+      collector.messages.poll(1, TimeUnit.SECONDS).shouldBeNull()
+      playerWebSocketRegistry.activePlayerIds() shouldBe emptySet()
+      combatStateRepository.findById(UUID.fromString(playerId)).shouldBeNull()
+    } finally {
+      attemptedSession?.close()
+    }
+  }
+
+  private fun clientEndpoint(collector: MessageCollector): Endpoint =
+    object : Endpoint() {
+      override fun onOpen(
+        session: Session,
+        config: EndpointConfig,
+      ) {
+        collector.onOpen()
+        session.addMessageHandler(String::class.java) { message -> collector.onMessage(message) }
+      }
+    }
+
+  private fun clientConfig(token: String?): ClientEndpointConfig {
+    val builder = ClientEndpointConfig.Builder.create()
+    if (token != null) {
+      builder.preferredSubprotocols(
+        listOf(
+          "bearer-token-carrier",
+          "quarkus-http-upgrade#Authorization#Bearer%20$token",
+        ),
+      )
+    }
+    return builder.build()
   }
 
   private fun waitForCombatState(playerId: String): com.wafuri.idle.domain.model.CombatState {
@@ -242,17 +318,32 @@ class PlayerWebSocketTest {
     error("Timed out waiting for websocket registration for player $playerId.")
   }
 
-  @ClientEndpoint
+  private fun expiredToken(
+    playerId: UUID,
+    username: String,
+  ): String {
+    val issuedAt = Instant.now().minusSeconds(3600)
+    val expiresAt = issuedAt.plusSeconds(60)
+    return Jwt
+      .issuer("wafuri-idle")
+      .subject(playerId.toString())
+      .upn(username)
+      .claim("scope", "User")
+      .claim("role", AuthScope.USER.name)
+      .claim("guestAccount", true)
+      .issuedAt(issuedAt)
+      .expiresAt(expiresAt)
+      .sign()
+  }
+
   class MessageCollector {
     val opened = CountDownLatch(1)
     val messages = LinkedBlockingQueue<String>()
 
-    @OnOpen
     fun onOpen() {
       opened.countDown()
     }
 
-    @OnMessage
     fun onMessage(message: String) {
       messages.offer(message)
     }

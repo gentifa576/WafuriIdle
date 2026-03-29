@@ -15,11 +15,8 @@ export function createPlayerSocket(playerId: string, options: PlayerSocketOption
   const url = new URL(`/ws/player/${playerId}`, baseUrl)
   url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:'
   const token = currentSessionToken()
-  if (token) {
-    url.searchParams.set('token', token)
-  }
-
-  const socket = new WebSocket(url)
+  const protocols = token ? ['bearer-token-carrier', encodeURIComponent(`quarkus-http-upgrade#Authorization#Bearer ${token}`)] : undefined
+  const socket = protocols ? new WebSocket(url, protocols) : new WebSocket(url)
   socket.addEventListener('open', () => options.onOpen?.())
   socket.addEventListener('close', () => options.onClose?.())
   socket.addEventListener('error', () => options.onError?.())

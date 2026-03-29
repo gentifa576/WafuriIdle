@@ -43,7 +43,7 @@ http://localhost:5173
 - The frontend expects the backend on `http://localhost:8080` by default.
 - Vite proxies `/auth`, `/players`, `/teams`, `/characters`, and `/ws` to the backend in local development.
 - REST uses the backend-issued session token as a bearer token.
-- WebSocket connects to `/ws/player/{playerId}` and passes the current session token as the `token` query parameter.
+- WebSocket connects to `/ws/player/{playerId}` and carries the bearer token through the `bearer-token-carrier` subprotocol/header bridge so the backend can authenticate the upgrade.
 
 If you need a different backend origin, set `VITE_API_BASE_URL`.
 

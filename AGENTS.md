@@ -98,7 +98,7 @@
 | Scope | Channels are player-scoped. |
 | Usage | WebSocket messages push player-scoped state sync and gameplay notifications only. |
 | Command input | WebSocket may also accept selected player-scoped commands when the command must execute on the socket-owning node. |
-| Authentication | Player WebSocket sessions must present a valid session JWT, and the authenticated JWT subject must match the `{playerId}` path before the session is treated as active or commands are accepted. |
+| Authentication | Player WebSocket sessions must present a valid session JWT through the WebSocket bearer-token carrier flow, and the authenticated JWT subject must match the `{playerId}` path before the session is treated as active or commands are accepted. |
 | Authority | Authoritative game logic must not depend on WebSocket transport. |
 | Tick source | Ongoing WebSocket state updates are emitted from the server tick loop; explicit WebSocket commands may return an immediate command-specific acknowledgement payload. |
 | Loop separation | WebSocket state sync must not be responsible for advancing combat simulation. |
@@ -163,7 +163,7 @@
 | Area | Capability |
 | --- | --- |
 | Channel | `/ws/player/{playerId}` is the only WebSocket channel. |
-| Auth binding | `/ws/player/{playerId}` requires a valid session token and only authorizes the socket-owning player for that same `{playerId}`. |
+| Auth binding | `/ws/player/{playerId}` requires a valid session token via the WebSocket bearer-token carrier flow and only authorizes the socket-owning player for that same `{playerId}`. |
 | Incoming commands | `/ws/player/{playerId}` accepts `{ type: "START_COMBAT" }` to start combat on the socket-owning node. |
 | Source | State sync is driven by the server tick loop. |
 | Tick rate | The default state-sync tick cadence is 200ms. |

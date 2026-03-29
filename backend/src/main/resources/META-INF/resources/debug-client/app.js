@@ -149,8 +149,11 @@ function connectWebSocket() {
     (ids.watchPlayerId.value || ids.playerId.value).trim(),
     "Player ID is required to open a WebSocket session.",
   );
-  const wsUrl = buildWsUrl(`/ws/player/${playerId}`, { token: requireSessionToken() });
-  const socket = new WebSocket(wsUrl);
+  const wsUrl = buildWsUrl(`/ws/player/${playerId}`);
+  const socket = new WebSocket(wsUrl, [
+    "bearer-token-carrier",
+    encodeURIComponent(`quarkus-http-upgrade#Authorization#Bearer ${requireSessionToken()}`),
+  ]);
   state.socket = socket;
 
   socket.addEventListener("open", () => {

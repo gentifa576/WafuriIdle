@@ -1,31 +1,29 @@
 package com.wafuri.idle.transport.websocket
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.wafuri.idle.application.exception.AuthorizationException
 import com.wafuri.idle.application.model.CombatStateMessage
 import com.wafuri.idle.application.port.out.PlayerStateChangeTracker
 import com.wafuri.idle.application.port.out.PlayerStateWorkQueue
 import com.wafuri.idle.application.service.combat.CombatService
 import com.wafuri.idle.application.service.player.OfflineProgressionService
-import io.smallrye.jwt.auth.principal.JWTParser
-import io.smallrye.jwt.auth.principal.ParseException
+import io.quarkus.security.Authenticated
+import io.quarkus.websockets.next.OnClose
+import io.quarkus.websockets.next.OnOpen
+import io.quarkus.websockets.next.OnTextMessage
+import io.quarkus.websockets.next.WebSocket
+import io.quarkus.websockets.next.WebSocketConnection
+import io.smallrye.common.annotation.Blocking
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
-import jakarta.websocket.OnClose
-import jakarta.websocket.OnError
-import jakarta.websocket.OnMessage
-import jakarta.websocket.OnOpen
-import jakarta.websocket.Session
-import jakarta.websocket.server.PathParam
-import jakarta.websocket.server.ServerEndpoint
 import org.eclipse.microprofile.context.ManagedExecutor
 import org.eclipse.microprofile.jwt.JsonWebToken
 import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.util.UUID
 
+@Authenticated
+@WebSocket(path = "/ws/player/{playerId}")
 @ApplicationScoped
-@ServerEndpoint("/ws/player/{playerId}")
 class PlayerWebSocketEndpoint {
   private val logger = LoggerFactory.getLogger(PlayerWebSocketEndpoint::class.java)
 
@@ -48,18 +46,12 @@ class PlayerWebSocketEndpoint {
   lateinit var combatService: CombatService
 
   @Inject
-  lateinit var objectMapper: ObjectMapper
-
-  @Inject
-  lateinit var jwtParser: JWTParser
+  lateinit var jwt: JsonWebToken
 
   @OnOpen
-  fun onOpen(
-    session: Session,
-    @PathParam("playerId") playerId: String,
-  ) {
-    val parsedPlayerId = requireAuthorizedPlayer(session, playerId)
-    registry.register(parsedPlayerId, session)
+  fun onOpen(connection: WebSocketConnection) {
+    val parsedPlayerId = requireAuthorizedPlayer(connection.pathParam("playerId"))
+    registry.register(parsedPlayerId, connection)
     playerStateChangeTracker.invalidate(parsedPlayerId)
     playerStateWorkQueue.markDirty(parsedPlayerId)
     backgroundExecutor.execute {
@@ -79,89 +71,40 @@ class PlayerWebSocketEndpoint {
   }
 
   @OnClose
-  fun onClose(
-    session: Session,
-    @PathParam("playerId") playerId: String,
-  ) {
-    registry.unregister(UUID.fromString(playerId), session)
+  fun onClose(connection: WebSocketConnection) {
+    registry.unregister(UUID.fromString(connection.pathParam("playerId")), connection)
   }
 
-  @OnMessage
+  @Blocking
+  @OnTextMessage
   fun onMessage(
-    message: String,
-    session: Session,
-  ) {
-    val playerId =
-      session.pathParameters["playerId"]
-        ?: run {
-          logger.atWarn().log("Ignoring websocket player command without a player id path parameter.")
-          return
-        }
-    val command = objectMapper.readValue(message, PlayerSocketCommand::class.java)
-    runCatching {
-      when (command.type) {
-        PlayerSocketCommandType.START_COMBAT -> {
-          logger.atInfo().addKeyValue("playerId", playerId).log("Received websocket combat start command.")
-          val parsedPlayerId = requireAuthorizedPlayer(session, playerId)
-          backgroundExecutor.execute {
-            runCatching {
-              val snapshot = combatService.start(parsedPlayerId)
-              val payload =
-                objectMapper.writeValueAsString(
-                  CombatStateMessage(
-                    playerId = parsedPlayerId,
-                    snapshot = snapshot,
-                    serverTime = Instant.now(),
-                  ),
-                )
-              session.basicRemote.sendText(payload)
-              playerStateChangeTracker.invalidate(parsedPlayerId)
-              playerStateWorkQueue.markDirty(parsedPlayerId)
-            }.onFailure { throwable ->
-              logger
-                .atWarn()
-                .setCause(throwable)
-                .addKeyValue("playerId", playerId)
-                .addKeyValue("commandType", command.type)
-                .log("Websocket player command failed.")
-            }
-          }
-        }
+    command: PlayerSocketCommand,
+    connection: WebSocketConnection,
+  ): CombatStateMessage? {
+    val playerId = connection.pathParam("playerId")
+    return when (command.type) {
+      PlayerSocketCommandType.START_COMBAT -> {
+        logger.atInfo().addKeyValue("playerId", playerId).log("Received websocket combat start command.")
+        val parsedPlayerId = requireAuthorizedPlayer(playerId)
+        val snapshot = combatService.start(parsedPlayerId)
+        playerStateChangeTracker.invalidate(parsedPlayerId)
+        playerStateWorkQueue.markDirty(parsedPlayerId)
+        CombatStateMessage(
+          playerId = parsedPlayerId,
+          snapshot = snapshot,
+          serverTime = Instant.now(),
+        )
       }
     }
   }
 
-  @OnError
-  fun onError(
-    session: Session,
-    @PathParam("playerId") playerId: String,
-    @Suppress("UNUSED_PARAMETER") throwable: Throwable,
-  ) {
-    registry.unregister(UUID.fromString(playerId), session)
-  }
-
-  internal fun requireAuthorizedPlayer(
-    session: Session,
-    playerId: String,
-  ): UUID {
+  internal fun requireAuthorizedPlayer(playerId: String): UUID {
     val requestedPlayerId = UUID.fromString(playerId)
-    val authenticatedPlayerId = UUID.fromString(requireAuthenticatedToken(session).subject)
+    val authenticatedPlayerId = UUID.fromString(jwt.subject)
     if (requestedPlayerId != authenticatedPlayerId) {
       throw AuthorizationException("WebSocket player access is forbidden.")
     }
     return requestedPlayerId
-  }
-
-  private fun requireAuthenticatedToken(session: Session): JsonWebToken {
-    val token =
-      session.requestParameterMap["token"]
-        ?.firstOrNull()
-        ?: throw AuthorizationException("WebSocket player access requires a session token.")
-    return try {
-      jwtParser.parse(token)
-    } catch (_: ParseException) {
-      throw AuthorizationException("WebSocket player access requires a valid session token.")
-    }
   }
 }
 

@@ -1,6 +1,11 @@
 quarkus:
   http:
     port: 8080
+  websockets-next:
+    server:
+      supported-subprotocols:
+        - bearer-token-carrier
+      propagate-subprotocol-headers: true
   datasource:
     db-kind: h2
     username: sa
