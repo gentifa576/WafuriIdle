@@ -11,6 +11,17 @@ CLIENT_URL="http://127.0.0.1:5173"
 CLIENT_PID_FILE="$FRONTEND_DIR/.playtest-client.pid"
 CLIENT_LOG_FILE="$FRONTEND_DIR/.playtest-client.log"
 
+gradle_wrapper_command() {
+  case "$(uname -s)" in
+    CYGWIN*|MINGW*|MSYS*)
+      echo "./gradlew.bat"
+      ;;
+    *)
+      echo "./gradlew"
+      ;;
+  esac
+}
+
 wait_for_url() {
   local url="$1"
   local name="$2"
@@ -68,10 +79,10 @@ start_client() {
 }
 
 echo "Stopping backend if it is already running..."
-(cd "$BACKEND_DIR" && ./gradlew stopServer >/dev/null)
+(cd "$BACKEND_DIR" && "$(gradle_wrapper_command)" stopServer >/dev/null)
 
 echo "Starting backend..."
-(cd "$BACKEND_DIR" && ./gradlew runServer >/dev/null)
+(cd "$BACKEND_DIR" && "$(gradle_wrapper_command)" runServer >/dev/null)
 
 echo "Waiting for backend health check..."
 wait_for_url "$BACKEND_HEALTH_URL" "Backend" 60

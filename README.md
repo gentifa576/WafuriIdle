@@ -17,7 +17,7 @@ Install these once on any platform:
 - Node.js 20 or newer
 
 Recommended shell by platform:
-- Windows: Git Bash
+- Windows: PowerShell
 - macOS: Terminal
 - Linux: your normal shell
 
@@ -43,17 +43,35 @@ npm install
 cd ..
 ```
 
+Get the latest changes in your local copy before starting:
+
+```bash
+git pull
+```
+
 ### Local Playtest
-After the one-time frontend install above, run:
+After the one-time frontend install above, run from the repo root:
 
 ```bash
 ./scripts/start-local-playtest.sh
+```
+
+On Windows, double-click `scripts\start-local-playtest.bat` in Explorer or run:
+
+```bat
+.\scripts\start-local-playtest.bat
 ```
 
 When finished, stop the local playtest services with:
 
 ```bash
 ./scripts/stop-local-playtest.sh
+```
+
+On Windows, double-click `scripts\stop-local-playtest.bat` in Explorer or run:
+
+```bat
+.\scripts\stop-local-playtest.bat
 ```
 
 If the script finishes successfully, the tester should:
@@ -80,11 +98,25 @@ cd backend
 ./gradlew runServer
 ```
 
+On Windows `cmd.exe` or PowerShell, use:
+
+```powershell
+cd backend
+.\gradlew.bat runServer
+```
+
 Stop the local backend:
 
 ```bash
 cd backend
 ./gradlew stopServer
+```
+
+On Windows `cmd.exe` or PowerShell, use:
+
+```powershell
+cd backend
+.\gradlew.bat stopServer
 ```
 
 The backend debug harness is served at:

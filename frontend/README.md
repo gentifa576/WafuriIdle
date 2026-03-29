@@ -20,7 +20,7 @@ Install these once on any platform:
 - Node.js 20 or newer
 
 Recommended shell by platform:
-- Windows: Git Bash
+- Windows: PowerShell
 - macOS: Terminal
 - Linux: your normal shell
 
@@ -52,10 +52,22 @@ For the simplest local playtest flow from the repo root:
 ./scripts/start-local-playtest.sh
 ```
 
+On Windows, double-click `scripts\start-local-playtest.bat` in Explorer or run:
+
+```bat
+.\scripts\start-local-playtest.bat
+```
+
 When the tester is done, stop both backend and frontend with:
 
 ```bash
 ./scripts/stop-local-playtest.sh
+```
+
+On Windows, double-click `scripts\stop-local-playtest.bat` in Explorer or run:
+
+```bat
+.\scripts\stop-local-playtest.bat
 ```
 
 Then open:
@@ -91,6 +103,13 @@ Start the backend in a separate shell:
 ```bash
 cd ../backend
 ./gradlew runServer
+```
+
+On Windows `cmd.exe` or PowerShell:
+
+```powershell
+cd ..\backend
+.\gradlew.bat runServer
 ```
 
 Start the frontend dev server from `frontend/`:

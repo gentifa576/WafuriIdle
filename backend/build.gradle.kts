@@ -92,6 +92,12 @@ tasks.withType<Test> {
 
 val serverPidFile = layout.buildDirectory.file("server/server.pid")
 val serverLogFile = layout.buildDirectory.file("server/server.log")
+val gradleWrapperFileName =
+  if (System.getProperty("os.name").startsWith("Windows", ignoreCase = true)) {
+    "gradlew.bat"
+  } else {
+    "gradlew"
+  }
 
 tasks.register("runServer") {
   group = "application"
@@ -101,6 +107,13 @@ tasks.register("runServer") {
     val pidFile = serverPidFile.get().asFile
     val logFile = serverLogFile.get().asFile
     val gradleHome = project.rootDir.resolve(".gradle-user-home").absolutePath
+    val gradleWrapper = project.rootDir.resolve(gradleWrapperFileName).absolutePath
+    val runServerCommand =
+      if (gradleWrapperFileName == "gradlew.bat") {
+        listOf("cmd.exe", "/c", gradleWrapper, "--no-daemon", "-Dquarkus.analytics.disabled=true", "quarkusDev")
+      } else {
+        listOf(gradleWrapper, "--no-daemon", "-Dquarkus.analytics.disabled=true", "quarkusDev")
+      }
     pidFile.parentFile.mkdirs()
     logFile.parentFile.mkdirs()
 
@@ -118,12 +131,8 @@ tasks.register("runServer") {
     logFile.writeText("")
 
     val process =
-      ProcessBuilder(
-        project.rootDir.resolve("gradlew").absolutePath,
-        "--no-daemon",
-        "-Dquarkus.analytics.disabled=true",
-        "quarkusDev",
-      ).directory(project.projectDir)
+      ProcessBuilder(runServerCommand)
+        .directory(project.projectDir)
         .redirectErrorStream(true)
         .redirectOutput(ProcessBuilder.Redirect.appendTo(logFile))
         .also { builder ->

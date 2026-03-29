@@ -13,7 +13,7 @@
 | Linting | Ktlint enforced through Gradle `check` |
 | Local debug UI | Static browser client served by Quarkus with no extra frontend dependency |
 | Product frontend | Separate browser client in `frontend/` using React, TypeScript, Vite, and PixiJS |
-| Local server control | Use `backend/gradlew runServer` and `backend/gradlew stopServer` for background local server management |
+| Local server control | Use `backend/gradlew runServer` and `backend/gradlew stopServer` on Unix-like shells, `backend\gradlew.bat runServer` and `backend\gradlew.bat stopServer` on Windows shells, and the matching `scripts/start-local-playtest.sh` or clickable `scripts\start-local-playtest.bat` plus `scripts/stop-local-playtest.sh` or `scripts\stop-local-playtest.bat` helpers for full local playtest startup/shutdown. |
 | Auth | Quarkus JWT auth; dev/test may use resource keypairs, but prod signing and verify keys must come from external config, not checked-in secrets |
 | Character content | Static character templates loaded from resource in non-prod and from DB cache in prod |
 | Zone content | Static zone templates loaded from resource in non-prod and from DB cache in prod |

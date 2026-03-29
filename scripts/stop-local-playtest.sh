@@ -7,6 +7,17 @@ BACKEND_DIR="$ROOT_DIR/backend"
 FRONTEND_DIR="$ROOT_DIR/frontend"
 CLIENT_PID_FILE="$FRONTEND_DIR/.playtest-client.pid"
 
+gradle_wrapper_command() {
+  case "$(uname -s)" in
+    CYGWIN*|MINGW*|MSYS*)
+      echo "./gradlew.bat"
+      ;;
+    *)
+      echo "./gradlew"
+      ;;
+  esac
+}
+
 stop_tracked_client_if_running() {
   if [[ ! -f "$CLIENT_PID_FILE" ]]; then
     echo "No tracked frontend dev server found."
@@ -29,6 +40,6 @@ stop_tracked_client_if_running() {
 stop_tracked_client_if_running
 
 echo "Stopping backend..."
-(cd "$BACKEND_DIR" && ./gradlew stopServer >/dev/null)
+(cd "$BACKEND_DIR" && "$(gradle_wrapper_command)" stopServer >/dev/null)
 
 echo "Local playtest services stopped."

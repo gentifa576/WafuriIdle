@@ -25,10 +25,22 @@ Start the server in the background:
 ./gradlew runServer
 ```
 
+On Windows `cmd.exe` or PowerShell, use:
+
+```powershell
+.\gradlew.bat runServer
+```
+
 Stop the background server:
 
 ```bash
 ./gradlew stopServer
+```
+
+On Windows `cmd.exe` or PowerShell, use:
+
+```powershell
+.\gradlew.bat stopServer
 ```
 
 The server log is written to `build/server/server.log`, and the PID file is stored at `build/server/server.pid`.
@@ -131,6 +143,8 @@ It uses native browser `fetch` and `WebSocket` APIs only, so it adds no frontend
 ./gradlew ktlintFormat
 ./gradlew check
 ```
+
+On Windows `cmd.exe` or PowerShell, use `.\gradlew.bat` instead of `./gradlew`.
 
 ## Docker
 ```bash
