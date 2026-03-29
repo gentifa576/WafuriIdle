@@ -14,6 +14,65 @@ Browser product client for the WafuriIdle backend.
 - `backend` also serves `/debug-client/` as a separate local QA harness.
 
 ## Run
+Install these once on any platform:
+- Git
+- Java 25
+- Node.js 20 or newer
+
+Recommended shell by platform:
+- Windows: Git Bash
+- macOS: Terminal
+- Linux: your normal shell
+
+Clone the repo:
+
+```bash
+git clone git@github.com:gentifa576/WafuriIdle.git
+cd WafuriIdle
+```
+
+Install frontend dependencies once:
+
+```bash
+cd frontend
+npm install
+cd ..
+```
+
+For the simplest local playtest flow from the repo root:
+
+```bash
+./scripts/start-local-playtest.sh
+```
+
+When the tester is done, stop both backend and frontend with:
+
+```bash
+./scripts/stop-local-playtest.sh
+```
+
+Then open:
+
+```text
+http://127.0.0.1:5173
+```
+
+What a tester should do:
+- choose `Guest` for the fastest path
+- create a player name
+- claim a starter character when prompted
+- assign that character to a team slot
+- activate the team
+- open the combat view and start combat
+
+What a tester should look for:
+- the page loads without a blank screen or obvious errors
+- socket status changes to `connected`
+- the player panel shows a name, level, gold, and essence
+- combat can be started after a team is activated
+- combat and player state continue updating after combat starts
+- notifications appear for progression events such as zone level-up or offline progression
+
 Install dependencies once:
 
 ```bash

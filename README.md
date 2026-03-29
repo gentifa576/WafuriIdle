@@ -10,6 +10,61 @@ Monorepo for the WafuriIdle game project.
 
 ## Getting Started
 
+### Setup
+Install these once on any platform:
+- Git
+- Java 25
+- Node.js 20 or newer
+
+Recommended shell by platform:
+- Windows: Git Bash
+- macOS: Terminal
+- Linux: your normal shell
+
+Clone the repo:
+
+```bash
+git clone git@github.com:gentifa576/WafuriIdle.git
+cd WafuriIdle
+```
+
+Install frontend dependencies once:
+
+```bash
+cd frontend
+npm install
+cd ..
+```
+
+### Local Playtest
+After the one-time frontend install above, run:
+
+```bash
+./scripts/start-local-playtest.sh
+```
+
+When finished, stop the local playtest services with:
+
+```bash
+./scripts/stop-local-playtest.sh
+```
+
+If the script finishes successfully, the tester should:
+- open the printed client URL
+- choose `Guest`
+- enter a name and create a guest player
+- claim a starter character
+- assign that character to a team slot
+- activate the team
+- start combat
+
+What success looks like:
+- the page opens without a blank screen
+- socket status becomes `connected`
+- player stats appear at the top of the page
+- combat starts after the team is activated
+- the combat view and notifications keep updating
+
 ### Backend
 Run all backend commands from `backend/`:
 
