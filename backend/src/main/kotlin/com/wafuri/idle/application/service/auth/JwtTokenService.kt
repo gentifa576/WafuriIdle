@@ -17,6 +17,7 @@ class JwtTokenService(
     username: String,
     guestAccount: Boolean,
     role: AuthScope,
+    sessionId: UUID = UUID.randomUUID(),
   ): AuthSessionResult {
     val issuedAt = Instant.now()
     val expiresAt = issuedAt.plus(gameConfig.auth().sessionDuration())
@@ -26,6 +27,7 @@ class JwtTokenService(
         .subject(playerId.toString())
         .upn(username)
         .claim("scope", scopesFor(role).joinToString(" "))
+        .claim("sid", sessionId.toString())
         .claim("role", role.name)
         .claim("guestAccount", guestAccount)
         .issuedAt(issuedAt)
@@ -45,6 +47,7 @@ class JwtTokenService(
       username = jwt.name,
       guestAccount = jwt.getClaim<Any>("guestAccount") as? Boolean ?: false,
       role = AuthScope.valueOf(jwt.getClaim<Any>("role") as? String ?: AuthScope.USER.name),
+      sessionId = jwt.getClaim<String>("sid")?.let(UUID::fromString) ?: UUID.randomUUID(),
     ).let { RefreshedToken(token = it.sessionToken, expiresAt = it.sessionExpiresAt) }
 
   fun mintInternalNode(instanceId: String): String {

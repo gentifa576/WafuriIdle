@@ -41,6 +41,12 @@ export function loginPlayer(identity: { name?: string; email?: string; password:
   })
 }
 
+export function logoutPlayer() {
+  return http<void>('/auth/logout', {
+    method: 'POST',
+  })
+}
+
 export function getPlayer(playerId: string) {
   return http<Player>(`/players/${playerId}`)
 }

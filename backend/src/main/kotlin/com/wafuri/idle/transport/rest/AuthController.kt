@@ -4,6 +4,7 @@ import com.wafuri.idle.application.service.auth.AuthService
 import com.wafuri.idle.transport.rest.dto.LoginRequest
 import com.wafuri.idle.transport.rest.dto.SignUpRequest
 import com.wafuri.idle.transport.rest.dto.toResponse
+import jakarta.annotation.security.RolesAllowed
 import jakarta.ws.rs.Consumes
 import jakarta.ws.rs.POST
 import jakarta.ws.rs.Path
@@ -16,6 +17,7 @@ import jakarta.ws.rs.core.Response
 @Produces(MediaType.APPLICATION_JSON)
 class AuthController(
   private val authService: AuthService,
+  private val authContext: AuthContext,
 ) {
   @POST
   @Path("/signup")
@@ -31,4 +33,13 @@ class AuthController(
     Response
       .ok(authService.login(request.name, request.email, request.password).toResponse())
       .build()
+
+  @POST
+  @Path("/logout")
+  @RolesAllowed("User")
+  @Consumes(MediaType.WILDCARD)
+  fun logout(): Response {
+    authService.logout(authContext.jwt)
+    return Response.noContent().build()
+  }
 }

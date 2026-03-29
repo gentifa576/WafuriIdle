@@ -196,6 +196,12 @@ select {
   z-index: 12;
 }
 
+.status-tools-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 .notification-toggle {
   position: relative;
   min-width: 92px;

@@ -21,6 +21,7 @@ import com.wafuri.idle.transport.websocket.PlayerWebSocketRegistry
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldNotBeBlank
 import io.quarkus.test.common.http.TestHTTPResource
 import io.quarkus.test.junit.QuarkusTest
 import io.restassured.RestAssured.given
@@ -80,6 +81,19 @@ class PlayerWebSocketTest {
       .statusCode(200)
       .extract()
       .`as`(object : TypeRef<List<Team>>() {})
+
+  private fun refreshedSessionToken(
+    token: String,
+    playerId: String,
+  ): String =
+    given()
+      .header("Authorization", "Bearer $token")
+      .get("/players/$playerId")
+      .then()
+      .statusCode(200)
+      .extract()
+      .header("X-Session-Token")
+      .also { refreshed -> refreshed.shouldNotBeBlank() }
 
   @Test
   fun `player scoped websocket accepts authenticated connections`() {
@@ -271,6 +285,31 @@ class PlayerWebSocketTest {
     )
   }
 
+  @Test
+  fun `player websocket rejects connections after logout revokes the session`() {
+    val signupResponse = signupGuest("SocketLoggedOut")
+    val playerId = signupResponse.player.id.toString()
+    val refreshedToken = refreshedSessionToken(signupResponse.sessionToken, playerId)
+    val collector = MessageCollector()
+    val session = connect(collector, playerId, refreshedToken)
+
+    try {
+      collector.opened.await(5, TimeUnit.SECONDS) shouldBe true
+      waitForActivePlayer(signupResponse.player.id)
+
+      given()
+        .header("Authorization", "Bearer $refreshedToken")
+        .post("/auth/logout")
+        .then()
+        .statusCode(204)
+
+      waitForInactivePlayer(signupResponse.player.id)
+      assertUnauthorizedSocket(playerId = playerId, token = refreshedToken)
+    } finally {
+      session.close()
+    }
+  }
+
   private fun connect(
     collector: MessageCollector,
     playerId: String,
@@ -347,6 +386,16 @@ class PlayerWebSocketTest {
       Thread.sleep(200)
     }
     error("Timed out waiting for websocket registration for player $playerId.")
+  }
+
+  private fun waitForInactivePlayer(playerId: UUID) {
+    repeat(25) {
+      if (!playerWebSocketRegistry.activePlayerIds().contains(playerId)) {
+        return
+      }
+      Thread.sleep(200)
+    }
+    error("Timed out waiting for websocket deregistration for player $playerId.")
   }
 
   private fun expiredToken(

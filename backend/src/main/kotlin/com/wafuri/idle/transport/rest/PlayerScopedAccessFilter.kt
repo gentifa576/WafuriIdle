@@ -1,12 +1,14 @@
 package com.wafuri.idle.transport.rest
 
 import com.wafuri.idle.application.exception.AuthorizationException
+import com.wafuri.idle.application.service.auth.AuthSessionService
 import io.quarkus.security.identity.SecurityIdentity
 import jakarta.annotation.Priority
 import jakarta.ws.rs.Priorities
 import jakarta.ws.rs.container.ContainerRequestContext
 import jakarta.ws.rs.container.ContainerRequestFilter
 import jakarta.ws.rs.ext.Provider
+import org.eclipse.microprofile.jwt.JsonWebToken
 import java.util.UUID
 
 @Provider
@@ -15,8 +17,11 @@ import java.util.UUID
 class PlayerScopedAccessFilter(
   private val authContext: AuthContext,
   private val securityIdentity: SecurityIdentity,
+  private val authSessionService: AuthSessionService,
+  private val jwt: JsonWebToken,
 ) : ContainerRequestFilter {
   override fun filter(requestContext: ContainerRequestContext) {
+    authSessionService.requireActive(jwt)
     val requestedPlayerId =
       requestContext.uriInfo.pathParameters["id"]
         ?.firstOrNull()

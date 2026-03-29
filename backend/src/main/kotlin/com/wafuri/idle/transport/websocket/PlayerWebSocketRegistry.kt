@@ -29,5 +29,11 @@ class PlayerWebSocketRegistry : ActivePlayerRegistry {
 
   fun sessions(playerId: UUID): Set<WebSocketConnection> = sessionsByPlayer[playerId]?.toSet() ?: emptySet()
 
+  fun closeSessions(playerId: UUID) {
+    sessionsByPlayer.remove(playerId)?.forEach { session ->
+      runCatching { session.close() }
+    }
+  }
+
   override fun activePlayerIds(): Set<UUID> = sessionsByPlayer.keys.toSet()
 }

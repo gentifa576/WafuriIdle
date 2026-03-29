@@ -6,6 +6,7 @@ import com.wafuri.idle.application.model.CombatStateMessage
 import com.wafuri.idle.application.model.CommandErrorMessage
 import com.wafuri.idle.application.port.out.PlayerStateChangeTracker
 import com.wafuri.idle.application.port.out.PlayerStateWorkQueue
+import com.wafuri.idle.application.service.auth.AuthSessionService
 import com.wafuri.idle.application.service.combat.CombatService
 import com.wafuri.idle.application.service.player.OfflineProgressionService
 import io.quarkus.security.Authenticated
@@ -48,10 +49,14 @@ class PlayerWebSocketEndpoint {
   lateinit var combatService: CombatService
 
   @Inject
+  lateinit var authSessionService: AuthSessionService
+
+  @Inject
   lateinit var jwt: JsonWebToken
 
   @OnOpen
   fun onOpen(connection: WebSocketConnection) {
+    authSessionService.requireActive(jwt)
     val parsedPlayerId = requireAuthorizedPlayer(connection.pathParam("playerId"))
     registry.register(parsedPlayerId, connection)
     playerStateChangeTracker.invalidate(parsedPlayerId)
@@ -83,6 +88,7 @@ class PlayerWebSocketEndpoint {
     command: PlayerSocketCommand,
     connection: WebSocketConnection,
   ): Any? {
+    authSessionService.requireActive(jwt)
     val playerId = connection.pathParam("playerId")
     val parsedPlayerId = requireAuthorizedPlayer(playerId)
     return try {

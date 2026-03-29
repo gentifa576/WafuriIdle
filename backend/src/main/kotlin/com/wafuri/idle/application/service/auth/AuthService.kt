@@ -5,11 +5,13 @@ import com.wafuri.idle.application.exception.ValidationException
 import com.wafuri.idle.application.port.out.AuthAccountRepository
 import com.wafuri.idle.application.port.out.Repository
 import com.wafuri.idle.application.service.player.PlayerService
+import com.wafuri.idle.transport.websocket.PlayerWebSocketRegistry
 import com.wafuri.idle.domain.model.AuthAccount
 import com.wafuri.idle.domain.model.AuthScope
 import com.wafuri.idle.domain.model.Player
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.transaction.Transactional
+import org.eclipse.microprofile.jwt.JsonWebToken
 import java.util.UUID
 
 @ApplicationScoped
@@ -19,6 +21,8 @@ class AuthService(
   private val playerService: PlayerService,
   private val passwordHashService: PasswordHashService,
   private val jwtTokenService: JwtTokenService,
+  private val authSessionService: AuthSessionService,
+  private val playerWebSocketRegistry: PlayerWebSocketRegistry,
 ) {
   @Transactional
   fun signup(
@@ -87,6 +91,12 @@ class AuthService(
   ): AuthSessionResult {
     val token = jwtTokenService.mint(player.id, player.name, guestAccount, role)
     return token.copy(player = player)
+  }
+
+  @Transactional
+  fun logout(jwt: JsonWebToken) {
+    authSessionService.revoke(jwt)
+    UUID.fromString(jwt.subject).let(playerWebSocketRegistry::closeSessions)
   }
 
   private fun generateGuestPassword(): String = UUID.randomUUID().toString() + UUID.randomUUID().toString()

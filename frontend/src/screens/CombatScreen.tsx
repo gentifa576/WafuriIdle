@@ -214,10 +214,15 @@ export function CombatScreen() {
         </div>
 
         <div className="status-tools">
-          <button className="notification-toggle ghost-button" onClick={() => setNotificationsOpen((current) => !current)}>
-            <span className="notification-bell">Alerts</span>
-            {notifications.length > 0 ? <span className="notification-dot" /> : null}
-          </button>
+          <div className="status-tools-row">
+            <button className="notification-toggle ghost-button" onClick={() => setNotificationsOpen((current) => !current)}>
+              <span className="notification-bell">Alerts</span>
+              {notifications.length > 0 ? <span className="notification-dot" /> : null}
+            </button>
+            <button className="ghost-button" onClick={() => void actions.logout()} disabled={loading}>
+              Log Out
+            </button>
+          </div>
 
           {notificationsOpen ? (
             <div className="notification-popover">

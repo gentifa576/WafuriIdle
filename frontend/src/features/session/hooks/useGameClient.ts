@@ -9,6 +9,7 @@ import {
   getPlayerTeams,
   getStarterCharacterTemplates,
   loginPlayer,
+  logoutPlayer,
   pullCharacter,
   signUpPlayer,
 } from '../../../core/api/playerApi'
@@ -418,6 +419,36 @@ export function useGameClient() {
       },
       clearError() {
         setError(null)
+      },
+      async logout() {
+        setLoading(true)
+        setError(null)
+        try {
+          await logoutPlayer()
+        } catch (caught) {
+          const message = extractMessage(caught)
+          if (message !== 'HTTP 401' && message !== 'HTTP 403' && message !== 'Session is no longer active.') {
+            setError(message)
+            setLoading(false)
+            return
+          }
+        }
+
+        socketRef.current?.close()
+        socketRef.current = null
+        setSession(null)
+        setPlayer(null)
+        setTeams([])
+        setInventory([])
+        setOwnedCharacters([])
+        setZoneProgress([])
+        setCombat(null)
+        setNotifications([])
+        setActivity([])
+        setSessionExpiresAt(null)
+        setLatestPullResult(null)
+        setSocketStatus('disconnected')
+        setLoading(false)
       },
     }),
     [player, socketStatus, teams],

@@ -23,6 +23,7 @@ import com.wafuri.idle.transport.rest.dto.AuthResponse
 import com.wafuri.idle.transport.rest.dto.ErrorResponse
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldNotBeBlank
 import io.quarkus.test.junit.QuarkusTest
 import io.restassured.RestAssured.given
 import io.restassured.common.mapper.TypeRef
@@ -189,9 +190,44 @@ class ControllerTest {
       )
   }
 
+  @Test
+  fun `logout revokes the whole refreshed session family`() {
+    val signupResponse = signup("LogoutUser", password = null)
+    val playerId = signupResponse.player.id.toString()
+    val originalToken = signupResponse.sessionToken
+    val refreshedToken = refreshedSessionToken(originalToken, playerId)
+
+    auth(refreshedToken)
+      .post("/auth/logout")
+      .then()
+      .statusCode(204)
+
+    auth(originalToken)
+      .get("/players/$playerId")
+      .then()
+      .statusCode(401)
+
+    auth(refreshedToken)
+      .get("/players/$playerId")
+      .then()
+      .statusCode(401)
+  }
+
   private fun auth(token: String): RequestSpecification =
     given()
       .header("Authorization", "Bearer $token")
+
+  private fun refreshedSessionToken(
+    token: String,
+    playerId: String,
+  ): String =
+    auth(token)
+      .get("/players/$playerId")
+      .then()
+      .statusCode(200)
+      .extract()
+      .header("X-Session-Token")
+      .also { refreshed -> refreshed.shouldNotBeBlank() }
 
   private fun playerIdFromToken(token: String): String {
     val tokenParts = token.split('.')

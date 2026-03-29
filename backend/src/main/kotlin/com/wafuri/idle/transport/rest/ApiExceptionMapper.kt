@@ -1,8 +1,11 @@
 package com.wafuri.idle.transport.rest
 
+import com.wafuri.idle.application.exception.AuthenticationException
+import com.wafuri.idle.application.exception.AuthorizationException
 import com.wafuri.idle.application.exception.ResourceNotFoundException
 import com.wafuri.idle.application.exception.ValidationException
 import com.wafuri.idle.transport.rest.dto.ErrorResponse
+import jakarta.ws.rs.ForbiddenException
 import jakarta.ws.rs.NotFoundException
 import jakarta.ws.rs.core.Context
 import jakarta.ws.rs.core.Request
@@ -23,6 +26,9 @@ class ApiExceptionMapper : ExceptionMapper<RuntimeException> {
   override fun toResponse(exception: RuntimeException): Response {
     val status =
       when (exception) {
+        is AuthenticationException -> Response.Status.UNAUTHORIZED
+        is AuthorizationException -> Response.Status.FORBIDDEN
+        is ForbiddenException -> Response.Status.FORBIDDEN
         is ResourceNotFoundException -> Response.Status.NOT_FOUND
         is NotFoundException -> Response.Status.NOT_FOUND
         is ValidationException, is IllegalArgumentException -> Response.Status.BAD_REQUEST

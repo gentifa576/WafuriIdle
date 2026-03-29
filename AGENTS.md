@@ -113,6 +113,7 @@
 | `GET /health` | none | `204 No Content` | Public health check for local/dev/prod reachability checks. |
 | `POST /auth/signup` | `{ name, email?, password? }` | `{ player, sessionToken, sessionExpiresAt, guestAccount }` | Creates an account or guest player session. |
 | `POST /auth/login` | `{ name?, email?, password }` | `{ player, sessionToken, sessionExpiresAt, guestAccount }` | Authenticates by `name + password` or `email + password`. |
+| `POST /auth/logout` | none | `204 No Content` | Revokes the authenticated session family and disconnects active player WebSocket sessions owned by that player. |
 | `POST /players/{id}/starter` | `{ characterKey }` | `204 No Content` | Grants one configured starter to a player that currently owns no characters. |
 | `POST /players/{id}/gacha/characters/pull` | none | `{ player, pulledCharacterKey, grantedCharacterKey?, essenceGranted }` | Spends configured gold for one even-odds character pull across all loaded character templates; duplicate pulls convert into essence instead of granting another copy. |
 | `POST /internal/players/{id}/dirty` | none | `202 Accepted` | Internal node-to-node endpoint only; requires the `InternalNode` JWT role and marks a player dirty on the receiving node. |
