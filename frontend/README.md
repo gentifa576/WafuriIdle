@@ -24,7 +24,14 @@ Recommended shell by platform:
 - macOS: Terminal
 - Linux: your normal shell
 
-Clone the repo:
+Clone the repo with HTTPS:
+
+```bash
+git clone https://github.com/gentifa576/WafuriIdle.git
+cd WafuriIdle
+```
+
+Or, if your machine already has GitHub SSH access configured:
 
 ```bash
 git clone git@github.com:gentifa576/WafuriIdle.git
