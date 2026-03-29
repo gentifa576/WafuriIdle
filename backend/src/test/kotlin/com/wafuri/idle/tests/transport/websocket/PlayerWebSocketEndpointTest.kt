@@ -1,6 +1,7 @@
 package com.wafuri.idle.tests.transport.websocket
 
 import com.wafuri.idle.application.exception.AuthorizationException
+import com.wafuri.idle.application.model.CombatStateMessage
 import com.wafuri.idle.application.port.out.PlayerStateChangeTracker
 import com.wafuri.idle.application.port.out.PlayerStateWorkQueue
 import com.wafuri.idle.application.service.combat.CombatService
@@ -100,9 +101,10 @@ class PlayerWebSocketEndpointTest :
       every { endpoint.playerStateWorkQueue.markDirty(playerId) } just runs
 
       val response = endpoint.onMessage(PlayerSocketCommand(PlayerSocketCommandType.START_COMBAT), connection)
+      val combatResponse = response as CombatStateMessage
 
-      response?.playerId shouldBe playerId
-      response?.snapshot?.status shouldBe CombatStatus.FIGHTING
+      combatResponse.playerId shouldBe playerId
+      combatResponse.snapshot?.status shouldBe CombatStatus.FIGHTING
       verifyOrder {
         endpoint.combatService.start(playerId)
         endpoint.playerStateChangeTracker.invalidate(playerId)

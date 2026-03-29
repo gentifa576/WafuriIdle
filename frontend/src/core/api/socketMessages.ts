@@ -1,5 +1,6 @@
 import type {
   CombatStateSyncMessage,
+  CommandErrorMessage,
   OfflineProgressionMessage,
   PlayerSocketMessage,
   PlayerStateSyncMessage,
@@ -13,7 +14,8 @@ export function parsePlayerSocketMessage(raw: string): PlayerSocketMessage | nul
       isPlayerStateSyncMessage(parsed) ||
       isCombatStateSyncMessage(parsed) ||
       isZoneLevelUpMessage(parsed) ||
-      isOfflineProgressionMessage(parsed)
+      isOfflineProgressionMessage(parsed) ||
+      isCommandErrorMessage(parsed)
     ) {
       return parsed
     }
@@ -37,6 +39,10 @@ function isZoneLevelUpMessage(message: unknown): message is ZoneLevelUpMessage {
 
 function isOfflineProgressionMessage(message: unknown): message is OfflineProgressionMessage {
   return isTypedMessage(message, 'OFFLINE_PROGRESSION') && 'offlineDurationMillis' in message && 'rewards' in message
+}
+
+function isCommandErrorMessage(message: unknown): message is CommandErrorMessage {
+  return isTypedMessage(message, 'COMMAND_ERROR') && 'commandType' in message && 'message' in message
 }
 
 function isTypedMessage<T extends string>(

@@ -100,8 +100,9 @@ Items are static template content plus generated inventory state.
 - Combat is server-authoritative and progresses on the existing `200ms` game tick.
 - Players start combat by connecting to `/ws/player/{playerId}` with a valid session token carried through the WebSocket `bearer-token-carrier` subprotocol bridge and sending `{ "type": "START_COMBAT" }`.
 - The authenticated session token must belong to the same `{playerId}` in the WebSocket path.
+- If a WebSocket combat command is rejected by gameplay validation, the server responds on the player channel with `{ "type": "COMMAND_ERROR", "playerId", "commandType", "message", "serverTime" }`.
 - The server uses the player's active team from persistence for combat.
-- If the player has no active team, combat start returns `400 Bad Request`.
+- If the player has no active team, combat start returns a `COMMAND_ERROR` payload explaining the validation failure.
 - Team combat output is currently derived from character template base stats only:
   - `attack = strength.base`
   - `hit = agility.base`

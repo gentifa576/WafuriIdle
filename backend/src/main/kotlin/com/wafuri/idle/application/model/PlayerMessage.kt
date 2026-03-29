@@ -57,3 +57,11 @@ data class OfflineProgressionMessage(
 ) : PlayerMessage {
   override fun publishAt(serverTime: Instant): PlayerMessage = copy(serverTime = serverTime)
 }
+
+data class CommandErrorMessage(
+  override val type: EventType = EventType.COMMAND_ERROR,
+  override val playerId: UUID,
+  val commandType: String,
+  val message: String,
+  val serverTime: Instant,
+) : PlayerMessage

@@ -117,7 +117,7 @@ If you need a different backend origin, set `VITE_API_BASE_URL`.
 - Activate a team.
 - Equip and unequip inventory items on team positions.
 - Open the player WebSocket channel.
-- Start combat over WebSocket with `START_COMBAT`.
+- Start combat over WebSocket with `START_COMBAT`; rejected commands surface a `COMMAND_ERROR` message with the gameplay validation reason.
 - Observe player sync, combat sync, zone level-up, and offline progression notifications.
 - Render the combat scene in the frontend while backend combat remains authoritative.
 

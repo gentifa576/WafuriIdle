@@ -154,8 +154,17 @@ export interface OfflineProgressionMessage {
   serverTime: string | null
 }
 
+export interface CommandErrorMessage {
+  type: 'COMMAND_ERROR'
+  playerId: string
+  commandType: string
+  message: string
+  serverTime: string
+}
+
 export type PlayerSocketMessage =
   | PlayerStateSyncMessage
   | CombatStateSyncMessage
   | ZoneLevelUpMessage
   | OfflineProgressionMessage
+  | CommandErrorMessage

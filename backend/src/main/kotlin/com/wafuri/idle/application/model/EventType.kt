@@ -5,4 +5,5 @@ enum class EventType {
   COMBAT_STATE_SYNC,
   ZONE_LEVEL_UP,
   OFFLINE_PROGRESSION,
+  COMMAND_ERROR,
 }

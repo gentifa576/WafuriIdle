@@ -101,6 +101,7 @@
 | Authentication | Player WebSocket sessions must present a valid session JWT through the WebSocket bearer-token carrier flow, and the authenticated JWT subject must match the `{playerId}` path before the session is treated as active or commands are accepted. |
 | Authority | Authoritative game logic must not depend on WebSocket transport. |
 | Tick source | Ongoing WebSocket state updates are emitted from the server tick loop; explicit WebSocket commands may return an immediate command-specific acknowledgement payload. |
+| Command failure shape | WebSocket command validation failures should return a player-scoped command error payload instead of failing silently or surfacing only as transport ambiguity. |
 | Loop separation | WebSocket state sync must not be responsible for advancing combat simulation. |
 | Publish timing | Player and combat publishes should each include small jitter to avoid synchronized fan-out spikes. |
 | Change gating | Player state should not be published when the authoritative state content is unchanged. |
@@ -170,7 +171,7 @@
 | Tick rate | The default state-sync tick cadence is 200ms. |
 | Jitter | Publish timing includes a small jitter window before sending. |
 | Publish rule | Tick processing skips WebSocket publish when the player's state content did not change. |
-| Payload | Event payloads are player-scoped messages `{ type, playerId, snapshot }` for player-state sync, `{ type, playerId, snapshot, serverTime }` for combat-state sync, `{ type, playerId, zoneId, level, serverTime }` for zone level-up notifications, and `{ type, playerId, offlineDurationMillis, kills, experienceGained, goldGained, playerLevel, playerLevelsGained, zoneId, zoneLevel, zoneLevelsGained, rewards, serverTime }` for offline progression summaries. `START_COMBAT` may also return an immediate combat-state sync payload on the player channel. |
+| Payload | Event payloads are player-scoped messages `{ type, playerId, snapshot }` for player-state sync, `{ type, playerId, snapshot, serverTime }` for combat-state sync, `{ type, playerId, zoneId, level, serverTime }` for zone level-up notifications, `{ type, playerId, offlineDurationMillis, kills, experienceGained, goldGained, playerLevel, playerLevelsGained, zoneId, zoneLevel, zoneLevelsGained, rewards, serverTime }` for offline progression summaries, and `{ type, playerId, commandType, message, serverTime }` for WebSocket command validation failures. `START_COMBAT` may return either an immediate combat-state sync payload or a command error payload on the player channel. |
 | Event dedupe | If an offline progression summary for a zone is present in a player publish batch, separate zone level-up notifications for that same zone are suppressed because the summary already carries the final zone level and levels gained. |
 | Snapshot | Player-state `snapshot` contains player identity, player EXP/level, gold, essence, owned character roster with shared character level, per-zone progression, inventory with static item and generated item data, and server time. Combat state is sent as a separate sync message. |
 | Player snapshot | Player state includes the player's owned character roster so unlock changes can be observed over WebSocket. |

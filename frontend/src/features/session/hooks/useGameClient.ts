@@ -140,6 +140,10 @@ export function useGameClient() {
       pushNotification(zoneLevelUpNotification(message))
       return
     }
+    if (message.type === 'COMMAND_ERROR') {
+      setError(message.message)
+      return
+    }
     pushNotification(offlineProgressionNotification(message))
   }
 
@@ -362,8 +366,13 @@ export function useGameClient() {
         if (!player) {
           return
         }
+        const activeTeam = teams.find((team) => team.id === player.activeTeamId)
+        if (!activeTeam || activeTeam.slots.every((slot) => slot.characterKey == null)) {
+          setError('Activate a team with at least one character before starting combat.')
+          return
+        }
         const socket = socketRef.current
-        if (!socket || socket.readyState !== WebSocket.OPEN) {
+        if (socketStatus !== 'connected' || !socket || socket.readyState !== WebSocket.OPEN) {
           setError('Connect to the game server before starting combat.')
           return
         }
@@ -378,7 +387,7 @@ export function useGameClient() {
         setError(null)
       },
     }),
-    [player],
+    [player, socketStatus, teams],
   )
 
   return {
@@ -411,6 +420,8 @@ function describeSocketEvent(message: PlayerSocketMessage): string | null {
       return `Zone level ${message.level} reached in ${message.zoneId}`
     case 'OFFLINE_PROGRESSION':
       return `Offline gains applied for ${message.zoneId}`
+    case 'COMMAND_ERROR':
+      return `${message.commandType} failed: ${message.message}`
   }
 }
 

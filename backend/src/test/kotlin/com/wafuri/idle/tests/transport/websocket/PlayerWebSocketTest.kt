@@ -2,6 +2,7 @@ package com.wafuri.idle.tests.transport.websocket
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.wafuri.idle.application.model.EventType
+import com.wafuri.idle.application.model.CommandErrorMessage
 import com.wafuri.idle.application.model.PlayerStateMessage
 import com.wafuri.idle.application.port.out.CombatStateRepository
 import com.wafuri.idle.application.service.character.CharacterTemplateCatalog
@@ -185,6 +186,36 @@ class PlayerWebSocketTest {
           pendingDamageMillis = combatState.pendingDamageMillis,
           lastSimulatedAt = combatState.lastSimulatedAt,
         )
+    } finally {
+      session.close()
+    }
+  }
+
+  @Test
+  fun `player websocket returns command error when combat start is rejected`() {
+    val signupResponse = signupGuest("SocketNoActiveTeam")
+    val playerId = signupResponse.player.id.toString()
+    val token = signupResponse.sessionToken
+
+    val collector = MessageCollector()
+    val session = connect(collector, playerId, token)
+    try {
+      collector.opened.await(5, TimeUnit.SECONDS) shouldBe true
+      waitForActivePlayer(signupResponse.player.id)
+
+      collector.messages.poll(5, TimeUnit.SECONDS).shouldNotBeNull()
+
+      session.asyncRemote.sendText("""{"type":"START_COMBAT"}""")
+
+      val errorMessage = collector.messages.poll(5, TimeUnit.SECONDS)
+      errorMessage.shouldNotBeNull()
+
+      val commandError = objectMapper.readValue(errorMessage, CommandErrorMessage::class.java)
+      commandError.type shouldBe EventType.COMMAND_ERROR
+      commandError.playerId shouldBe signupResponse.player.id
+      commandError.commandType shouldBe "START_COMBAT"
+      commandError.message shouldBe "Player does not have an active team."
+      combatStateRepository.findById(signupResponse.player.id).shouldBeNull()
     } finally {
       session.close()
     }

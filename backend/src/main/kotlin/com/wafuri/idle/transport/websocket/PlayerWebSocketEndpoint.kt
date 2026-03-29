@@ -1,7 +1,9 @@
 package com.wafuri.idle.transport.websocket
 
 import com.wafuri.idle.application.exception.AuthorizationException
+import com.wafuri.idle.application.exception.ValidationException
 import com.wafuri.idle.application.model.CombatStateMessage
+import com.wafuri.idle.application.model.CommandErrorMessage
 import com.wafuri.idle.application.port.out.PlayerStateChangeTracker
 import com.wafuri.idle.application.port.out.PlayerStateWorkQueue
 import com.wafuri.idle.application.service.combat.CombatService
@@ -80,21 +82,36 @@ class PlayerWebSocketEndpoint {
   fun onMessage(
     command: PlayerSocketCommand,
     connection: WebSocketConnection,
-  ): CombatStateMessage? {
+  ): Any? {
     val playerId = connection.pathParam("playerId")
-    return when (command.type) {
-      PlayerSocketCommandType.START_COMBAT -> {
-        logger.atInfo().addKeyValue("playerId", playerId).log("Received websocket combat start command.")
-        val parsedPlayerId = requireAuthorizedPlayer(playerId)
-        val snapshot = combatService.start(parsedPlayerId)
-        playerStateChangeTracker.invalidate(parsedPlayerId)
-        playerStateWorkQueue.markDirty(parsedPlayerId)
-        CombatStateMessage(
-          playerId = parsedPlayerId,
-          snapshot = snapshot,
-          serverTime = Instant.now(),
-        )
+    val parsedPlayerId = requireAuthorizedPlayer(playerId)
+    return try {
+      when (command.type) {
+        PlayerSocketCommandType.START_COMBAT -> {
+          logger.atInfo().addKeyValue("playerId", playerId).log("Received websocket combat start command.")
+          val snapshot = combatService.start(parsedPlayerId)
+          playerStateChangeTracker.invalidate(parsedPlayerId)
+          playerStateWorkQueue.markDirty(parsedPlayerId)
+          CombatStateMessage(
+            playerId = parsedPlayerId,
+            snapshot = snapshot,
+            serverTime = Instant.now(),
+          )
+        }
       }
+    } catch (exception: ValidationException) {
+      logger
+        .atInfo()
+        .setCause(exception)
+        .addKeyValue("playerId", parsedPlayerId)
+        .addKeyValue("commandType", command.type)
+        .log("Rejected websocket command.")
+      CommandErrorMessage(
+        playerId = parsedPlayerId,
+        commandType = command.type.name,
+        message = exception.message ?: "Command rejected.",
+        serverTime = Instant.now(),
+      )
     }
   }
 
