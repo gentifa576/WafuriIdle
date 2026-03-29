@@ -9,6 +9,8 @@ import com.wafuri.idle.application.port.out.Repository
 import com.wafuri.idle.application.service.player.ProgressionService
 import com.wafuri.idle.domain.model.Player
 import com.wafuri.idle.domain.model.PlayerZoneProgress
+import com.wafuri.idle.tests.support.expectedPlayer
+import com.wafuri.idle.tests.support.expectedZoneProgress
 import com.wafuri.idle.tests.support.gameConfig
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
@@ -47,7 +49,7 @@ class ProgressionServiceTest : StringSpec() {
     "record kill grants player experience and creates zone progress" {
       val playerId = UUID.randomUUID()
       val zoneId = "starter-plains"
-      val player = Player(id = playerId, name = "Alice")
+      val player = expectedPlayer(id = playerId, name = "Alice")
       var savedPlayer: Player? = null
       var savedProgress: PlayerZoneProgress? = null
 
@@ -62,11 +64,8 @@ class ProgressionServiceTest : StringSpec() {
 
       service.recordKill(playerId, zoneId)
 
-      savedPlayer?.experience shouldBe 25
-      savedPlayer?.level shouldBe 1
-      savedPlayer?.gold shouldBe 25
-      savedProgress?.killCount shouldBe 1
-      savedProgress?.level shouldBe 1
+      savedPlayer shouldBe expectedPlayer(id = playerId, name = "Alice", experience = 25, level = 1, gold = 25)
+      savedProgress shouldBe expectedZoneProgress(playerId = playerId, zoneId = zoneId, killCount = 1, level = 1)
       verify(exactly = 0) { playerEventQueue.enqueue(any()) }
       verify(exactly = 1) { playerStateWorkQueue.markDirty(playerId) }
     }
@@ -74,7 +73,7 @@ class ProgressionServiceTest : StringSpec() {
     "record kill levels player and zone based on configured thresholds" {
       val playerId = UUID.randomUUID()
       val zoneId = "starter-plains"
-      val currentPlayer = Player(id = playerId, name = "Alice", experience = 90, level = 1)
+      val currentPlayer = expectedPlayer(id = playerId, name = "Alice", experience = 90, level = 1)
       val currentProgress =
         PlayerZoneProgress(
           playerId = playerId,
@@ -96,11 +95,8 @@ class ProgressionServiceTest : StringSpec() {
 
       service.recordKill(playerId, zoneId)
 
-      savedPlayer?.experience shouldBe 115
-      savedPlayer?.level shouldBe 2
-      savedPlayer?.gold shouldBe 25
-      savedProgress?.killCount shouldBe 3
-      savedProgress?.level shouldBe 2
+      savedPlayer shouldBe expectedPlayer(id = playerId, name = "Alice", experience = 115, level = 2, gold = 25)
+      savedProgress shouldBe expectedZoneProgress(playerId = playerId, zoneId = zoneId, killCount = 3, level = 2)
       verify(exactly = 1) {
         playerEventQueue.enqueue(
           ZoneLevelUpMessage(

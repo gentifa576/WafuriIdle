@@ -11,6 +11,9 @@ import com.wafuri.idle.domain.model.InventoryItem
 import com.wafuri.idle.domain.model.Player
 import com.wafuri.idle.domain.model.Team
 import com.wafuri.idle.domain.model.TeamMemberSlot
+import com.wafuri.idle.tests.support.expectedInventoryItem
+import com.wafuri.idle.tests.support.expectedPlayer
+import com.wafuri.idle.tests.support.expectedTeam
 import com.wafuri.idle.tests.support.swordItem
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
@@ -41,15 +44,15 @@ class EquipmentServiceTest : StringSpec() {
     "equip validates ownership and slot" {
       val playerId = UUID.randomUUID()
       val teamId = UUID.randomUUID()
-      val player = Player(playerId, "Alice", ownedCharacterKeys = setOf("warrior"))
+      val player = expectedPlayer(id = playerId, name = "Alice", ownedCharacterKeys = setOf("warrior"))
       val team =
-        Team(
-          teamId,
-          playerId,
+        expectedTeam(
+          id = teamId,
+          playerId = playerId,
           slots = listOf(TeamMemberSlot(1, "warrior"), TeamMemberSlot(2), TeamMemberSlot(3)),
         )
       val foreignItem =
-        InventoryItem(
+        expectedInventoryItem(
           id = UUID.randomUUID(),
           playerId = UUID.randomUUID(),
           item = swordItem(),
@@ -69,11 +72,11 @@ class EquipmentServiceTest : StringSpec() {
       val playerId = UUID.randomUUID()
       val inventoryItemId = UUID.randomUUID()
       val teamId = UUID.randomUUID()
-      val player = Player(playerId, "Alice", ownedCharacterKeys = setOf("warrior"))
+      val player = expectedPlayer(id = playerId, name = "Alice", ownedCharacterKeys = setOf("warrior"))
       val team =
-        Team(
-          teamId,
-          playerId,
+        expectedTeam(
+          id = teamId,
+          playerId = playerId,
           slots =
             listOf(
               TeamMemberSlot(1, "warrior", weaponItemId = inventoryItemId),
@@ -82,7 +85,7 @@ class EquipmentServiceTest : StringSpec() {
             ),
         )
       val inventoryItem =
-        InventoryItem(
+        expectedInventoryItem(
           id = inventoryItemId,
           playerId = playerId,
           item = swordItem(),

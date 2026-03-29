@@ -183,7 +183,7 @@ fun swordItem(): Item =
     name = "sword_0001",
     displayName = "Old Dagger",
     type = ItemType.WEAPON,
-    baseStat = Stat(StatType.STRENGTH, 12f),
+    baseStat = Stat(StatType.STRENGTH, 10.8f),
     subStatPool = listOf(StatType.AGILITY, StatType.VITALITY, StatType.CRIT_CHANCE),
   )
 

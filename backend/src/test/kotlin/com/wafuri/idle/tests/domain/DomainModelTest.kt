@@ -13,6 +13,9 @@ import com.wafuri.idle.domain.model.TeamMemberSlot
 import com.wafuri.idle.domain.model.ZoneLootEntry
 import com.wafuri.idle.domain.model.ZoneTemplate
 import com.wafuri.idle.tests.support.armorItem
+import com.wafuri.idle.tests.support.expectedCombatMemberState
+import com.wafuri.idle.tests.support.expectedCombatState
+import com.wafuri.idle.tests.support.expectedPlayer
 import com.wafuri.idle.tests.support.swordItem
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
@@ -119,8 +122,7 @@ class DomainModelTest :
           .spendGold(40)
           .grantEssence(15)
 
-      updated.gold shouldBe 85
-      updated.essence shouldBe 18
+      updated shouldBe expectedPlayer(id = player.id, name = "Alice", gold = 85, essence = 18)
     }
 
     "combat state advances enemy hp only after enough accumulated elapsed time" {
@@ -148,9 +150,29 @@ class DomainModelTest :
       val buffered = state.advance(elapsedMillis = 500L, damageIntervalMillis = 1000L, respawnDelayMillis = 1000L)
       val updated = buffered.advance(elapsedMillis = 500L, damageIntervalMillis = 1000L, respawnDelayMillis = 1000L)
 
-      buffered.enemyHp shouldBe 10f
-      updated.enemyHp shouldBe 0f
-      updated.status shouldBe CombatStatus.WON
+      buffered shouldBe
+        expectedCombatState(
+          playerId = state.playerId,
+          status = CombatStatus.FIGHTING,
+          zoneId = "starter-plains",
+          activeTeamId = state.activeTeamId,
+          enemyName = "Training Dummy",
+          enemyHp = 10f,
+          enemyMaxHp = 10f,
+          members = listOf(expectedCombatMemberState("warrior", 10f, 3f, 15f, 15f)),
+          pendingDamageMillis = 500L,
+        )
+      updated shouldBe
+        expectedCombatState(
+          playerId = state.playerId,
+          status = CombatStatus.WON,
+          zoneId = "starter-plains",
+          activeTeamId = state.activeTeamId,
+          enemyName = "Training Dummy",
+          enemyHp = 0f,
+          enemyMaxHp = 10f,
+          members = listOf(expectedCombatMemberState("warrior", 10f, 3f, 15f, 15f)),
+        )
     }
 
     "combat state respawns after the configured delay and consumes overflow time" {
@@ -177,10 +199,18 @@ class DomainModelTest :
 
       val updated = state.advance(elapsedMillis = 1500L, damageIntervalMillis = 1000L, respawnDelayMillis = 1000L)
 
-      updated.status shouldBe CombatStatus.FIGHTING
-      updated.enemyHp shouldBe 10f
-      updated.pendingDamageMillis shouldBe 500L
-      updated.pendingRespawnMillis shouldBe 0L
+      updated shouldBe
+        expectedCombatState(
+          playerId = state.playerId,
+          status = CombatStatus.FIGHTING,
+          zoneId = "starter-plains",
+          activeTeamId = state.activeTeamId,
+          enemyName = "Training Dummy",
+          enemyHp = 10f,
+          enemyMaxHp = 10f,
+          members = listOf(expectedCombatMemberState("warrior", 10f, 3f, 15f, 15f)),
+          pendingDamageMillis = 500L,
+        )
     }
 
     "zone template requires at least one enemy and positive loot weights" {
@@ -206,6 +236,6 @@ class DomainModelTest :
           maxHp = 15f,
         )
 
-      member.dps shouldBe 0f
+      member shouldBe expectedCombatMemberState("warrior", 10f, 3f, 0f, 15f)
     }
   })

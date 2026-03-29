@@ -10,6 +10,7 @@ import com.wafuri.idle.domain.model.EquipmentSlot
 import com.wafuri.idle.domain.model.InventoryItem
 import com.wafuri.idle.domain.model.Player
 import com.wafuri.idle.domain.model.Team
+import com.wafuri.idle.tests.support.expectedPlayer
 import com.wafuri.idle.tests.support.swordItem
 import io.kotest.matchers.shouldBe
 import io.quarkus.test.TestTransaction
@@ -39,11 +40,12 @@ class PersistenceRepositoryIntegrationTest {
   @Test
   @TestTransaction
   fun `repositories persist and reload aggregates`() {
-    val player = playerRepository.save(Player(UUID.randomUUID(), "Alice", activeTeamId = UUID.randomUUID()))
+    val expectedPlayer = expectedPlayer(id = UUID.randomUUID(), name = "Alice", activeTeamId = UUID.randomUUID())
+    val player = playerRepository.save(expectedPlayer)
     val team = teamRepository.save(Team(UUID.randomUUID(), player.id))
     val updatedTeam = teamRepository.save(team.assignCharacter(1, "warrior"))
     val item = itemRepository.save(swordItem())
-    val inventoryItem =
+    val expectedInventoryItem =
       inventoryRepository.save(
         InventoryItem(
           id = UUID.randomUUID(),
@@ -54,25 +56,24 @@ class PersistenceRepositoryIntegrationTest {
         ),
       )
 
-    playerRepository.findById(player.id)?.activeTeamId shouldBe player.activeTeamId
-    teamRepository.findByPlayerId(player.id).single().id shouldBe team.id
-    updatedTeam.characterKeys.single() shouldBe "warrior"
-    inventoryRepository.findByTeamPositionAndSlot(team.id, 1, EquipmentSlot.WEAPON)?.equippedTeamId shouldBe team.id
-    inventoryRepository.findById(inventoryItem.id)?.item?.name shouldBe item.name
+    playerRepository.findById(player.id) shouldBe expectedPlayer
+    teamRepository.findByPlayerId(player.id) shouldBe listOf(updatedTeam)
+    inventoryRepository.findByTeamPositionAndSlot(team.id, 1, EquipmentSlot.WEAPON) shouldBe expectedInventoryItem
+    inventoryRepository.findById(expectedInventoryItem.id) shouldBe expectedInventoryItem
   }
 
   @Test
   @TestTransaction
   fun `cluster node repository persists and queries live nodes`() {
     val now = Instant.now()
-    clusterNodeRepository.save(
+    val node =
       ClusterNode(
         instanceId = "node-a",
         internalBaseUrl = "http://10.0.0.1:8080",
         lastHeartbeatAt = now,
-      ),
-    )
+      )
+    clusterNodeRepository.save(node)
 
-    clusterNodeRepository.findAliveSince(now.minusSeconds(1)).any { it.instanceId == "node-a" } shouldBe true
+    clusterNodeRepository.findAliveSince(now.minusSeconds(1)).first { it.instanceId == node.instanceId } shouldBe node
   }
 }

@@ -2,20 +2,26 @@ package com.wafuri.idle.tests.e2e
 
 import com.wafuri.idle.application.port.out.CombatStateRepository
 import com.wafuri.idle.domain.model.CombatStatus
+import com.wafuri.idle.domain.model.InventoryItem
+import com.wafuri.idle.domain.model.Player
+import com.wafuri.idle.domain.model.PlayerZoneProgress
 import com.wafuri.idle.tests.support.TestTickWarpService
+import com.wafuri.idle.tests.support.expectedCombatMemberState
+import com.wafuri.idle.tests.support.expectedCombatState
+import com.wafuri.idle.tests.support.expectedPlayer
+import com.wafuri.idle.tests.support.expectedZoneProgress
+import com.wafuri.idle.tests.support.swordItem
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.quarkus.test.common.http.TestHTTPResource
 import io.quarkus.test.junit.QuarkusTest
 import io.restassured.RestAssured.given
+import io.restassured.common.mapper.TypeRef
 import io.restassured.specification.RequestSpecification
 import jakarta.inject.Inject
 import jakarta.websocket.ClientEndpoint
 import jakarta.websocket.ContainerProvider
 import jakarta.websocket.OnMessage
-import org.hamcrest.CoreMatchers.equalTo
-import org.hamcrest.Matchers.greaterThan
-import org.hamcrest.Matchers.notNullValue
 import org.junit.jupiter.api.Test
 import java.net.URI
 import java.util.UUID
@@ -56,6 +62,39 @@ class CombatProgressionE2ETest {
     given()
       .header("Authorization", "Bearer $token")
 
+  private fun playerResponse(
+    token: String,
+    playerId: String,
+  ): Player =
+    auth(token)
+      .get("/players/$playerId")
+      .then()
+      .statusCode(200)
+      .extract()
+      .`as`(Player::class.java)
+
+  private fun zoneProgressResponse(
+    token: String,
+    playerId: String,
+  ): List<PlayerZoneProgress> =
+    auth(token)
+      .get("/players/$playerId/zone-progress")
+      .then()
+      .statusCode(200)
+      .extract()
+      .`as`(object : TypeRef<List<PlayerZoneProgress>>() {})
+
+  private fun inventoryResponse(
+    token: String,
+    playerId: String,
+  ): List<InventoryItem> =
+    auth(token)
+      .get("/players/$playerId/inventory")
+      .then()
+      .statusCode(200)
+      .extract()
+      .`as`(object : TypeRef<List<InventoryItem>>() {})
+
   private fun firstTeamId(
     playerId: String,
     token: String,
@@ -91,7 +130,7 @@ class CombatProgressionE2ETest {
       .then()
       .statusCode(200)
 
-    startCombatOverWebSocket(playerId, token)
+    startCombatOverWebSocket(playerId, token, teamId)
 
     return PreparedCombat(playerId = playerId, token = token, teamId = teamId)
   }
@@ -104,23 +143,37 @@ class CombatProgressionE2ETest {
 
     val wonState = tickWarpService.warpCombatUntilStatus(UUID.fromString(playerId), CombatStatus.WON)
 
-    wonState.status shouldBe CombatStatus.WON
+    wonState shouldBe
+      expectedCombatState(
+        playerId = UUID.fromString(playerId),
+        status = CombatStatus.WON,
+        zoneId = "starter-plains",
+        activeTeamId = UUID.fromString(prepared.teamId),
+        enemyName = "Training Dummy",
+        enemyHp = 0f,
+        enemyMaxHp = 1000f,
+        members = listOf(expectedCombatMemberState("nimbus", 13.7f, 9.8f, 9.3f, 9.3f)),
+        lastSimulatedAt = wonState.lastSimulatedAt,
+      )
 
-    auth(token)
-      .get("/players/$playerId")
-      .then()
-      .statusCode(200)
-      .body("experience", equalTo(10))
-      .body("level", equalTo(1))
-
-    auth(token)
-      .get("/players/$playerId/zone-progress")
-      .then()
-      .statusCode(200)
-      .body("size()", equalTo(1))
-      .body("[0].zoneId", equalTo("starter-plains"))
-      .body("[0].killCount", equalTo(1))
-      .body("[0].level", equalTo(1))
+    playerResponse(token, playerId) shouldBe
+      expectedPlayer(
+        id = UUID.fromString(playerId),
+        name = "E2EGuest",
+        ownedCharacterKeys = setOf("nimbus"),
+        activeTeamId = UUID.fromString(prepared.teamId),
+        experience = 10,
+        gold = 25,
+      )
+    zoneProgressResponse(token, playerId) shouldBe
+      listOf(
+        expectedZoneProgress(
+          playerId = UUID.fromString(playerId),
+          zoneId = "starter-plains",
+          killCount = 1,
+          level = 1,
+        ),
+      )
   }
 
   @Test
@@ -131,14 +184,12 @@ class CombatProgressionE2ETest {
 
     tickWarpService.warpCombatUntilStatus(UUID.fromString(playerId), CombatStatus.WON)
 
-    auth(token)
-      .get("/players/$playerId/inventory")
-      .then()
-      .statusCode(200)
-      .body("size()", greaterThan(0))
-      .body("[0].id", notNullValue())
-      .body("[0].equippedTeamId", equalTo(null))
-      .body("[0].equippedPosition", equalTo(null))
+    normalizeInventory(inventoryResponse(token, playerId)) shouldBe
+      listOf(
+        normalizedInventoryItem(
+          playerId = UUID.fromString(playerId),
+        ),
+      )
   }
 
   @Test
@@ -149,30 +200,38 @@ class CombatProgressionE2ETest {
 
     tickWarpService.warpCombatWins(UUID.fromString(playerId), wins = 90)
 
-    auth(token)
-      .get("/players/$playerId")
-      .then()
-      .statusCode(200)
-      .body("experience", equalTo(900))
-      .body("level", equalTo(10))
-
-    auth(token)
-      .get("/players/$playerId/zone-progress")
-      .then()
-      .statusCode(200)
-      .body("[0].killCount", equalTo(90))
-      .body("[0].level", equalTo(10))
-
-    auth(token)
-      .get("/players/$playerId/inventory")
-      .then()
-      .statusCode(200)
-      .body("size()", greaterThan(0))
+    playerResponse(token, playerId) shouldBe
+      expectedPlayer(
+        id = UUID.fromString(playerId),
+        name = "LevelTenGuest",
+        ownedCharacterKeys = setOf("nimbus"),
+        activeTeamId = UUID.fromString(prepared.teamId),
+        experience = 900,
+        level = 10,
+        gold = 2250,
+      )
+    zoneProgressResponse(token, playerId) shouldBe
+      listOf(
+        expectedZoneProgress(
+          playerId = UUID.fromString(playerId),
+          zoneId = "starter-plains",
+          killCount = 90,
+          level = 10,
+        ),
+      )
+    normalizeInventory(inventoryResponse(token, playerId)) shouldBe
+      List(90) { index ->
+        normalizedInventoryItem(
+          playerId = UUID.fromString(playerId),
+          ordinal = index,
+        )
+      }
   }
 
   private fun startCombatOverWebSocket(
     playerId: String,
     token: String,
+    teamId: String,
   ) {
     val client = ContainerProvider.getWebSocketContainer()
     val collector = MessageCollector()
@@ -187,7 +246,20 @@ class CombatProgressionE2ETest {
     try {
       session.asyncRemote.sendText("""{"type":"START_COMBAT"}""")
       collector.messages.poll(5, TimeUnit.SECONDS).shouldNotBeNull()
-      waitForCombatState(playerId).status shouldBe CombatStatus.FIGHTING
+      val combatState = waitForCombatState(playerId)
+
+      combatState shouldBe
+        expectedCombatState(
+          playerId = UUID.fromString(playerId),
+          status = CombatStatus.FIGHTING,
+          zoneId = "starter-plains",
+          activeTeamId = UUID.fromString(teamId),
+          enemyName = "Training Dummy",
+          enemyHp = 1000f,
+          enemyMaxHp = 1000f,
+          members = listOf(expectedCombatMemberState("nimbus", 13.7f, 9.8f, 9.3f, 9.3f)),
+          lastSimulatedAt = combatState.lastSimulatedAt,
+        )
     } finally {
       session.close()
     }
@@ -211,3 +283,20 @@ class CombatProgressionE2ETest {
     }
   }
 }
+
+private fun normalizeInventory(items: List<InventoryItem>): List<InventoryItem> =
+  items.mapIndexed { index, item ->
+    item.copy(id = normalizedInventoryId(index))
+  }
+
+private fun normalizedInventoryItem(
+  playerId: UUID,
+  ordinal: Int = 0,
+): InventoryItem =
+  InventoryItem(
+    id = normalizedInventoryId(ordinal),
+    playerId = playerId,
+    item = swordItem(),
+  )
+
+private fun normalizedInventoryId(index: Int): UUID = UUID.nameUUIDFromBytes("inventory-$index".toByteArray())

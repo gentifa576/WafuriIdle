@@ -10,7 +10,11 @@ import com.wafuri.idle.application.service.player.PlayerService
 import com.wafuri.idle.domain.model.Player
 import com.wafuri.idle.domain.model.Team
 import com.wafuri.idle.tests.support.clericTemplate
+import com.wafuri.idle.tests.support.expectedCharacterPullResult
+import com.wafuri.idle.tests.support.expectedPlayer
+import com.wafuri.idle.tests.support.expectedValidationException
 import com.wafuri.idle.tests.support.gameConfig
+import com.wafuri.idle.tests.support.shouldMatchExpected
 import com.wafuri.idle.tests.support.warriorTemplate
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
@@ -56,12 +60,7 @@ class PlayerServiceTest : StringSpec() {
       val player = service.provision("Alice")
 
       service.get(player.id) shouldBe player
-      player.experience shouldBe 0
-      player.level shouldBe 1
-      player.gold shouldBe 0
-      player.essence shouldBe 0
-      player.ownedCharacterKeys shouldBe emptySet()
-      player.activeTeamId shouldBe null
+      player shouldBe expectedPlayer(id = player.id, name = "Alice")
       verify(exactly = 1) { playerRepository.save(any()) }
       verify(exactly = 3) { teamRepository.save(any()) }
       verify(exactly = 1) { playerRepository.findById(player.id) }
@@ -77,7 +76,7 @@ class PlayerServiceTest : StringSpec() {
 
       val updated = service.claimStarter(playerId, "nimbus")
 
-      updated.ownedCharacterKeys shouldBe setOf("nimbus")
+      updated shouldBe player.copy(ownedCharacterKeys = setOf("nimbus"))
       verify(exactly = 1) { characterTemplateCatalog.require("nimbus") }
       verify(exactly = 1) { playerRepository.save(any()) }
       verify(exactly = 1) { playerStateWorkQueue.markDirty(playerId) }
@@ -87,9 +86,14 @@ class PlayerServiceTest : StringSpec() {
       val playerId = UUID.randomUUID()
       every { playerRepository.findById(playerId) } returns Player(playerId, "Alice", ownedCharacterKeys = setOf("nimbus"))
 
-      shouldThrow<com.wafuri.idle.application.exception.ValidationException> {
-        service.claimStarter(playerId, "vyron")
-      }.message shouldBe "Starter choice is only available for players without owned characters."
+      val thrown =
+        shouldThrow<com.wafuri.idle.application.exception.ValidationException> {
+          service.claimStarter(playerId, "vyron")
+        }
+
+      thrown.shouldMatchExpected(
+        expectedValidationException("Starter choice is only available for players without owned characters."),
+      )
     }
 
     "pull character grants a new character and spends gold" {
@@ -103,11 +107,13 @@ class PlayerServiceTest : StringSpec() {
 
       val result = service.pullCharacter(playerId)
 
-      result.pulledCharacterKey shouldBe "warrior"
-      result.grantedCharacterKey shouldBe "warrior"
-      result.essenceGranted shouldBe 0
-      result.player.gold shouldBe 50
-      result.player.ownedCharacterKeys shouldBe setOf("warrior")
+      result shouldBe
+        expectedCharacterPullResult(
+          player = player.copy(gold = 50, ownedCharacterKeys = setOf("warrior")),
+          pulledCharacterKey = "warrior",
+          grantedCharacterKey = "warrior",
+          essenceGranted = 0,
+        )
       verify(exactly = 1) { playerStateWorkQueue.markDirty(playerId) }
     }
 
@@ -122,21 +128,27 @@ class PlayerServiceTest : StringSpec() {
 
       val result = service.pullCharacter(playerId)
 
-      result.pulledCharacterKey shouldBe "warrior"
-      result.grantedCharacterKey shouldBe null
-      result.essenceGranted shouldBe 15
-      result.player.gold shouldBe 50
-      result.player.essence shouldBe 20
-      result.player.ownedCharacterKeys shouldBe setOf("warrior")
+      result shouldBe
+        expectedCharacterPullResult(
+          player = player.copy(gold = 50, essence = 20),
+          pulledCharacterKey = "warrior",
+          grantedCharacterKey = null,
+          essenceGranted = 15,
+        )
     }
 
     "pull character rejects players without enough gold" {
       val playerId = UUID.randomUUID()
       every { playerRepository.findById(playerId) } returns Player(playerId, "Alice", gold = 249)
 
-      shouldThrow<com.wafuri.idle.application.exception.ValidationException> {
-        service.pullCharacter(playerId)
-      }.message shouldBe "Player $playerId does not have enough gold for a character pull."
+      val thrown =
+        shouldThrow<com.wafuri.idle.application.exception.ValidationException> {
+          service.pullCharacter(playerId)
+        }
+
+      thrown.shouldMatchExpected(
+        expectedValidationException("Player $playerId does not have enough gold for a character pull."),
+      )
     }
   }
 }

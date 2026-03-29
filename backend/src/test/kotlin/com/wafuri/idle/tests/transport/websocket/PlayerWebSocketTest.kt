@@ -4,13 +4,24 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.wafuri.idle.application.model.EventType
 import com.wafuri.idle.application.model.PlayerStateMessage
 import com.wafuri.idle.application.port.out.CombatStateRepository
+import com.wafuri.idle.application.service.character.CharacterTemplateCatalog
 import com.wafuri.idle.domain.model.CombatStatus
+import com.wafuri.idle.domain.model.Team
+import com.wafuri.idle.tests.support.expectedAuthResponse
+import com.wafuri.idle.tests.support.expectedCombatMemberState
+import com.wafuri.idle.tests.support.expectedCombatState
+import com.wafuri.idle.tests.support.expectedOwnedCharacterSnapshot
+import com.wafuri.idle.tests.support.expectedPlayer
+import com.wafuri.idle.tests.support.expectedPlayerStateMessage
+import com.wafuri.idle.tests.support.expectedPlayerStateSnapshot
+import com.wafuri.idle.transport.rest.dto.AuthResponse
 import com.wafuri.idle.transport.websocket.PlayerWebSocketRegistry
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.quarkus.test.common.http.TestHTTPResource
 import io.quarkus.test.junit.QuarkusTest
 import io.restassured.RestAssured.given
+import io.restassured.common.mapper.TypeRef
 import jakarta.inject.Inject
 import jakarta.websocket.ClientEndpoint
 import jakarta.websocket.ContainerProvider
@@ -19,6 +30,7 @@ import jakarta.websocket.OnOpen
 import jakarta.websocket.Session
 import org.junit.jupiter.api.Test
 import java.net.URI
+import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
@@ -34,21 +46,47 @@ class PlayerWebSocketTest {
   @Inject
   lateinit var combatStateRepository: CombatStateRepository
 
+  @Inject
+  lateinit var characterTemplateCatalog: CharacterTemplateCatalog
+
   @field:TestHTTPResource("/ws/player")
   lateinit var wsBaseUri: URI
 
+  private fun signupGuest(name: String): AuthResponse =
+    given()
+      .contentType("application/json")
+      .body("""{"name":"$name","email":null,"password":null}""")
+      .post("/auth/signup")
+      .then()
+      .statusCode(201)
+      .extract()
+      .`as`(AuthResponse::class.java)
+
+  private fun authResponse(response: AuthResponse): AuthResponse = response.copy(sessionToken = "", sessionExpiresAt = "")
+
+  private fun teamsResponse(
+    token: String,
+    playerId: String,
+  ): List<Team> =
+    given()
+      .header("Authorization", "Bearer $token")
+      .get("/players/$playerId/teams")
+      .then()
+      .statusCode(200)
+      .extract()
+      .`as`(object : TypeRef<List<Team>>() {})
+
   @Test
   fun `player scoped websocket accepts authenticated connections`() {
-    val signupResponse =
-      given()
-        .contentType("application/json")
-        .body("""{"name":"SocketUser","email":null,"password":null}""")
-        .post("/auth/signup")
-        .then()
-        .statusCode(201)
-        .extract()
-    val playerId = signupResponse.path<String>("player.id")
-    val token = signupResponse.path<String>("sessionToken")
+    val signupResponse = signupGuest("SocketUser")
+    val playerId = signupResponse.player.id.toString()
+    val token = signupResponse.sessionToken
+
+    authResponse(signupResponse) shouldBe
+      expectedAuthResponse(
+        player = expectedPlayer(id = signupResponse.player.id, name = "SocketUser"),
+        guestAccount = true,
+      )
 
     val collector = MessageCollector()
     val client = ContainerProvider.getWebSocketContainer()
@@ -70,24 +108,11 @@ class PlayerWebSocketTest {
 
   @Test
   fun `player websocket receives initial player state and accepts combat start commands`() {
-    val signupResponse =
-      given()
-        .contentType("application/json")
-        .body("""{"name":"SocketSyncUser","email":null,"password":null}""")
-        .post("/auth/signup")
-        .then()
-        .statusCode(201)
-        .extract()
-    val playerId = signupResponse.path<String>("player.id")
-    val token = signupResponse.path<String>("sessionToken")
-    val teamId =
-      given()
-        .header("Authorization", "Bearer $token")
-        .get("/players/$playerId/teams")
-        .then()
-        .statusCode(200)
-        .extract()
-        .path<String>("[0].id")
+    val signupResponse = signupGuest("SocketSyncUser")
+    val playerId = signupResponse.player.id.toString()
+    val token = signupResponse.sessionToken
+    val teamId = teamsResponse(token, playerId).first().id.toString()
+    val starter = characterTemplateCatalog.require("nimbus")
 
     given()
       .header("Authorization", "Bearer $token")
@@ -113,17 +138,48 @@ class PlayerWebSocketTest {
     val session = connect(collector, playerId, token)
     try {
       collector.opened.await(5, TimeUnit.SECONDS) shouldBe true
-      playerWebSocketRegistry.activePlayerIds().map { it.toString() }.toSet() shouldBe setOf(playerId)
+      playerWebSocketRegistry.activePlayerIds() shouldBe setOf(signupResponse.player.id)
 
       val initialMessage = collector.messages.poll(5, TimeUnit.SECONDS)
       initialMessage.shouldNotBeNull()
       val playerState = objectMapper.readValue(initialMessage, PlayerStateMessage::class.java)
-      playerState.type shouldBe EventType.PLAYER_STATE_SYNC
-      playerState.playerId.toString() shouldBe playerId
+      playerState shouldBe
+        expectedPlayerStateMessage(
+          playerId = signupResponse.player.id,
+          snapshot =
+            expectedPlayerStateSnapshot(
+              playerId = signupResponse.player.id,
+              playerName = "SocketSyncUser",
+              ownedCharacters =
+                listOf(
+                  expectedOwnedCharacterSnapshot(
+                    key = starter.key,
+                    name = starter.name,
+                    level = 1,
+                  ),
+                ),
+              serverTime = playerState.snapshot.serverTime,
+            ),
+          type = EventType.PLAYER_STATE_SYNC,
+        )
 
       session.asyncRemote.sendText("""{"type":"START_COMBAT"}""")
 
-      waitForCombatState(playerId).status shouldBe CombatStatus.FIGHTING
+      val combatState = waitForCombatState(playerId)
+
+      combatState shouldBe
+        expectedCombatState(
+          playerId = signupResponse.player.id,
+          status = CombatStatus.FIGHTING,
+          zoneId = "starter-plains",
+          activeTeamId = UUID.fromString(teamId),
+          enemyName = "Training Dummy",
+          enemyHp = 1000f,
+          enemyMaxHp = 1000f,
+          members = listOf(expectedCombatMemberState("nimbus", 13.7f, 9.8f, 9.3f, 9.3f)),
+          pendingDamageMillis = 200L,
+          lastSimulatedAt = combatState.lastSimulatedAt,
+        )
     } finally {
       session.close()
     }

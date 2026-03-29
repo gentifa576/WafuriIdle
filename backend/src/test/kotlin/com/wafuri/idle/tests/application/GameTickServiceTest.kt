@@ -3,10 +3,8 @@ package com.wafuri.idle.tests.application
 import com.wafuri.idle.application.model.CombatStateMessage
 import com.wafuri.idle.application.model.EventType
 import com.wafuri.idle.application.model.OfflineProgressionMessage
-import com.wafuri.idle.application.model.OfflineRewardSummary
 import com.wafuri.idle.application.model.PlayerMessage
 import com.wafuri.idle.application.model.PlayerStateMessage
-import com.wafuri.idle.application.model.PlayerStateSnapshot
 import com.wafuri.idle.application.model.ZoneLevelUpMessage
 import com.wafuri.idle.application.port.out.ActivePlayerRegistry
 import com.wafuri.idle.application.port.out.PlayerMessagePublisher
@@ -15,6 +13,8 @@ import com.wafuri.idle.application.port.out.PlayerStateChangeTracker
 import com.wafuri.idle.application.port.out.PlayerStateWorkQueue
 import com.wafuri.idle.application.service.player.PlayerStateSnapshotService
 import com.wafuri.idle.application.service.tick.GameTickService
+import com.wafuri.idle.tests.support.expectedBasicPlayerStateSnapshot
+import com.wafuri.idle.tests.support.expectedOfflineRewardSummary
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
@@ -57,14 +57,8 @@ class GameTickServiceTest : StringSpec() {
     "tick publishes snapshots for active and dirty players" {
       val playerId = UUID.randomUUID()
       val snapshot =
-        PlayerStateSnapshot(
+        expectedBasicPlayerStateSnapshot(
           playerId = playerId,
-          playerName = "Alice",
-          playerExperience = 0,
-          playerLevel = 1,
-          ownedCharacters = emptyList(),
-          zoneProgress = emptyList(),
-          inventory = emptyList(),
           serverTime = Instant.now(),
         )
 
@@ -102,14 +96,9 @@ class GameTickServiceTest : StringSpec() {
       every { playerStateWorkQueue.drainDirtyPlayerIds() } returns emptySet()
       playerIds.forEach { playerId ->
         every { playerStateSnapshotService.snapshotFor(playerId) } returns
-          PlayerStateSnapshot(
+          expectedBasicPlayerStateSnapshot(
             playerId = playerId,
             playerName = playerId.toString(),
-            playerExperience = 0,
-            playerLevel = 1,
-            ownedCharacters = emptyList(),
-            zoneProgress = emptyList(),
-            inventory = emptyList(),
             serverTime = Instant.now(),
           )
         every { playerStateSnapshotService.combatSnapshotFor(playerId) } returns null
@@ -130,14 +119,8 @@ class GameTickServiceTest : StringSpec() {
     "tick skips publish when player state did not change" {
       val playerId = UUID.randomUUID()
       val snapshot =
-        PlayerStateSnapshot(
+        expectedBasicPlayerStateSnapshot(
           playerId = playerId,
-          playerName = "Alice",
-          playerExperience = 0,
-          playerLevel = 1,
-          ownedCharacters = emptyList(),
-          zoneProgress = emptyList(),
-          inventory = emptyList(),
           serverTime = Instant.now(),
         )
 
@@ -160,14 +143,8 @@ class GameTickServiceTest : StringSpec() {
     "tick publishes combat state separately when only combat changed" {
       val playerId = UUID.randomUUID()
       val snapshot =
-        PlayerStateSnapshot(
+        expectedBasicPlayerStateSnapshot(
           playerId = playerId,
-          playerName = "Alice",
-          playerExperience = 0,
-          playerLevel = 1,
-          ownedCharacters = emptyList(),
-          zoneProgress = emptyList(),
-          inventory = emptyList(),
           serverTime = Instant.now(),
         )
 
@@ -199,14 +176,8 @@ class GameTickServiceTest : StringSpec() {
     "tick publishes queued player events even when state did not change" {
       val playerId = UUID.randomUUID()
       val snapshot =
-        PlayerStateSnapshot(
+        expectedBasicPlayerStateSnapshot(
           playerId = playerId,
-          playerName = "Alice",
-          playerExperience = 0,
-          playerLevel = 1,
-          ownedCharacters = emptyList(),
-          zoneProgress = emptyList(),
-          inventory = emptyList(),
           serverTime = Instant.now(),
         )
       val events = listOf(ZoneLevelUpMessage(playerId = playerId, zoneId = "starter-plains", level = 2))
@@ -236,14 +207,8 @@ class GameTickServiceTest : StringSpec() {
     "tick publishes offline progression summaries from the event queue" {
       val playerId = UUID.randomUUID()
       val snapshot =
-        PlayerStateSnapshot(
+        expectedBasicPlayerStateSnapshot(
           playerId = playerId,
-          playerName = "Alice",
-          playerExperience = 0,
-          playerLevel = 1,
-          ownedCharacters = emptyList(),
-          zoneProgress = emptyList(),
-          inventory = emptyList(),
           serverTime = Instant.now(),
         )
       val events =
@@ -259,7 +224,7 @@ class GameTickServiceTest : StringSpec() {
             zoneId = "starter-plains",
             zoneLevel = 4,
             zoneLevelsGained = 3,
-            rewards = listOf(OfflineRewardSummary(itemName = "sword_0001", count = 32)),
+            rewards = listOf(expectedOfflineRewardSummary(itemName = "sword_0001", count = 32)),
           ),
         )
 
@@ -288,14 +253,8 @@ class GameTickServiceTest : StringSpec() {
     "tick suppresses zone level-up events already covered by offline progression" {
       val playerId = UUID.randomUUID()
       val snapshot =
-        PlayerStateSnapshot(
+        expectedBasicPlayerStateSnapshot(
           playerId = playerId,
-          playerName = "Alice",
-          playerExperience = 0,
-          playerLevel = 1,
-          ownedCharacters = emptyList(),
-          zoneProgress = emptyList(),
-          inventory = emptyList(),
           serverTime = Instant.now(),
         )
       val events =

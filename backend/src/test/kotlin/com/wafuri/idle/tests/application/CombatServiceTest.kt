@@ -1,8 +1,6 @@
 package com.wafuri.idle.tests.application
 
 import com.wafuri.idle.application.config.GameConfig
-import com.wafuri.idle.application.model.CharacterCombatStats
-import com.wafuri.idle.application.model.TeamCombatStats
 import com.wafuri.idle.application.port.out.CombatStateRepository
 import com.wafuri.idle.application.port.out.PlayerStateWorkQueue
 import com.wafuri.idle.application.port.out.Repository
@@ -14,9 +12,13 @@ import com.wafuri.idle.domain.model.CombatStatus
 import com.wafuri.idle.domain.model.LevelRange
 import com.wafuri.idle.domain.model.Player
 import com.wafuri.idle.domain.model.ZoneTemplate
+import com.wafuri.idle.tests.support.expectedCombatMemberSnapshot
+import com.wafuri.idle.tests.support.expectedCombatSnapshot
+import com.wafuri.idle.tests.support.expectedPlayer
+import com.wafuri.idle.tests.support.expectedSingleMemberCombatState
+import com.wafuri.idle.tests.support.expectedSingleMemberTeamCombatStats
 import com.wafuri.idle.tests.support.gameConfig
 import io.kotest.core.spec.style.StringSpec
-import io.kotest.matchers.floats.plusOrMinus
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.just
@@ -56,15 +58,8 @@ class CombatServiceTest : StringSpec() {
     "start combat uses the player's current team stats" {
       val playerId = UUID.randomUUID()
       val teamId = UUID.randomUUID()
-      val player = Player(playerId, "Alice")
-      val teamStats =
-        TeamCombatStats(
-          teamId = teamId,
-          characterStats =
-            listOf(
-              CharacterCombatStats("warrior", 12f, 7f, 11f),
-            ),
-        )
+      val player = expectedPlayer(id = playerId, name = "Alice")
+      val teamStats = expectedSingleMemberTeamCombatStats(teamId = teamId, attack = 12f, hit = 7f, maxHp = 11f)
       var savedState: CombatState? = null
       val zone =
         ZoneTemplate(
@@ -86,16 +81,44 @@ class CombatServiceTest : StringSpec() {
       every { playerStateWorkQueue.markDirty(playerId) } just runs
 
       val result = service.start(playerId)
+      val expectedState =
+        expectedSingleMemberCombatState(
+          playerId = playerId,
+          teamId = teamId,
+          attack = 12f,
+          hit = 7f,
+          currentHp = 11f,
+          maxHp = 11f,
+          enemyHp = 1000f,
+          enemyMaxHp = 1000f,
+          zoneId = zone.id,
+          lastSimulatedAt = savedState?.lastSimulatedAt,
+        )
+      val expectedSnapshot =
+        expectedCombatSnapshot(
+          playerId = playerId,
+          status = CombatStatus.FIGHTING,
+          zoneId = zone.id,
+          activeTeamId = teamId,
+          enemyName = "Training Dummy",
+          enemyHp = 1000f,
+          enemyMaxHp = 1000f,
+          teamDps = 84f,
+          members =
+            listOf(
+              expectedCombatMemberSnapshot(
+                characterKey = "warrior",
+                attack = 12f,
+                hit = 7f,
+                currentHp = 11f,
+                maxHp = 11f,
+                alive = true,
+              ),
+            ),
+        )
 
-      result.status shouldBe CombatStatus.FIGHTING
-      result.zoneId shouldBe zone.id
-      result.activeTeamId shouldBe teamId
-      result.enemyName shouldBe "Training Dummy"
-      result.enemyHp shouldBe 1000f
-      result.teamDps shouldBe (84f plusOrMinus 0.001f)
-      result.members.single().currentHp shouldBe 11f
-      result.members.single().maxHp shouldBe 11f
-      savedState?.status shouldBe CombatStatus.FIGHTING
+      result shouldBe expectedSnapshot
+      savedState shouldBe expectedState
       verify(exactly = 1) { playerStateWorkQueue.markDirty(playerId) }
     }
   }

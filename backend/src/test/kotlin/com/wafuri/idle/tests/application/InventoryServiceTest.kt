@@ -8,6 +8,8 @@ import com.wafuri.idle.application.service.item.ItemTemplateCatalog
 import com.wafuri.idle.domain.model.InventoryItem
 import com.wafuri.idle.domain.model.Player
 import com.wafuri.idle.domain.model.Rarity
+import com.wafuri.idle.tests.support.expectedInventoryItem
+import com.wafuri.idle.tests.support.expectedPlayer
 import com.wafuri.idle.tests.support.swordItem
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
@@ -35,7 +37,7 @@ class InventoryServiceTest : StringSpec() {
     }
 
     "add generated item stores owned inventory item" {
-      val player = Player(UUID.randomUUID(), "Alice")
+      val player = expectedPlayer(id = UUID.randomUUID(), name = "Alice")
 
       every { playerRepository.findById(player.id) } returns player
       every { itemTemplateCatalog.require("sword_0001") } returns swordItem()
@@ -44,8 +46,12 @@ class InventoryServiceTest : StringSpec() {
 
       val inventoryItem = service.addGeneratedItem(player.id, "sword_0001", Rarity.COMMON)
 
-      inventoryItem.playerId shouldBe player.id
-      inventoryItem.rarity shouldBe Rarity.COMMON
+      inventoryItem shouldBe
+        expectedInventoryItem(
+          id = inventoryItem.id,
+          playerId = player.id,
+          item = swordItem(),
+        ).copy(rarity = Rarity.COMMON)
       verify(exactly = 1) { inventoryRepository.save(any()) }
       verify(exactly = 1) { playerStateWorkQueue.markDirty(player.id) }
     }

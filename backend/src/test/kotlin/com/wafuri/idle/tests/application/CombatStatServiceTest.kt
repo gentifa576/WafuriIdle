@@ -1,7 +1,6 @@
 package com.wafuri.idle.tests.application
 
 import com.wafuri.idle.application.exception.ValidationException
-import com.wafuri.idle.application.model.TeamCombatStats
 import com.wafuri.idle.application.port.out.InventoryRepository
 import com.wafuri.idle.application.port.out.Repository
 import com.wafuri.idle.application.port.out.TeamRepository
@@ -10,14 +9,17 @@ import com.wafuri.idle.application.service.combat.CombatPassiveService
 import com.wafuri.idle.application.service.combat.CombatStatService
 import com.wafuri.idle.domain.model.Player
 import com.wafuri.idle.domain.model.StatGrowth
-import com.wafuri.idle.domain.model.Team
 import com.wafuri.idle.domain.model.TeamMemberSlot
 import com.wafuri.idle.tests.support.characterTemplate
 import com.wafuri.idle.tests.support.clericTemplate
+import com.wafuri.idle.tests.support.expectedCharacterCombatStats
+import com.wafuri.idle.tests.support.expectedCombatMemberState
+import com.wafuri.idle.tests.support.expectedPlayer
+import com.wafuri.idle.tests.support.expectedTeam
+import com.wafuri.idle.tests.support.expectedTeamCombatStats
 import com.wafuri.idle.tests.support.rangerTemplate
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
-import io.kotest.matchers.floats.plusOrMinus
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -48,12 +50,12 @@ class CombatStatServiceTest : StringSpec() {
     }
 
     "team stats derive attack hit and hp from template growth at player level" {
-      val player = Player(UUID.randomUUID(), "Alice", ownedCharacterKeys = setOf("warrior", "cleric"), level = 3)
+      val player = expectedPlayer(id = UUID.randomUUID(), name = "Alice", ownedCharacterKeys = setOf("warrior", "cleric"), level = 3)
       val teamId = UUID.randomUUID()
       val team =
-        Team(
-          teamId,
-          player.id,
+        expectedTeam(
+          id = teamId,
+          playerId = player.id,
           slots = listOf(TeamMemberSlot(1, "warrior"), TeamMemberSlot(2, "cleric"), TeamMemberSlot(3)),
         )
       val warrior =
@@ -82,29 +84,31 @@ class CombatStatServiceTest : StringSpec() {
       characterTemplateCatalog.replace(listOf(warrior, cleric))
 
       val result = service.teamStats(teamId)
-
-      result shouldBe
-        TeamCombatStats(
+      val expected =
+        expectedTeamCombatStats(
           teamId = teamId,
-          characterStats = result.characterStats,
+          characterStats =
+            listOf(
+              expectedCharacterCombatStats(characterKey = "warrior", attack = 16f, hit = 9.2f, maxHp = 14.6f),
+              expectedCharacterCombatStats(characterKey = "cleric", attack = 6.4f, hit = 5.2f, maxHp = 10.4f),
+            ),
         )
-      result.characterStats[0].attack shouldBe (16f plusOrMinus 0.001f)
-      result.characterStats[0].hit shouldBe (9.2f plusOrMinus 0.001f)
-      result.characterStats[0].maxHp shouldBe (14.6f plusOrMinus 0.001f)
-      result.characterStats[1].attack shouldBe (6.4f plusOrMinus 0.001f)
-      result.characterStats[1].hit shouldBe (5.2f plusOrMinus 0.001f)
-      result.characterStats[1].maxHp shouldBe (10.4f plusOrMinus 0.001f)
-      result.dps shouldBe (180.48f plusOrMinus 0.001f)
-      result.toCombatMembers().sumOf { it.currentHp.toDouble() }.toFloat() shouldBe (25f plusOrMinus 0.001f)
+
+      result shouldBe expected
+      result.toCombatMembers() shouldBe
+        listOf(
+          expectedCombatMemberState("warrior", 16f, 9.2f, 14.6f, 14.6f),
+          expectedCombatMemberState("cleric", 6.4f, 5.2f, 10.4f, 10.4f),
+        )
     }
 
     "leader aura passive buffs team attack when condition matches" {
-      val player = Player(UUID.randomUUID(), "Alice", ownedCharacterKeys = setOf("cleric", "ranger"), level = 2)
+      val player = expectedPlayer(id = UUID.randomUUID(), name = "Alice", ownedCharacterKeys = setOf("cleric", "ranger"), level = 2)
       val teamId = UUID.randomUUID()
       val team =
-        Team(
-          teamId,
-          player.id,
+        expectedTeam(
+          id = teamId,
+          playerId = player.id,
           slots = listOf(TeamMemberSlot(1, "cleric"), TeamMemberSlot(2, "ranger"), TeamMemberSlot(3)),
         )
 
@@ -114,12 +118,19 @@ class CombatStatServiceTest : StringSpec() {
 
       val result = service.teamStats(teamId)
 
-      result.characterStats[0].attack shouldBe (8.55f plusOrMinus 0.001f)
-      result.characterStats[1].attack shouldBe (13.5f plusOrMinus 0.001f)
+      result shouldBe
+        expectedTeamCombatStats(
+          teamId = teamId,
+          characterStats =
+            listOf(
+              expectedCharacterCombatStats(characterKey = "cleric", attack = 8.549999f, hit = 4.6f, maxHp = 9.2f),
+              expectedCharacterCombatStats(characterKey = "ranger", attack = 13.5f, hit = 13.8f, maxHp = 10.3f),
+            ),
+        )
     }
 
     "player combat stats require an active team" {
-      val player = Player(UUID.randomUUID(), "Alice")
+      val player = expectedPlayer(id = UUID.randomUUID(), name = "Alice")
 
       every { playerRepository.findById(player.id) } returns player
 

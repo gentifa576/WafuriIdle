@@ -9,6 +9,8 @@ import com.wafuri.idle.application.service.team.TeamService
 import com.wafuri.idle.domain.model.Player
 import com.wafuri.idle.domain.model.Team
 import com.wafuri.idle.domain.model.TeamMemberSlot
+import com.wafuri.idle.tests.support.expectedPlayer
+import com.wafuri.idle.tests.support.expectedTeam
 import com.wafuri.idle.tests.support.warriorTemplate
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
@@ -49,7 +51,7 @@ class TeamServiceTest : StringSpec() {
 
       val team = service.create(player.id)
 
-      team.playerId shouldBe player.id
+      team shouldBe expectedTeam(id = team.id, playerId = player.id)
       verify(exactly = 1) { teamRepository.save(any()) }
       verify(exactly = 1) { playerStateWorkQueue.markDirty(player.id) }
     }
@@ -105,9 +107,15 @@ class TeamServiceTest : StringSpec() {
       every { playerStateWorkQueue.markDirty(player.id) } just runs
 
       val updatedTeam = service.assignCharacter(player.id, team.id, 1, characterKey)
+      val expectedTeam =
+        expectedTeam(
+          id = team.id,
+          playerId = player.id,
+          slots = listOf(TeamMemberSlot(1, "warrior"), TeamMemberSlot(2), TeamMemberSlot(3)),
+        )
 
-      updatedTeam.characterKeys.single() shouldBe characterKey
-      savedTeams.last().characterKeys.single() shouldBe characterKey
+      updatedTeam shouldBe expectedTeam
+      savedTeams.last() shouldBe expectedTeam
       verify(exactly = 1) { playerStateWorkQueue.markDirty(player.id) }
     }
 
@@ -127,9 +135,10 @@ class TeamServiceTest : StringSpec() {
       every { playerStateWorkQueue.markDirty(player.id) } just runs
 
       val activatedTeam = service.activate(player.id, team.id)
+      val expectedPlayer = expectedPlayer(id = player.id, name = "Alice", ownedCharacterKeys = setOf("warrior"), activeTeamId = team.id)
 
-      activatedTeam.id shouldBe team.id
-      updatedPlayers.last().activeTeamId shouldBe team.id
+      activatedTeam shouldBe team
+      updatedPlayers.last() shouldBe expectedPlayer
       verify(exactly = 1) { playerStateWorkQueue.markDirty(player.id) }
     }
   }
