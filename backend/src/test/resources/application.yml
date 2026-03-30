@@ -38,8 +38,21 @@ game:
     enemy-max-hp: 1000
     damage-interval: 1s
     respawn-delay: 1s
+    zone-scaling:
+      hp-scaling-constant: 1.0
+      reward-scaling-exponent: 0.5
+      tutorial-end-level: 19
+      tutorial-growth-rate: 0.005
+      normal-growth-rate: 0.02
+      spike-start-level: 20
+      spike-growth-factor: 0.15
+      spike-spacing-start: 10
+      spike-spacing-max: 50
+      spike-spacing-ramp: 300
     loot:
       base-item-drop-rate: 0.01
+      item-level:
+        stat-multiplier-per-level: 0.08
       rarity:
         common: 0.70
         rare: 0.20

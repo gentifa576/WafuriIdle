@@ -4,6 +4,7 @@ import com.wafuri.idle.application.exception.AuthorizationException
 import com.wafuri.idle.application.model.CombatStateMessage
 import com.wafuri.idle.application.port.out.PlayerStateChangeTracker
 import com.wafuri.idle.application.port.out.PlayerStateWorkQueue
+import com.wafuri.idle.application.service.auth.AuthSessionService
 import com.wafuri.idle.application.service.combat.CombatService
 import com.wafuri.idle.application.service.player.OfflineProgressionService
 import com.wafuri.idle.domain.model.CombatStatus
@@ -35,6 +36,7 @@ class PlayerWebSocketEndpointTest :
       val offlineProgressionService = mockk<OfflineProgressionService>()
       val backgroundExecutor = mockk<ManagedExecutor>()
       val combatService = mockk<CombatService>()
+      val authSessionService = mockk<AuthSessionService>()
       val jwt = mockk<JsonWebToken>()
       val endpoint =
         PlayerWebSocketEndpoint().apply {
@@ -44,11 +46,13 @@ class PlayerWebSocketEndpointTest :
           this.offlineProgressionService = offlineProgressionService
           this.backgroundExecutor = backgroundExecutor
           this.combatService = combatService
+          this.authSessionService = authSessionService
           this.jwt = jwt
         }
 
       every { connection.pathParam("playerId") } returns playerId.toString()
       every { jwt.subject } returns playerId.toString()
+      every { authSessionService.requireActive(jwt) } just runs
       every { offlineProgressionService.applyIfNeeded(playerId) } returns null
       every { playerStateChangeTracker.invalidate(playerId) } just runs
       every { registry.register(playerId, connection) } just runs
@@ -79,6 +83,7 @@ class PlayerWebSocketEndpointTest :
           offlineProgressionService = mockk()
           backgroundExecutor = mockk()
           combatService = mockk()
+          authSessionService = mockk()
           jwt = mockk()
         }
 
@@ -97,6 +102,7 @@ class PlayerWebSocketEndpointTest :
       val connection = mockk<WebSocketConnection>()
       every { connection.pathParam("playerId") } returns playerId.toString()
       every { endpoint.jwt.subject } returns playerId.toString()
+      every { endpoint.authSessionService.requireActive(endpoint.jwt) } just runs
       every { endpoint.playerStateChangeTracker.invalidate(playerId) } just runs
       every { endpoint.playerStateWorkQueue.markDirty(playerId) } just runs
 

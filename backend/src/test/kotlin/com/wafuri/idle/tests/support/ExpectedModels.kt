@@ -267,6 +267,8 @@ fun expectedCombatState(
   zoneId: String? = null,
   activeTeamId: UUID? = null,
   enemyName: String? = null,
+  enemyLevel: Int = 0,
+  enemyBaseHp: Float = 0f,
   enemyHp: Float = 0f,
   enemyMaxHp: Float = 0f,
   members: List<CombatMemberState> = emptyList(),
@@ -280,6 +282,15 @@ fun expectedCombatState(
     zoneId = zoneId,
     activeTeamId = activeTeamId,
     enemyName = enemyName,
+    enemyLevel = if (status == CombatStatus.IDLE) 0 else enemyLevel.coerceAtLeast(1),
+    enemyBaseHp =
+      if (status == CombatStatus.IDLE) {
+        0f
+      } else if (enemyBaseHp > 0f) {
+        enemyBaseHp
+      } else {
+        enemyMaxHp
+      },
     enemyHp = enemyHp,
     enemyMaxHp = enemyMaxHp,
     members = members,
@@ -299,6 +310,8 @@ fun expectedSingleMemberCombatState(
   status: CombatStatus = CombatStatus.FIGHTING,
   zoneId: String = "starter-plains",
   enemyName: String = "Training Dummy",
+  enemyLevel: Int = 1,
+  enemyBaseHp: Float? = null,
   enemyHp: Float,
   enemyMaxHp: Float,
   pendingDamageMillis: Long = 0,
@@ -311,6 +324,8 @@ fun expectedSingleMemberCombatState(
     zoneId = zoneId,
     activeTeamId = teamId,
     enemyName = enemyName,
+    enemyLevel = enemyLevel,
+    enemyBaseHp = enemyBaseHp ?: enemyMaxHp,
     enemyHp = enemyHp,
     enemyMaxHp = enemyMaxHp,
     members = listOf(expectedCombatMemberState(characterKey, attack, hit, currentHp, maxHp)),
@@ -397,6 +412,7 @@ fun expectedInventoryItem(
   id: UUID,
   playerId: UUID,
   item: com.wafuri.idle.domain.model.Item,
+  itemLevel: Int = 1,
   equippedTeamId: UUID? = null,
   equippedPosition: Int? = null,
 ): InventoryItem =
@@ -404,6 +420,7 @@ fun expectedInventoryItem(
     id = id,
     playerId = playerId,
     item = item,
+    itemLevel = itemLevel,
     equippedTeamId = equippedTeamId,
     equippedPosition = equippedPosition,
   )

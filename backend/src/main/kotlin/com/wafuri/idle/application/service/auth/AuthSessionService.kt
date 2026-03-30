@@ -39,8 +39,7 @@ class AuthSessionService(
   }
 }
 
-private fun JsonWebToken.sessionId(): UUID? =
-  getClaim<String>("sid")?.let(UUID::fromString)
+private fun JsonWebToken.sessionId(): UUID? = getClaim<String>("sid")?.let(UUID::fromString)
 
 private fun JsonWebToken.expiresAtInstant(): Instant {
   val expiration = getClaim<Any>("exp")

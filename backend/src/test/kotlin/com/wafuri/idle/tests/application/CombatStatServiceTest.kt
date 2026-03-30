@@ -7,6 +7,7 @@ import com.wafuri.idle.application.port.out.TeamRepository
 import com.wafuri.idle.application.service.character.CharacterTemplateCatalog
 import com.wafuri.idle.application.service.combat.CombatPassiveService
 import com.wafuri.idle.application.service.combat.CombatStatService
+import com.wafuri.idle.application.service.scaling.ScalingRule
 import com.wafuri.idle.domain.model.Player
 import com.wafuri.idle.domain.model.StatGrowth
 import com.wafuri.idle.domain.model.TeamMemberSlot
@@ -17,6 +18,7 @@ import com.wafuri.idle.tests.support.expectedCombatMemberState
 import com.wafuri.idle.tests.support.expectedPlayer
 import com.wafuri.idle.tests.support.expectedTeam
 import com.wafuri.idle.tests.support.expectedTeamCombatStats
+import com.wafuri.idle.tests.support.gameConfig
 import com.wafuri.idle.tests.support.rangerTemplate
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
@@ -45,6 +47,7 @@ class CombatStatServiceTest : StringSpec() {
           inventoryRepository,
           characterTemplateCatalog,
           CombatPassiveService(characterTemplateCatalog),
+          ScalingRule(gameConfig()),
         )
       every { inventoryRepository.findById(any()) } returns null
     }

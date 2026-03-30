@@ -5,6 +5,7 @@ import com.wafuri.idle.application.port.out.ActivePlayerRegistry
 import com.wafuri.idle.application.port.out.CombatStateRepository
 import com.wafuri.idle.application.port.out.PlayerStateWorkQueue
 import com.wafuri.idle.application.service.player.ProgressionService
+import com.wafuri.idle.application.service.scaling.ScalingRule
 import com.wafuri.idle.domain.model.CombatStatus
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.transaction.Transactional
@@ -20,6 +21,7 @@ class CombatTickService(
   private val playerStateWorkQueue: PlayerStateWorkQueue,
   private val combatLootService: CombatLootService,
   private val progressionService: ProgressionService,
+  private val scalingRule: ScalingRule,
   private val gameConfig: GameConfig,
 ) {
   @Transactional
@@ -53,15 +55,16 @@ class CombatTickService(
         damageIntervalMillis = combatConfig.damageInterval().toMillis(),
         respawnDelayMillis = combatConfig.respawnDelay().toMillis(),
       )
+    val scaledState = refreshRespawnedEnemy(playerId, refreshedState, advancedState)
     val nextState =
-      advancedState.copy(lastSimulatedAt = Instant.now())
+      scaledState.copy(lastSimulatedAt = Instant.now())
 
     if (nextState != state) {
       combatStateRepository.save(nextState)
       if (state.status != CombatStatus.WON && nextState.status == CombatStatus.WON) {
         val zoneId = requireNotNull(nextState.zoneId) { "Won combat must retain a zone id." }
-        progressionService.recordKill(playerId, zoneId)
-        combatLootService.rollLoot(playerId, zoneId)
+        progressionService.recordKill(playerId, zoneId, nextState.enemyLevel)
+        combatLootService.rollLoot(playerId, zoneId, refreshedState.enemyLevel)
       }
       if (
         nextState.copy(
@@ -73,5 +76,19 @@ class CombatTickService(
         playerStateWorkQueue.markDirty(playerId)
       }
     }
+  }
+
+  private fun refreshRespawnedEnemy(
+    playerId: UUID,
+    previousState: com.wafuri.idle.domain.model.CombatState,
+    nextState: com.wafuri.idle.domain.model.CombatState,
+  ): com.wafuri.idle.domain.model.CombatState {
+    if (previousState.status != CombatStatus.WON || nextState.status != CombatStatus.FIGHTING) {
+      return nextState
+    }
+    val zoneId = requireNotNull(nextState.zoneId) { "Respawned combat must retain a zone id." }
+    val zoneLevel = progressionService.requireZoneProgress(playerId, zoneId).level
+    val scaledEnemyHp = scalingRule.enemyHpFor(zoneLevel, nextState.enemyBaseHp)
+    return nextState.refreshEnemy(enemyLevel = zoneLevel, enemyMaxHp = scaledEnemyHp)
   }
 }

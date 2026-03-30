@@ -6,6 +6,8 @@ import com.wafuri.idle.application.port.out.PlayerStateWorkQueue
 import com.wafuri.idle.application.port.out.Repository
 import com.wafuri.idle.application.service.combat.CombatService
 import com.wafuri.idle.application.service.combat.CombatStatService
+import com.wafuri.idle.application.service.player.ProgressionService
+import com.wafuri.idle.application.service.scaling.ScalingRule
 import com.wafuri.idle.application.service.zone.ZoneTemplateCatalog
 import com.wafuri.idle.domain.model.CombatState
 import com.wafuri.idle.domain.model.CombatStatus
@@ -33,6 +35,7 @@ class CombatServiceTest : StringSpec() {
   private lateinit var combatStatService: CombatStatService
   private lateinit var playerStateWorkQueue: PlayerStateWorkQueue
   private lateinit var zoneTemplateCatalog: ZoneTemplateCatalog
+  private lateinit var progressionService: ProgressionService
   private lateinit var config: GameConfig
   private lateinit var service: CombatService
 
@@ -43,6 +46,7 @@ class CombatServiceTest : StringSpec() {
       combatStatService = mockk()
       playerStateWorkQueue = mockk()
       zoneTemplateCatalog = mockk()
+      progressionService = mockk()
       config = gameConfig(enemyMaxHp = 1000f)
       service =
         CombatService(
@@ -51,6 +55,8 @@ class CombatServiceTest : StringSpec() {
           combatStatService,
           playerStateWorkQueue,
           zoneTemplateCatalog,
+          progressionService,
+          ScalingRule(config),
           config,
         )
     }
@@ -74,6 +80,7 @@ class CombatServiceTest : StringSpec() {
       every { playerRepository.findById(playerId) } returns player
       every { combatStatService.teamStatsForPlayer(playerId) } returns teamStats
       every { zoneTemplateCatalog.default() } returns zone
+      every { progressionService.requireZoneProgress(playerId, zone.id) } returns mockk { every { level } returns 1 }
       every { combatStateRepository.findById(playerId) } returns null
       every { combatStateRepository.save(any()) } answers {
         firstArg<CombatState>().also { savedState = it }

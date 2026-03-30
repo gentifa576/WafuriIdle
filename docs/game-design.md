@@ -48,8 +48,8 @@ Current implementation:
 - players start at `0` EXP
 - players start at `0` gold
 - players start at `0` essence
-- each kill grants `10` player EXP
-- each kill grants `25` gold
+- each kill grants base `10` player EXP and base `25` gold before zone reward scaling
+- kill rewards currently scale by defeated enemy zone level through a softer reward curve: `rewardMultiplier = zoneMultiplier ^ rewardScalingExponent`
 - player level currently advances every `100` EXP
 - player level directly scales all owned character combat stats through template stat growth
 
@@ -91,6 +91,8 @@ Current implementation:
 - each kill in a zone increments only that player’s progress in that zone
 - zone level currently advances every `10` kills in that zone
 - when a zone level increases, the server pushes a player-scoped WebSocket notification
+- future enemy spawns in that combat now scale their HP from the player's current zone level using config-driven smooth growth plus dynamic spike spacing
+- EXP and gold rewards for kills in that zone also scale from the defeated enemy zone level, but use a softer exponent than enemy HP so the economy grows more slowly than combat durability
 
 ## Kill Rewards
 
@@ -116,6 +118,7 @@ Current direction:
 - disconnecting from WebSocket pauses live combat ticks for that player
 - when the player reconnects, the server calculates missed combat progression from the timestamp difference since the last combat simulation
 - offline progression currently uses the same 1:1 combat, EXP, zone, and loot rules as live progression
+- offline reward replay uses each projected kill's actual enemy zone level, so reconnect summaries reflect the same scaled EXP and gold a live session would have earned
 
 Current implementation:
 - combat state records the last authoritative simulation timestamp
@@ -186,6 +189,8 @@ Current loop direction:
 - combat auto-continues after respawn
 - zone is the unit that groups combat processing
 - when team stat refresh changes a combat member's max HP, current HP preserves the existing current-to-max ratio instead of keeping the old flat HP value
+- enemy HP scaling is currently the only implemented enemy-side zone scaling; enemy damage is not authored yet
+- zone reward scaling currently reuses the same zone multiplier with a softer exponent so reward growth stays below enemy HP growth
 
 ## Zones
 
@@ -210,6 +215,8 @@ Current loot direction:
 - loot is rolled on kill
 - loot is server-generated and added directly to player inventory
 - loot config is driven by game configuration
+- dropped items inherit an `itemLevel` from the defeated enemy's zone level
+- effective item stats scale from template stat values by item level
 
 Current default tuning:
 - base item drop rate: `1%` per kill
@@ -239,6 +246,7 @@ Static item templates define:
 - substat pool
 
 Generated inventory state defines:
+- item level
 - rarity
 - rolled substats
 - upgrade state
@@ -290,14 +298,12 @@ Security note:
 Near-term systems to define more precisely:
 - player EXP curve
 - zone kill thresholds per level
-- what zone level affects
-- whether zone level influences enemy strength, loot, or unlocks first
+- how far zone level should expand beyond enemy HP, reward scaling, and item level into enemy damage or unlocks
 - full active skill execution model
 - triggered passive runtime and event counters
 
 ## Open Questions
 
-- Should zone level influence enemy strength, rewards, or both?
 - Should zone progression ever reset, prestige, or cap?
 - Should each kill always grant the same EXP, or vary by enemy/zone?
 - Should zone progression be linear by kills, or use a separate zone EXP curve later?

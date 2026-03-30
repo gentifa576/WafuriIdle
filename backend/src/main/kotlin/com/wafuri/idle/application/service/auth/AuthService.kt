@@ -5,10 +5,10 @@ import com.wafuri.idle.application.exception.ValidationException
 import com.wafuri.idle.application.port.out.AuthAccountRepository
 import com.wafuri.idle.application.port.out.Repository
 import com.wafuri.idle.application.service.player.PlayerService
-import com.wafuri.idle.transport.websocket.PlayerWebSocketRegistry
 import com.wafuri.idle.domain.model.AuthAccount
 import com.wafuri.idle.domain.model.AuthScope
 import com.wafuri.idle.domain.model.Player
+import com.wafuri.idle.transport.websocket.PlayerWebSocketRegistry
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.transaction.Transactional
 import org.eclipse.microprofile.jwt.JsonWebToken

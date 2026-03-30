@@ -9,6 +9,8 @@ data class CombatState(
   val zoneId: String? = null,
   val activeTeamId: UUID? = null,
   val enemyName: String? = null,
+  val enemyLevel: Int = 0,
+  val enemyBaseHp: Float = 0f,
   val enemyHp: Float = 0f,
   val enemyMaxHp: Float = 0f,
   val members: List<CombatMemberState> = emptyList(),
@@ -18,6 +20,7 @@ data class CombatState(
 ) {
   init {
     require(enemyHp >= 0f) { "Enemy HP must not be negative." }
+    require(enemyBaseHp >= 0f) { "Enemy base HP must not be negative." }
     require(enemyMaxHp >= 0f) { "Enemy max HP must not be negative." }
     require(pendingDamageMillis >= 0) { "Pending damage millis must not be negative." }
     require(pendingRespawnMillis >= 0) { "Pending respawn millis must not be negative." }
@@ -27,6 +30,8 @@ data class CombatState(
       require(zoneId == null) { "Idle combat must not have a zone." }
       require(activeTeamId == null) { "Idle combat must not have an active team." }
       require(enemyName == null) { "Idle combat must not have an enemy." }
+      require(enemyLevel == 0) { "Idle combat must not have an enemy level." }
+      require(enemyBaseHp == 0f) { "Idle combat must not have an enemy base HP." }
       require(enemyHp == 0f) { "Idle combat must not have enemy HP." }
       require(enemyMaxHp == 0f) { "Idle combat must not have enemy max HP." }
       require(members.isEmpty()) { "Idle combat must not have combat members." }
@@ -36,6 +41,8 @@ data class CombatState(
       require(!zoneId.isNullOrBlank()) { "Active combat must have a zone." }
       require(activeTeamId != null) { "Active combat must have an active team." }
       require(!enemyName.isNullOrBlank()) { "Active combat must have an enemy name." }
+      require(enemyLevel >= 1) { "Active combat must have an enemy level." }
+      require(enemyBaseHp > 0f) { "Active combat must have positive enemy base HP." }
       require(enemyMaxHp > 0f) { "Active combat must have positive enemy max HP." }
       require(enemyHp <= enemyMaxHp) { "Enemy HP must not exceed enemy max HP." }
       require(members.isNotEmpty()) { "Active combat must have at least one combat member." }
@@ -52,11 +59,15 @@ data class CombatState(
     zoneId: String,
     teamId: UUID,
     enemyName: String,
+    enemyLevel: Int,
+    enemyBaseHp: Float,
     enemyMaxHp: Float,
     members: List<CombatMemberState>,
   ): CombatState {
     require(zoneId.isNotBlank()) { "Zone id must not be blank." }
     require(enemyName.isNotBlank()) { "Enemy name must not be blank." }
+    require(enemyLevel >= 1) { "Enemy level must be at least 1." }
+    require(enemyBaseHp > 0f) { "Enemy base HP must be positive." }
     require(enemyMaxHp > 0f) { "Enemy max HP must be positive." }
     require(members.isNotEmpty()) { "Combat must start with at least one member." }
     require(members.any { it.isAlive }) { "Combat must start with at least one living member." }
@@ -66,6 +77,8 @@ data class CombatState(
       zoneId = zoneId,
       activeTeamId = teamId,
       enemyName = enemyName,
+      enemyLevel = enemyLevel,
+      enemyBaseHp = enemyBaseHp,
       enemyHp = enemyMaxHp,
       enemyMaxHp = enemyMaxHp,
       members = members,
@@ -76,6 +89,22 @@ data class CombatState(
 
   fun refreshMembers(members: List<CombatMemberState>): CombatState {
     return refreshTeam(activeTeamId ?: return this, members)
+  }
+
+  fun refreshEnemy(
+    enemyLevel: Int,
+    enemyMaxHp: Float,
+  ): CombatState {
+    if (status != CombatStatus.FIGHTING) {
+      return this
+    }
+    require(enemyLevel >= 1) { "Enemy level must be at least 1." }
+    require(enemyMaxHp > 0f) { "Enemy max HP must be positive." }
+    return copy(
+      enemyLevel = enemyLevel,
+      enemyHp = enemyMaxHp,
+      enemyMaxHp = enemyMaxHp,
+    )
   }
 
   fun refreshTeam(

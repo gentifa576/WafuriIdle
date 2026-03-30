@@ -28,6 +28,7 @@ class JpaInventoryRepository(
       it.id = domain.id
       it.playerId = domain.playerId
       it.itemName = domain.item.name
+      it.itemLevel = domain.itemLevel
       it.subStats = domain.subStats
       it.rarity = domain.rarity
       it.upgrade = domain.upgrade
@@ -66,6 +67,7 @@ private fun InventoryItemEntity.toDomain(item: Item): InventoryItem =
     id = id,
     playerId = playerId,
     item = item,
+    itemLevel = itemLevel,
     subStats = subStats,
     rarity = rarity,
     upgrade = upgrade,

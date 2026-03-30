@@ -125,7 +125,7 @@
 | `GET /characters/templates` | none | `[{ key, name, strength, agility, intelligence, wisdom, vitality, image, tags, skill, passive }]` | Returns the currently loaded character templates. |
 | `GET /players/{id}` | none | `Player` | Returns the player domain model directly, including player EXP, level, gold, and essence. Owned character level is implicitly the same as player level. |
 | `GET /players/{id}/teams` | none | `[Team]` | Returns all player teams; active team is inferred from `Player.activeTeamId`. |
-| `GET /players/{id}/inventory` | none | `[InventoryItem]` | Returns inventory state for the player with nested `item` data and team-slot assignment state. |
+| `GET /players/{id}/inventory` | none | `[InventoryItem]` | Returns inventory state for the player with nested static `item` data, generated `itemLevel`, and team-slot assignment state. |
 | `GET /players/{id}/zone-progress` | none | `[PlayerZoneProgress]` | Returns per-player per-zone kill and level progression. |
 | `GET /debug-client/` | none | Static HTML/JS/CSS page | Local-only manual test harness for REST commands and player-scoped WebSocket observation. |
 
@@ -153,12 +153,12 @@
 | Combat team refresh | Ongoing combat must refresh its active team id and member snapshot from the player's currently active team each combat tick so team edits and active-team switches are reflected in combat sync. |
 | Combat timing | Use real elapsed server tick time to correct drift; do not assume every loop executes exactly on schedule. |
 | Offline progression | When a player reconnects after combat continued while they were disconnected, progression catch-up must be calculated from timestamp difference, not by replaying server ticks. |
-| Player progression | Players gain EXP and gold from kills and level globally based on configured thresholds. |
-| Zone progression | Zone progression is tracked per player and per zone through kill counts and zone level thresholds. |
+| Player progression | Players gain EXP and gold from kills and level globally based on configured thresholds; kill rewards currently scale by defeated enemy zone level through a softer config-driven reward exponent layered on top of the main zone multiplier. |
+| Zone progression | Zone progression is tracked per player and per zone through kill counts and zone level thresholds, and current zone level drives config-based enemy HP scaling plus softer EXP and gold reward scaling for future kills in that combat zone. |
 | Offline summary threshold | If offline progression covers at least `5m`, enqueue a player-scoped summary notification of gained rewards and progression. |
-| Loot config | Combat loot settings are config-driven. Base item drop rate is `1%` per kill, then rarity rolls use `common 70%`, `rare 20%`, `epic 8%`, `legendary 2%`. |
+| Loot config | Combat loot settings are config-driven. Base item drop rate is `1%` per kill, rarity rolls use `common 70%`, `rare 20%`, `epic 8%`, `legendary 2%`, and dropped item stats scale from generated `itemLevel` derived from the defeated enemy's zone level. |
 | Zone model | Zones define level range, loot table, enemy list, and future event references; combat currently uses the default zone as its source of enemy data and executes grouped by zone. |
-| Item model | Items define stable `name`, user-facing `displayName`, `type`, `baseStat`, and `subStatPool` as static template data. Inventory state owns generated `subStats`, `rarity`, and `upgrade`. |
+| Item model | Items define stable `name`, user-facing `displayName`, `type`, `baseStat`, and `subStatPool` as static template data. Inventory state owns generated `itemLevel`, `subStats`, `rarity`, and `upgrade`; effective item stats scale from template values by `itemLevel`. |
 | Rule enforcement | `GET` and `POST` handlers enforce rules through application services, not transport code. |
 | Tick handoff | Command-side mutations must mark player state for server tick processing instead of pushing direct WebSocket events. |
 
@@ -174,7 +174,7 @@
 | Publish rule | Tick processing skips WebSocket publish when the player's state content did not change. |
 | Payload | Event payloads are player-scoped messages `{ type, playerId, snapshot }` for player-state sync, `{ type, playerId, snapshot, serverTime }` for combat-state sync, `{ type, playerId, zoneId, level, serverTime }` for zone level-up notifications, `{ type, playerId, offlineDurationMillis, kills, experienceGained, goldGained, playerLevel, playerLevelsGained, zoneId, zoneLevel, zoneLevelsGained, rewards, serverTime }` for offline progression summaries, and `{ type, playerId, commandType, message, serverTime }` for WebSocket command validation failures. `START_COMBAT` may return either an immediate combat-state sync payload or a command error payload on the player channel. |
 | Event dedupe | If an offline progression summary for a zone is present in a player publish batch, separate zone level-up notifications for that same zone are suppressed because the summary already carries the final zone level and levels gained. |
-| Snapshot | Player-state `snapshot` contains player identity, player EXP/level, gold, essence, owned character roster with shared character level, per-zone progression, inventory with static item and generated item data, and server time. Combat state is sent as a separate sync message. |
+| Snapshot | Player-state `snapshot` contains player identity, player EXP/level, gold, essence, owned character roster with shared character level, per-zone progression, inventory with static item metadata plus generated item level and scaled item stat values, and server time. Combat state is sent as a separate sync message. |
 | Player snapshot | Player state includes the player's owned character roster so unlock changes can be observed over WebSocket. |
 
 ## Testing Requirements

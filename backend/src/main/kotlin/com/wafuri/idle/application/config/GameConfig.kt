@@ -38,6 +38,8 @@ interface GameConfig {
 
     fun respawnDelay(): Duration
 
+    fun zoneScaling(): ZoneScaling
+
     fun loot(): Loot
   }
 
@@ -54,7 +56,13 @@ interface GameConfig {
   interface Loot {
     fun baseItemDropRate(): Float
 
+    fun itemLevel(): ItemLevel
+
     fun rarity(): Rarity
+  }
+
+  interface ItemLevel {
+    fun statMultiplierPerLevel(): Float
   }
 
   interface Rarity {
@@ -95,6 +103,28 @@ interface GameConfig {
 
   interface Zone {
     fun killsPerLevel(): Int
+  }
+
+  interface ZoneScaling {
+    fun hpScalingConstant(): Float
+
+    fun rewardScalingExponent(): Float
+
+    fun tutorialEndLevel(): Int
+
+    fun tutorialGrowthRate(): Float
+
+    fun normalGrowthRate(): Float
+
+    fun spikeStartLevel(): Int
+
+    fun spikeGrowthFactor(): Float
+
+    fun spikeSpacingStart(): Float
+
+    fun spikeSpacingMax(): Float
+
+    fun spikeSpacingRamp(): Float
   }
 
   interface Offline {

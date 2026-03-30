@@ -7,8 +7,10 @@ import com.wafuri.idle.application.port.out.CombatStateRepository
 import com.wafuri.idle.application.port.out.PlayerMessageQueue
 import com.wafuri.idle.application.service.combat.CombatLootService
 import com.wafuri.idle.application.service.combat.CombatStatService
+import com.wafuri.idle.application.service.scaling.ScalingRule
 import com.wafuri.idle.domain.model.CombatState
 import com.wafuri.idle.domain.model.CombatStatus
+import com.wafuri.idle.domain.model.PlayerZoneProgress
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.transaction.Transactional
 import java.time.Duration
@@ -22,6 +24,7 @@ class OfflineProgressionService(
   private val progressionService: ProgressionService,
   private val combatLootService: CombatLootService,
   private val playerEventQueue: PlayerMessageQueue,
+  private val scalingRule: ScalingRule,
   private val gameConfig: GameConfig,
 ) {
   @Transactional
@@ -46,15 +49,15 @@ class OfflineProgressionService(
     val beforePlayer = progressionService.requirePlayer(playerId)
     val beforeZone = progressionService.requireZoneProgress(playerId, zoneId)
     val refreshedState = refreshCombatState(playerId, state)
-    val projection = projectOfflineCombat(refreshedState, offlineDuration)
+    val projection = projectOfflineCombat(refreshedState, offlineDuration, beforeZone)
 
-    repeat(projection.kills) {
-      progressionService.recordKill(playerId, zoneId)
+    projection.killEnemyLevels.forEach { enemyLevel ->
+      progressionService.recordKill(playerId, zoneId, enemyLevel)
     }
     val rewardCounts =
       buildMap<String, Int> {
-        repeat(projection.kills) {
-          combatLootService.rollLoot(playerId, zoneId)?.let { item ->
+        projection.killEnemyLevels.forEach { enemyLevel ->
+          combatLootService.rollLoot(playerId, zoneId, enemyLevel)?.let { item ->
             put(item.item.name, getOrDefault(item.item.name, 0) + 1)
           }
         }
@@ -116,13 +119,17 @@ class OfflineProgressionService(
   private fun projectOfflineCombat(
     state: CombatState,
     elapsed: Duration,
+    startingZoneProgress: PlayerZoneProgress,
   ): OfflineCombatProjection {
     val combatConfig = gameConfig.combat()
     var remaining = elapsed.toMillis().coerceAtLeast(0)
     var current = state
     var kills = 0
+    var zoneProgress = startingZoneProgress
+    val killEnemyLevels = mutableListOf<Int>()
     val damageIntervalMillis = combatConfig.damageInterval().toMillis()
     val respawnDelayMillis = combatConfig.respawnDelay().toMillis()
+    val killsPerLevel = gameConfig.progression().zone().killsPerLevel()
 
     while (remaining > 0 && current.status != CombatStatus.IDLE) {
       if (current.status == CombatStatus.WON) {
@@ -142,6 +149,10 @@ class OfflineProgressionService(
               damageIntervalMillis = damageIntervalMillis,
               respawnDelayMillis = respawnDelayMillis,
             )
+          if (current.status == CombatStatus.FIGHTING) {
+            val enemyMaxHp = scalingRule.enemyHpFor(zoneProgress.level, current.enemyBaseHp)
+            current = current.refreshEnemy(enemyLevel = zoneProgress.level, enemyMaxHp = enemyMaxHp)
+          }
           remaining -= toRespawn
         }
         continue
@@ -178,10 +189,12 @@ class OfflineProgressionService(
       remaining -= killTimeMillis
       if (current.status == CombatStatus.WON) {
         kills += 1
+        killEnemyLevels += current.enemyLevel
+        zoneProgress = zoneProgress.recordKill(killsPerLevel)
       }
     }
 
-    return OfflineCombatProjection(state = current, kills = kills)
+    return OfflineCombatProjection(state = current, kills = kills, killEnemyLevels = killEnemyLevels)
   }
 
   private fun timeToKillMillis(
@@ -232,4 +245,5 @@ data class OfflineProgressionResult(
 private data class OfflineCombatProjection(
   val state: CombatState,
   val kills: Int,
+  val killEnemyLevels: List<Int>,
 )

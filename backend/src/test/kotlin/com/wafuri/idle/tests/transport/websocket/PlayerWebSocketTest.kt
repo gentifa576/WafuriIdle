@@ -1,8 +1,8 @@
 package com.wafuri.idle.tests.transport.websocket
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.wafuri.idle.application.model.EventType
 import com.wafuri.idle.application.model.CommandErrorMessage
+import com.wafuri.idle.application.model.EventType
 import com.wafuri.idle.application.model.PlayerStateMessage
 import com.wafuri.idle.application.port.out.CombatStateRepository
 import com.wafuri.idle.application.service.character.CharacterTemplateCatalog

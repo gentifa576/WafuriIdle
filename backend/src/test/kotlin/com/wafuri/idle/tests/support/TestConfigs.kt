@@ -15,7 +15,18 @@ fun gameConfig(
   enemyMaxHp: Float = 1000f,
   damageInterval: Duration = Duration.ofSeconds(1),
   respawnDelay: Duration = Duration.ofSeconds(1),
+  zoneHpScalingConstant: Float = 1f,
+  rewardScalingExponent: Float = 0.5f,
+  tutorialEndLevel: Int = 19,
+  tutorialGrowthRate: Float = 0.005f,
+  normalGrowthRate: Float = 0.02f,
+  spikeStartLevel: Int = 20,
+  spikeGrowthFactor: Float = 0.15f,
+  spikeSpacingStart: Float = 10f,
+  spikeSpacingMax: Float = 50f,
+  spikeSpacingRamp: Float = 300f,
   baseItemDropRate: Float = 0.01f,
+  itemStatMultiplierPerLevel: Float = 0.08f,
   commonRarityWeight: Float = 80f,
   rareRarityWeight: Float = 15f,
   epicRarityWeight: Float = 4f,
@@ -35,11 +46,13 @@ fun gameConfig(
   val gachaConfig = mockk<GameConfig.Gacha>()
   val characterPullConfig = mockk<GameConfig.CharacterPull>()
   val lootConfig = mockk<GameConfig.Loot>()
+  val itemLevelConfig = mockk<GameConfig.ItemLevel>()
   val rarityConfig = mockk<GameConfig.Rarity>()
   val authConfig = mockk<GameConfig.Auth>()
   val progressionConfig = mockk<GameConfig.Progression>()
   val playerProgressionConfig = mockk<GameConfig.Player>()
   val zoneProgressionConfig = mockk<GameConfig.Zone>()
+  val zoneScalingConfig = mockk<GameConfig.ZoneScaling>()
   val offlineProgressionConfig = mockk<GameConfig.Offline>()
   val contentConfig = mockk<GameConfig.Content>()
   val gameConfig = mockk<GameConfig>()
@@ -54,9 +67,12 @@ fun gameConfig(
   every { combatConfig.enemyMaxHp() } returns enemyMaxHp
   every { combatConfig.damageInterval() } returns damageInterval
   every { combatConfig.respawnDelay() } returns respawnDelay
+  every { combatConfig.zoneScaling() } returns zoneScalingConfig
   every { combatConfig.loot() } returns lootConfig
   every { lootConfig.baseItemDropRate() } returns baseItemDropRate
+  every { lootConfig.itemLevel() } returns itemLevelConfig
   every { lootConfig.rarity() } returns rarityConfig
+  every { itemLevelConfig.statMultiplierPerLevel() } returns itemStatMultiplierPerLevel
   every { rarityConfig.common() } returns commonRarityWeight
   every { rarityConfig.rare() } returns rareRarityWeight
   every { rarityConfig.epic() } returns epicRarityWeight
@@ -66,6 +82,16 @@ fun gameConfig(
   every { progressionConfig.player() } returns playerProgressionConfig
   every { progressionConfig.zone() } returns zoneProgressionConfig
   every { progressionConfig.offline() } returns offlineProgressionConfig
+  every { zoneScalingConfig.hpScalingConstant() } returns zoneHpScalingConstant
+  every { zoneScalingConfig.rewardScalingExponent() } returns rewardScalingExponent
+  every { zoneScalingConfig.tutorialEndLevel() } returns tutorialEndLevel
+  every { zoneScalingConfig.tutorialGrowthRate() } returns tutorialGrowthRate
+  every { zoneScalingConfig.normalGrowthRate() } returns normalGrowthRate
+  every { zoneScalingConfig.spikeStartLevel() } returns spikeStartLevel
+  every { zoneScalingConfig.spikeGrowthFactor() } returns spikeGrowthFactor
+  every { zoneScalingConfig.spikeSpacingStart() } returns spikeSpacingStart
+  every { zoneScalingConfig.spikeSpacingMax() } returns spikeSpacingMax
+  every { zoneScalingConfig.spikeSpacingRamp() } returns spikeSpacingRamp
   every { playerProgressionConfig.killExperience() } returns killExperience
   every { playerProgressionConfig.experiencePerLevel() } returns experiencePerLevel
   every { playerProgressionConfig.killGold() } returns killGold

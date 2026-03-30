@@ -10,6 +10,7 @@ import com.wafuri.idle.application.service.combat.CombatStatService
 import com.wafuri.idle.application.service.combat.CombatTickService
 import com.wafuri.idle.application.service.player.OfflineProgressionService
 import com.wafuri.idle.application.service.player.ProgressionService
+import com.wafuri.idle.application.service.scaling.ScalingRule
 import com.wafuri.idle.domain.model.CombatState
 import com.wafuri.idle.domain.model.Player
 import com.wafuri.idle.domain.model.PlayerZoneProgress
@@ -63,6 +64,7 @@ class OfflineProgressionServiceTest : StringSpec() {
           progressionService,
           combatLootService,
           playerEventQueue,
+          ScalingRule(config),
           config,
         )
     }
@@ -90,8 +92,8 @@ class OfflineProgressionServiceTest : StringSpec() {
 
       result shouldBe null
       verify(exactly = 1) { combatStateRepository.save(match { it.lastSimulatedAt != null }) }
-      verify(exactly = 0) { progressionService.recordKill(any(), any()) }
-      verify(exactly = 0) { combatLootService.rollLoot(any(), any()) }
+      verify(exactly = 0) { progressionService.recordKill(any(), any(), any()) }
+      verify(exactly = 0) { combatLootService.rollLoot(any(), any(), any()) }
       verify(exactly = 0) { playerEventQueue.enqueue(any()) }
     }
 
@@ -128,8 +130,8 @@ class OfflineProgressionServiceTest : StringSpec() {
         expectedSingleMemberTeamCombatStats(teamId = teamId, attack = 10f, hit = 1f, maxHp = 10f)
       every { progressionService.requirePlayer(playerId) } returnsMany listOf(beforePlayer, afterPlayer)
       every { progressionService.requireZoneProgress(playerId, zoneId) } returnsMany listOf(beforeZone, afterZone)
-      every { progressionService.recordKill(playerId, zoneId) } just runs
-      every { combatLootService.rollLoot(playerId, zoneId) } returns item
+      every { progressionService.recordKill(playerId, zoneId, any()) } just runs
+      every { combatLootService.rollLoot(playerId, zoneId, any()) } returns item
       every { combatStateRepository.save(any()) } answers {
         firstArg<CombatState>().also { savedState = it }
       }
@@ -141,22 +143,22 @@ class OfflineProgressionServiceTest : StringSpec() {
         expectedOfflineProgressionResult(
           playerId = playerId,
           offlineDuration = actualResult.offlineDuration,
-          kills = 32,
+          kills = 30,
           zoneId = zoneId,
-          rewards = listOf(expectedOfflineRewardSummary(itemName = "sword_0001", count = 32)),
-        )
+          rewards = listOf(expectedOfflineRewardSummary(itemName = "sword_0001", count = 30)),
+        ).copy(experienceGained = 320, goldGained = 800)
       val expectedSummary =
         expectedOfflineProgressionMessage(
           playerId = playerId,
           offlineDuration = actualResult.offlineDuration,
-          kills = 32,
+          kills = 30,
           zoneId = zoneId,
-          rewards = listOf(expectedOfflineRewardSummary(itemName = "sword_0001", count = 32)),
-        )
+          rewards = listOf(expectedOfflineRewardSummary(itemName = "sword_0001", count = 30)),
+        ).copy(experienceGained = 320, goldGained = 800)
 
       actualResult shouldBe expectedResult
-      verify(exactly = 32) { progressionService.recordKill(playerId, zoneId) }
-      verify(exactly = 32) { combatLootService.rollLoot(playerId, zoneId) }
+      verify(exactly = 30) { progressionService.recordKill(playerId, zoneId, any()) }
+      verify(exactly = 30) { combatLootService.rollLoot(playerId, zoneId, any()) }
       verify(exactly = 1) { playerEventQueue.enqueue(expectedSummary) }
     }
 
@@ -186,8 +188,8 @@ class OfflineProgressionServiceTest : StringSpec() {
         expectedSingleMemberTeamCombatStats(teamId = teamId, attack = 10f, hit = 1f, maxHp = 10f)
       every { progressionService.requirePlayer(playerId) } returnsMany listOf(beforePlayer, afterPlayer)
       every { progressionService.requireZoneProgress(playerId, zoneId) } returnsMany listOf(beforeZone, afterZone)
-      every { progressionService.recordKill(playerId, zoneId) } just runs
-      every { combatLootService.rollLoot(playerId, zoneId) } returns null
+      every { progressionService.recordKill(playerId, zoneId, any()) } just runs
+      every { combatLootService.rollLoot(playerId, zoneId, any()) } returns null
       every { combatStateRepository.save(any()) } answers { firstArg() }
       every { playerEventQueue.enqueue(any()) } just runs
 
@@ -198,10 +200,10 @@ class OfflineProgressionServiceTest : StringSpec() {
         expectedOfflineProgressionResult(
           playerId = playerId,
           offlineDuration = actualResult.offlineDuration,
-          kills = 21,
+          kills = 20,
           zoneId = zoneId,
           rewards = emptyList(),
-        )
+        ).copy(experienceGained = 210, goldGained = 525)
       verify(exactly = 0) { playerEventQueue.enqueue(any()) }
     }
 
@@ -237,6 +239,7 @@ class OfflineProgressionServiceTest : StringSpec() {
           offlineProgressionServicePort,
           offlineCombatLootService,
           offlinePlayerMessageQueue,
+          ScalingRule(config),
           config,
         )
 
@@ -254,6 +257,7 @@ class OfflineProgressionServiceTest : StringSpec() {
           livePlayerStateWorkQueue,
           liveCombatLootService,
           liveProgressionService,
+          ScalingRule(config),
           config,
         )
 
@@ -284,8 +288,8 @@ class OfflineProgressionServiceTest : StringSpec() {
           level = 1 + (offlineKills / 10),
         )
       }
-      every { offlineProgressionServicePort.recordKill(playerId, zoneId) } answers { offlineKills += 1 }
-      every { offlineCombatLootService.rollLoot(playerId, zoneId) } returns null
+      every { offlineProgressionServicePort.recordKill(playerId, zoneId, any()) } answers { offlineKills += 1 }
+      every { offlineCombatLootService.rollLoot(playerId, zoneId, any()) } returns null
       every { offlinePlayerMessageQueue.enqueue(any()) } just runs
 
       every { liveActivePlayerRegistry.activePlayerIds() } returns setOf(playerId)
@@ -296,8 +300,16 @@ class OfflineProgressionServiceTest : StringSpec() {
       }
       every { liveCombatStatService.teamStatsForPlayer(playerId, any()) } returns teamStats
       every { livePlayerStateWorkQueue.markDirty(playerId) } just runs
-      every { liveProgressionService.recordKill(playerId, zoneId) } answers { liveKills += 1 }
-      every { liveCombatLootService.rollLoot(playerId, zoneId) } returns null
+      every { liveProgressionService.requireZoneProgress(playerId, zoneId) } answers {
+        PlayerZoneProgress(
+          playerId = playerId,
+          zoneId = zoneId,
+          killCount = liveKills,
+          level = 1 + (liveKills / 10),
+        )
+      }
+      every { liveProgressionService.recordKill(playerId, zoneId, any()) } answers { liveKills += 1 }
+      every { liveCombatLootService.rollLoot(playerId, zoneId, any()) } returns null
 
       val offlineResult = requireNotNull(offlineService.applyIfNeeded(playerId))
       val actualOfflineDurationMillis = offlineResult.offlineDuration.toMillis()

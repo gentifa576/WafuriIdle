@@ -25,6 +25,9 @@ class InventoryItemEntity {
   @Column(nullable = false)
   lateinit var itemName: String
 
+  @Column(nullable = false)
+  var itemLevel: Int = 1
+
   @Convert(converter = StatListConverter::class)
   @Column(nullable = false)
   var subStats: List<Stat> = emptyList()

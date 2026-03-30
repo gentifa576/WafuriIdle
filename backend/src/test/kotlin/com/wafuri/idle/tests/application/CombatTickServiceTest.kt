@@ -10,6 +10,7 @@ import com.wafuri.idle.application.service.combat.CombatLootService
 import com.wafuri.idle.application.service.combat.CombatStatService
 import com.wafuri.idle.application.service.combat.CombatTickService
 import com.wafuri.idle.application.service.player.ProgressionService
+import com.wafuri.idle.application.service.scaling.ScalingRule
 import com.wafuri.idle.domain.model.CombatState
 import com.wafuri.idle.domain.model.CombatStatus
 import com.wafuri.idle.tests.support.expectedCombatMemberState
@@ -58,6 +59,7 @@ class CombatTickServiceTest : StringSpec() {
           playerStateWorkQueue,
           combatLootService,
           progressionService,
+          ScalingRule(config),
           config,
         )
     }
@@ -87,8 +89,8 @@ class CombatTickServiceTest : StringSpec() {
         firstArg<CombatState>().also { savedState = it }
       }
       every { playerStateWorkQueue.markDirty(playerId) } just runs
-      every { combatLootService.rollLoot(any(), any()) } returns null
-      every { progressionService.recordKill(any(), any()) } returns Unit
+      every { combatLootService.rollLoot(any(), any(), any()) } returns null
+      every { progressionService.recordKill(any(), any(), any()) } returns Unit
 
       service.tickZone("starter-plains", Duration.ofMillis(200))
 
@@ -148,8 +150,8 @@ class CombatTickServiceTest : StringSpec() {
         firstArg<CombatState>().also { currentState = it }
       }
       every { playerStateWorkQueue.markDirty(playerId) } just runs
-      every { combatLootService.rollLoot(any(), any()) } returns null
-      every { progressionService.recordKill(any(), any()) } returns Unit
+      every { combatLootService.rollLoot(any(), any(), any()) } returns null
+      every { progressionService.recordKill(any(), any(), any()) } returns Unit
 
       service.tickZone("starter-plains", Duration.ofMillis(1200))
 
@@ -209,8 +211,9 @@ class CombatTickServiceTest : StringSpec() {
         firstArg<CombatState>().also { currentState = it }
       }
       every { playerStateWorkQueue.markDirty(playerId) } just runs
-      every { combatLootService.rollLoot(any(), any()) } returns null
-      every { progressionService.recordKill(any(), any()) } returns Unit
+      every { combatLootService.rollLoot(any(), any(), any()) } returns null
+      every { progressionService.requireZoneProgress(playerId, "starter-plains") } returns mockk { every { level } returns 1 }
+      every { progressionService.recordKill(any(), any(), any()) } returns Unit
 
       service.tickZone("starter-plains", Duration.ofMillis(500))
 
@@ -245,8 +248,8 @@ class CombatTickServiceTest : StringSpec() {
           lastSimulatedAt = currentState.lastSimulatedAt,
         )
       verify(exactly = 1) { playerStateWorkQueue.markDirty(playerId) }
-      verify(exactly = 0) { progressionService.recordKill(playerId, "starter-plains") }
-      verify(exactly = 0) { combatLootService.rollLoot(playerId, "starter-plains") }
+      verify(exactly = 0) { progressionService.recordKill(playerId, "starter-plains", any()) }
+      verify(exactly = 0) { combatLootService.rollLoot(playerId, "starter-plains", any()) }
     }
 
     "tick awards kill progression and loot when combat is first won" {
@@ -273,8 +276,8 @@ class CombatTickServiceTest : StringSpec() {
         firstArg<CombatState>().also { currentState = it }
       }
       every { playerStateWorkQueue.markDirty(playerId) } just runs
-      every { combatLootService.rollLoot(playerId, "starter-plains") } returns null
-      every { progressionService.recordKill(playerId, "starter-plains") } returns Unit
+      every { combatLootService.rollLoot(playerId, "starter-plains", 1) } returns null
+      every { progressionService.recordKill(playerId, "starter-plains", 1) } returns Unit
 
       service.tickZone("starter-plains", Duration.ofSeconds(1))
 
@@ -290,8 +293,8 @@ class CombatTickServiceTest : StringSpec() {
           members = listOf(expectedCombatMemberState("warrior", 12f, 7f, 11f, 11f)),
           lastSimulatedAt = currentState.lastSimulatedAt,
         )
-      verify(exactly = 1) { progressionService.recordKill(playerId, "starter-plains") }
-      verify(exactly = 1) { combatLootService.rollLoot(playerId, "starter-plains") }
+      verify(exactly = 1) { progressionService.recordKill(playerId, "starter-plains", 1) }
+      verify(exactly = 1) { combatLootService.rollLoot(playerId, "starter-plains", 1) }
     }
 
     "tick refreshes combat members when team composition changes" {
@@ -324,8 +327,8 @@ class CombatTickServiceTest : StringSpec() {
         firstArg<CombatState>().also { currentState = it }
       }
       every { playerStateWorkQueue.markDirty(playerId) } just runs
-      every { combatLootService.rollLoot(any(), any()) } returns null
-      every { progressionService.recordKill(any(), any()) } returns Unit
+      every { combatLootService.rollLoot(any(), any(), any()) } returns null
+      every { progressionService.recordKill(any(), any(), any()) } returns Unit
 
       service.tickZone("starter-plains", Duration.ZERO)
 
@@ -376,8 +379,8 @@ class CombatTickServiceTest : StringSpec() {
         firstArg<CombatState>().also { currentState = it }
       }
       every { playerStateWorkQueue.markDirty(playerId) } just runs
-      every { combatLootService.rollLoot(any(), any()) } returns null
-      every { progressionService.recordKill(any(), any()) } returns Unit
+      every { combatLootService.rollLoot(any(), any(), any()) } returns null
+      every { progressionService.recordKill(any(), any(), any()) } returns Unit
 
       service.tickZone("starter-plains", Duration.ZERO)
 
@@ -445,8 +448,8 @@ class CombatTickServiceTest : StringSpec() {
         firstArg<CombatState>().also { stateB = it }
       }
       every { playerStateWorkQueue.markDirty(any()) } just runs
-      every { combatLootService.rollLoot(any(), any()) } returns null
-      every { progressionService.recordKill(any(), any()) } returns Unit
+      every { combatLootService.rollLoot(any(), any(), any()) } returns null
+      every { progressionService.recordKill(any(), any(), any()) } returns Unit
 
       service.tickZone(zoneA, Duration.ofSeconds(1))
       service.tickZone(zoneB, Duration.ofSeconds(1))

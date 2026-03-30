@@ -7,6 +7,7 @@ import com.wafuri.idle.application.port.out.PlayerStateWorkQueue
 import com.wafuri.idle.application.port.out.PlayerZoneProgressRepository
 import com.wafuri.idle.application.port.out.Repository
 import com.wafuri.idle.application.service.player.ProgressionService
+import com.wafuri.idle.application.service.scaling.ScalingRule
 import com.wafuri.idle.domain.model.Player
 import com.wafuri.idle.domain.model.PlayerZoneProgress
 import com.wafuri.idle.tests.support.expectedPlayer
@@ -42,6 +43,7 @@ class ProgressionServiceTest : StringSpec() {
           playerZoneProgressRepository,
           playerEventQueue,
           playerStateWorkQueue,
+          ScalingRule(config),
           config,
         )
     }
@@ -68,6 +70,28 @@ class ProgressionServiceTest : StringSpec() {
       savedProgress shouldBe expectedZoneProgress(playerId = playerId, zoneId = zoneId, killCount = 1, level = 1)
       verify(exactly = 0) { playerEventQueue.enqueue(any()) }
       verify(exactly = 1) { playerStateWorkQueue.markDirty(playerId) }
+    }
+
+    "record kill scales experience and gold rewards by enemy zone level" {
+      val playerId = UUID.randomUUID()
+      val zoneId = "starter-plains"
+      val player = expectedPlayer(id = playerId, name = "Alice")
+      var savedPlayer: Player? = null
+      var savedProgress: PlayerZoneProgress? = null
+
+      every { playerRepository.findById(playerId) } returns player
+      every { playerRepository.save(any()) } answers { firstArg<Player>().also { savedPlayer = it } }
+      every { playerZoneProgressRepository.findByPlayerIdAndZoneId(playerId, zoneId) } returns null
+      every { playerZoneProgressRepository.save(any()) } answers {
+        firstArg<PlayerZoneProgress>().also { savedProgress = it }
+      }
+      every { playerEventQueue.enqueue(any()) } just runs
+      every { playerStateWorkQueue.markDirty(playerId) } just runs
+
+      service.recordKill(playerId, zoneId, enemyLevel = 50)
+
+      savedPlayer shouldBe expectedPlayer(id = playerId, name = "Alice", experience = 44, level = 1, gold = 44)
+      savedProgress shouldBe expectedZoneProgress(playerId = playerId, zoneId = zoneId, killCount = 1, level = 1)
     }
 
     "record kill levels player and zone based on configured thresholds" {

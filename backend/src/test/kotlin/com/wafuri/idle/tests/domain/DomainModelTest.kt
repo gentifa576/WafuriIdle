@@ -133,6 +133,8 @@ class DomainModelTest :
           zoneId = "starter-plains",
           activeTeamId = UUID.randomUUID(),
           enemyName = "Training Dummy",
+          enemyLevel = 1,
+          enemyBaseHp = 10f,
           enemyHp = 10f,
           enemyMaxHp = 10f,
           members =
@@ -183,6 +185,8 @@ class DomainModelTest :
           zoneId = "starter-plains",
           activeTeamId = UUID.randomUUID(),
           enemyName = "Training Dummy",
+          enemyLevel = 1,
+          enemyBaseHp = 10f,
           enemyHp = 0f,
           enemyMaxHp = 10f,
           members =

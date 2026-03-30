@@ -7,11 +7,13 @@ import com.wafuri.idle.application.port.out.PlayerMessageQueue
 import com.wafuri.idle.application.port.out.PlayerStateWorkQueue
 import com.wafuri.idle.application.port.out.PlayerZoneProgressRepository
 import com.wafuri.idle.application.port.out.Repository
+import com.wafuri.idle.application.service.scaling.ScalingRule
 import com.wafuri.idle.domain.model.Player
 import com.wafuri.idle.domain.model.PlayerZoneProgress
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.transaction.Transactional
 import java.util.UUID
+import kotlin.math.roundToInt
 
 @ApplicationScoped
 class ProgressionService(
@@ -19,24 +21,27 @@ class ProgressionService(
   private val playerZoneProgressRepository: PlayerZoneProgressRepository,
   private val playerEventQueue: PlayerMessageQueue,
   private val playerStateWorkQueue: PlayerStateWorkQueue,
+  private val scalingRule: ScalingRule,
   private val gameConfig: GameConfig,
 ) {
   @Transactional
   fun recordKill(
     playerId: UUID,
     zoneId: String,
+    enemyLevel: Int = 1,
   ) {
     val player =
       playerRepository.findById(playerId)
         ?: throw ResourceNotFoundException("Player $playerId was not found.")
 
     val playerProgressionConfig = gameConfig.progression().player()
+    val rewardMultiplier = scalingRule.rewardMultiplier(enemyLevel)
     val rewardedPlayer =
       player.grantExperience(
-        amount = playerProgressionConfig.killExperience(),
+        amount = (playerProgressionConfig.killExperience() * rewardMultiplier).roundToInt(),
         experiencePerLevel = playerProgressionConfig.experiencePerLevel(),
       )
-    val updatedPlayer = rewardedPlayer.grantGold(playerProgressionConfig.killGold())
+    val updatedPlayer = rewardedPlayer.grantGold((playerProgressionConfig.killGold() * rewardMultiplier).roundToInt())
     if (updatedPlayer != player) {
       playerRepository.save(updatedPlayer)
     }

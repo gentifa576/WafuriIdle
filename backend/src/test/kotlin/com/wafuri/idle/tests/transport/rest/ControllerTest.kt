@@ -296,7 +296,7 @@ class ControllerTest {
     val playerId = signupResponse.player.id.toString()
     val token = signupResponse.sessionToken
     repeat(20) {
-      progressionService.recordKill(UUID.fromString(playerId), "starter-plains")
+      progressionService.recordKill(UUID.fromString(playerId), "starter-plains", enemyLevel = 1)
     }
     val rolledCharacterKey = characterTemplateCatalog.all().first().key
 

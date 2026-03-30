@@ -10,6 +10,7 @@ import com.wafuri.idle.application.port.out.InventoryRepository
 import com.wafuri.idle.application.port.out.PlayerZoneProgressRepository
 import com.wafuri.idle.application.port.out.Repository
 import com.wafuri.idle.application.service.character.CharacterTemplateCatalog
+import com.wafuri.idle.application.service.scaling.ScalingRule
 import com.wafuri.idle.domain.model.Player
 import jakarta.enterprise.context.ApplicationScoped
 import java.time.Instant
@@ -22,6 +23,7 @@ class PlayerStateSnapshotService(
   private val playerZoneProgressRepository: PlayerZoneProgressRepository,
   private val combatStateRepository: CombatStateRepository,
   private val characterTemplateCatalog: CharacterTemplateCatalog,
+  private val scalingRule: ScalingRule,
 ) {
   fun snapshotFor(playerId: UUID): PlayerStateSnapshot {
     val player =
@@ -49,12 +51,13 @@ class PlayerStateSnapshotService(
         inventory.map {
           InventoryItemSnapshot(
             id = it.id,
+            itemLevel = it.itemLevel,
             itemName = it.item.name,
             itemDisplayName = it.item.displayName,
             itemType = it.item.type,
-            itemBaseStat = it.item.baseStat,
+            itemBaseStat = scalingRule.scaledBaseStat(it),
             itemSubStatPool = it.item.subStatPool,
-            subStats = it.subStats,
+            subStats = scalingRule.scaledSubStats(it),
             rarity = it.rarity,
             upgrade = it.upgrade,
             equippedTeamId = it.equippedTeamId,

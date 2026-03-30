@@ -6,6 +6,7 @@ data class InventoryItem(
   val id: UUID,
   val playerId: UUID,
   val item: Item,
+  val itemLevel: Int = 1,
   val subStats: List<Stat> = emptyList(),
   val rarity: Rarity = Rarity.COMMON,
   val upgrade: Int = 0,
@@ -13,6 +14,7 @@ data class InventoryItem(
   val equippedPosition: Int? = null,
 ) {
   init {
+    require(itemLevel >= 1) { "Inventory item level must be at least 1." }
     require(subStats.map { it.type }.distinct().size == subStats.size) {
       "Inventory item sub stats must be unique."
     }

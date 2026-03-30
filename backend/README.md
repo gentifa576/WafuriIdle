@@ -96,6 +96,7 @@ Items are static template content plus generated inventory state.
   - `baseStat` as `{ type, value }`
   - `subStatPool` of rollable stat types
 - Player-owned inventory state currently includes:
+  - generated `itemLevel`
   - generated float-valued `subStats`
   - `rarity`
   - `upgrade`
@@ -121,11 +122,12 @@ Items are static template content plus generated inventory state.
   - `hp = vitality.base`
   - `teamDps = sum(attack * hit)` across living combat members only
 - Combat starts in the default zone and uses that zone's first enemy name.
-- Enemy max HP is globally configured at `1000` for now.
+- Enemy base HP is configured globally at `1000` for now, then scaled per spawn by the player's current zone level through `game.combat.zone-scaling`.
 - Damage resolves on a separate `1s` cadence using real elapsed tick time.
 - After an enemy dies, combat auto-continues after the configured respawn delay (`1s` by default).
 - Loot drop settings are grouped under `game.combat.loot`:
   - base item drop rate: `1%` per kill
+  - dropped item stats scale from generated `itemLevel`, which currently matches the defeated enemy's zone level
   - rarity roll weights: `common 70%`, `rare 20%`, `epic 8%`, `legendary 2%`
 
 ## Debug Client

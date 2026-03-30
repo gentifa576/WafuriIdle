@@ -8,6 +8,7 @@ import com.wafuri.idle.application.port.out.InventoryRepository
 import com.wafuri.idle.application.port.out.Repository
 import com.wafuri.idle.application.port.out.TeamRepository
 import com.wafuri.idle.application.service.character.CharacterTemplateCatalog
+import com.wafuri.idle.application.service.scaling.ScalingRule
 import com.wafuri.idle.domain.model.CombatMemberState
 import com.wafuri.idle.domain.model.InventoryItem
 import com.wafuri.idle.domain.model.Player
@@ -22,6 +23,7 @@ class CombatStatService(
   private val inventoryRepository: InventoryRepository,
   private val characterTemplateCatalog: CharacterTemplateCatalog,
   private val combatPassiveService: CombatPassiveService,
+  private val scalingRule: ScalingRule,
 ) {
   fun teamStatsForPlayer(playerId: UUID): TeamCombatStats = teamStatsForPlayer(playerId, emptyList())
 
@@ -77,9 +79,9 @@ class CombatStatService(
           }
         CharacterCombatStats(
           characterKey = characterKey,
-          attack = template.strength.atLevel(player.level) + equippedItems.sumOf { it.attackBonus().toDouble() }.toFloat(),
-          hit = template.agility.atLevel(player.level) + equippedItems.sumOf { it.hitBonus().toDouble() }.toFloat(),
-          maxHp = template.vitality.atLevel(player.level) + equippedItems.sumOf { it.hpBonus().toDouble() }.toFloat(),
+          attack = template.strength.atLevel(player.level) + equippedItems.sumOf { attackBonus(it).toDouble() }.toFloat(),
+          hit = template.agility.atLevel(player.level) + equippedItems.sumOf { hitBonus(it).toDouble() }.toFloat(),
+          maxHp = template.vitality.atLevel(player.level) + equippedItems.sumOf { hpBonus(it).toDouble() }.toFloat(),
         )
       }
     val resolvedCharacterStats =
@@ -94,16 +96,19 @@ class CombatStatService(
       characterStats = resolvedCharacterStats,
     )
   }
+
+  private fun attackBonus(inventoryItem: InventoryItem): Float = statBonus(inventoryItem, StatType.STRENGTH)
+
+  private fun hitBonus(inventoryItem: InventoryItem): Float = statBonus(inventoryItem, StatType.AGILITY)
+
+  private fun hpBonus(inventoryItem: InventoryItem): Float = statBonus(inventoryItem, StatType.VITALITY)
+
+  private fun statBonus(
+    inventoryItem: InventoryItem,
+    statType: StatType,
+  ): Float =
+    listOf(scalingRule.scaledBaseStat(inventoryItem), *scalingRule.scaledSubStats(inventoryItem).toTypedArray())
+      .filter { it.type == statType }
+      .sumOf { it.value.toDouble() }
+      .toFloat()
 }
-
-private fun InventoryItem.attackBonus(): Float = statBonus(StatType.STRENGTH)
-
-private fun InventoryItem.hitBonus(): Float = statBonus(StatType.AGILITY)
-
-private fun InventoryItem.hpBonus(): Float = statBonus(StatType.VITALITY)
-
-private fun InventoryItem.statBonus(statType: StatType): Float =
-  listOf(item.baseStat, *subStats.toTypedArray())
-    .filter { it.type == statType }
-    .sumOf { it.value.toDouble() }
-    .toFloat()

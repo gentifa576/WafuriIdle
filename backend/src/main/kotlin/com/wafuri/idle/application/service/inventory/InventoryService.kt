@@ -24,6 +24,7 @@ class InventoryService(
     playerId: UUID,
     name: String,
     rarity: Rarity,
+    itemLevel: Int = 1,
   ): InventoryItem {
     playerRepository.findById(playerId)
       ?: throw ResourceNotFoundException("Player $playerId was not found.")
@@ -35,6 +36,7 @@ class InventoryService(
           id = UUID.randomUUID(),
           playerId = playerId,
           item = item,
+          itemLevel = itemLevel,
           rarity = rarity,
         ),
       )

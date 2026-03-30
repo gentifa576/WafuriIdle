@@ -60,6 +60,7 @@ data class ZoneProgressSnapshot(
 
 data class InventoryItemSnapshot(
   val id: UUID,
+  val itemLevel: Int,
   val itemName: String,
   val itemDisplayName: String,
   val itemType: ItemType,

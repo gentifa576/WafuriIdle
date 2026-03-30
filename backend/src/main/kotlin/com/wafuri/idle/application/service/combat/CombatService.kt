@@ -7,6 +7,8 @@ import com.wafuri.idle.application.model.toSnapshot
 import com.wafuri.idle.application.port.out.CombatStateRepository
 import com.wafuri.idle.application.port.out.PlayerStateWorkQueue
 import com.wafuri.idle.application.port.out.Repository
+import com.wafuri.idle.application.service.player.ProgressionService
+import com.wafuri.idle.application.service.scaling.ScalingRule
 import com.wafuri.idle.application.service.zone.ZoneTemplateCatalog
 import com.wafuri.idle.domain.model.CombatState
 import com.wafuri.idle.domain.model.Player
@@ -22,6 +24,8 @@ class CombatService(
   private val combatStatService: CombatStatService,
   private val playerStateWorkQueue: PlayerStateWorkQueue,
   private val zoneTemplateCatalog: ZoneTemplateCatalog,
+  private val progressionService: ProgressionService,
+  private val scalingRule: ScalingRule,
   private val gameConfig: GameConfig,
 ) {
   @Transactional
@@ -30,13 +34,17 @@ class CombatService(
       ?: throw ResourceNotFoundException("Player $playerId was not found.")
     val teamStats = combatStatService.teamStatsForPlayer(playerId)
     val zone = zoneTemplateCatalog.default()
+    val zoneLevel = progressionService.requireZoneProgress(playerId, zone.id).level
+    val enemyBaseHp = gameConfig.combat().enemyMaxHp()
     val currentState = combatStateRepository.findById(playerId) ?: CombatState(playerId = playerId)
     val startedState =
       currentState.start(
         zoneId = zone.id,
         teamId = teamStats.teamId,
         enemyName = zone.enemies.first(),
-        enemyMaxHp = gameConfig.combat().enemyMaxHp(),
+        enemyLevel = zoneLevel,
+        enemyBaseHp = enemyBaseHp,
+        enemyMaxHp = scalingRule.enemyHpFor(zoneLevel, enemyBaseHp),
         members = teamStats.toCombatMembers(),
       )
     val nextState = startedState.copy(lastSimulatedAt = Instant.now())
