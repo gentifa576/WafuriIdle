@@ -305,10 +305,6 @@ export function CombatScreen() {
 
               <div className="combat-bar-row combat-telemetry">
                 <div>
-                  <span className="label">Enemy HP</span>
-                  <strong>{combat ? `${combat.enemyHp.toFixed(0)} / ${combat.enemyMaxHp.toFixed(0)}` : 'Awaiting battle'}</strong>
-                </div>
-                <div>
                   <span className="label">Team DPS</span>
                   <strong>{combat?.teamDps.toFixed(1) ?? '0.0'}</strong>
                 </div>
