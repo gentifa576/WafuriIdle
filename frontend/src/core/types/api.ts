@@ -98,11 +98,17 @@ export interface PlayerStateSnapshot {
   serverTime: string
 }
 
-export interface CharacterPullResult {
-  player: Player
+export interface CharacterPull {
   pulledCharacterKey: string
   grantedCharacterKey: string | null
   essenceGranted: number
+}
+
+export interface CharacterPullResult {
+  player: Player
+  count: number
+  pulls: CharacterPull[]
+  totalEssenceGranted: number
 }
 
 export interface AuthResponse {

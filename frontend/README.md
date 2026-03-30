@@ -138,7 +138,7 @@ If you need a different backend origin, set `VITE_API_BASE_URL`.
 - Log in with name or email plus password.
 - Load player, roster, teams, inventory, and zone progress.
 - Claim a starter character.
-- Pull characters from the gacha endpoint.
+- Pull characters from the gacha endpoint, including single pulls and ten-pulls.
 - Assign characters to team slots.
 - Activate a team.
 - Equip and unequip inventory items on team positions.

@@ -16,6 +16,7 @@ import {
 import { sendStartCombat, createPlayerSocket } from '../../../core/api/wsClient'
 import { activateTeam, assignCharacterToTeam, equipTeamItem, unequipTeamItem } from '../../../core/api/teamApi'
 import type {
+  CharacterPull,
   CharacterTemplate,
   CombatSnapshot,
   EquipmentSlot,
@@ -50,9 +51,9 @@ export interface ActivityEntry {
 }
 
 export interface PullResult {
-  pulledCharacterKey: string
-  grantedCharacterKey: string | null
-  essenceGranted: number
+  count: number
+  pulls: CharacterPull[]
+  totalEssenceGranted: number
 }
 
 export function useGameClient() {
@@ -288,26 +289,30 @@ export function useGameClient() {
           setLoading(false)
         }
       },
-      async pullCharacter() {
+      async pullCharacter(count = 1) {
         if (!player) {
           return
         }
         setLoading(true)
         setError(null)
         try {
-          const result = await pullCharacter(player.id)
+          const result = await pullCharacter(player.id, count)
           setPlayer(result.player)
           setLatestPullResult({
-            pulledCharacterKey: result.pulledCharacterKey,
-            grantedCharacterKey: result.grantedCharacterKey,
-            essenceGranted: result.essenceGranted,
+            count: result.count,
+            pulls: result.pulls,
+            totalEssenceGranted: result.totalEssenceGranted,
           })
           await refreshPlayerState(player.id)
-          appendActivity(
-            result.grantedCharacterKey
-              ? `Pulled ${result.grantedCharacterKey}`
-              : `Pulled duplicate ${result.pulledCharacterKey} for +${result.essenceGranted} essence`,
-          )
+          const unlockedCount = result.pulls.filter((pull) => pull.grantedCharacterKey != null).length
+          const duplicateCount = result.pulls.length - unlockedCount
+          const summary =
+            result.count === 1
+              ? result.pulls[0]?.grantedCharacterKey
+                ? `Pulled ${result.pulls[0].grantedCharacterKey}`
+                : `Pulled duplicate ${result.pulls[0]?.pulledCharacterKey} for +${result.pulls[0]?.essenceGranted ?? 0} essence`
+              : `Pulled ${result.count} characters: ${unlockedCount} unlocks, ${duplicateCount} duplicates, +${result.totalEssenceGranted} essence`
+          appendActivity(summary)
         } catch (caught) {
           setError(extractMessage(caught))
         } finally {

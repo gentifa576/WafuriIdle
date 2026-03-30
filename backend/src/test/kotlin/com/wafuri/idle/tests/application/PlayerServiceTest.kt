@@ -10,6 +10,7 @@ import com.wafuri.idle.application.service.player.PlayerService
 import com.wafuri.idle.domain.model.Player
 import com.wafuri.idle.domain.model.Team
 import com.wafuri.idle.tests.support.clericTemplate
+import com.wafuri.idle.tests.support.expectedCharacterPull
 import com.wafuri.idle.tests.support.expectedCharacterPullResult
 import com.wafuri.idle.tests.support.expectedPlayer
 import com.wafuri.idle.tests.support.expectedValidationException
@@ -110,9 +111,16 @@ class PlayerServiceTest : StringSpec() {
       result shouldBe
         expectedCharacterPullResult(
           player = player.copy(gold = 50, ownedCharacterKeys = setOf("warrior")),
-          pulledCharacterKey = "warrior",
-          grantedCharacterKey = "warrior",
-          essenceGranted = 0,
+          count = 1,
+          pulls =
+            listOf(
+              expectedCharacterPull(
+                pulledCharacterKey = "warrior",
+                grantedCharacterKey = "warrior",
+                essenceGranted = 0,
+              ),
+            ),
+          totalEssenceGranted = 0,
         )
       verify(exactly = 1) { playerStateWorkQueue.markDirty(playerId) }
     }
@@ -131,9 +139,48 @@ class PlayerServiceTest : StringSpec() {
       result shouldBe
         expectedCharacterPullResult(
           player = player.copy(gold = 50, essence = 20),
-          pulledCharacterKey = "warrior",
-          grantedCharacterKey = null,
-          essenceGranted = 15,
+          count = 1,
+          pulls =
+            listOf(
+              expectedCharacterPull(
+                pulledCharacterKey = "warrior",
+                grantedCharacterKey = null,
+                essenceGranted = 15,
+              ),
+            ),
+          totalEssenceGranted = 15,
+        )
+    }
+
+    "pull character supports a ten pull and applies duplicates against updated batch ownership" {
+      val playerId = UUID.randomUUID()
+      val player = Player(playerId, "Alice", gold = 2_500)
+      every { playerRepository.findById(playerId) } returns player
+      every { characterTemplateCatalog.all() } returns listOf(clericTemplate(key = "cleric"), warriorTemplate(key = "warrior"))
+      every { randomSource.nextInt(2) } returnsMany listOf(1, 1, 0, 0, 1, 0, 1, 0, 1, 0)
+      every { playerRepository.save(capture(playerSlot)) } answers { playerSlot.captured }
+      every { playerStateWorkQueue.markDirty(playerId) } returns Unit
+
+      val result = service.pullCharacter(playerId, 10)
+
+      result shouldBe
+        expectedCharacterPullResult(
+          player = player.copy(gold = 0, ownedCharacterKeys = setOf("warrior", "cleric"), essence = 120),
+          count = 10,
+          pulls =
+            listOf(
+              expectedCharacterPull("warrior", "warrior", 0),
+              expectedCharacterPull("warrior", null, 15),
+              expectedCharacterPull("cleric", "cleric", 0),
+              expectedCharacterPull("cleric", null, 15),
+              expectedCharacterPull("warrior", null, 15),
+              expectedCharacterPull("cleric", null, 15),
+              expectedCharacterPull("warrior", null, 15),
+              expectedCharacterPull("cleric", null, 15),
+              expectedCharacterPull("warrior", null, 15),
+              expectedCharacterPull("cleric", null, 15),
+            ),
+          totalEssenceGranted = 120,
         )
     }
 
@@ -148,6 +195,19 @@ class PlayerServiceTest : StringSpec() {
 
       thrown.shouldMatchExpected(
         expectedValidationException("Player $playerId does not have enough gold for a character pull."),
+      )
+    }
+
+    "pull character rejects unsupported pull counts" {
+      val playerId = UUID.randomUUID()
+
+      val thrown =
+        shouldThrow<com.wafuri.idle.application.exception.ValidationException> {
+          service.pullCharacter(playerId, 2)
+        }
+
+      thrown.shouldMatchExpected(
+        expectedValidationException("Character pull count must be 1 or 10."),
       )
     }
   }

@@ -74,8 +74,9 @@ export function claimStarterCharacter(playerId: string, characterKey: string) {
   })
 }
 
-export function pullCharacter(playerId: string) {
+export function pullCharacter(playerId: string, count = 1) {
   return http<CharacterPullResult>(`/players/${playerId}/gacha/characters/pull`, {
     method: 'POST',
+    body: JSON.stringify({ count }),
   })
 }

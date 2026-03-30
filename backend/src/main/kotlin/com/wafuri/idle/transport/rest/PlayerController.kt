@@ -9,6 +9,7 @@ import com.wafuri.idle.domain.model.InventoryItem
 import com.wafuri.idle.domain.model.Player
 import com.wafuri.idle.domain.model.PlayerZoneProgress
 import com.wafuri.idle.domain.model.Team
+import com.wafuri.idle.transport.rest.dto.CharacterPullRequest
 import com.wafuri.idle.transport.rest.dto.ClaimStarterRequest
 import jakarta.annotation.security.RolesAllowed
 import jakarta.ws.rs.Consumes
@@ -73,5 +74,6 @@ class PlayerController(
   @Path("/{id}/gacha/characters/pull")
   fun pullCharacter(
     @PathParam("id") playerId: UUID,
-  ): CharacterPullResult = playerService.pullCharacter(playerId)
+    request: CharacterPullRequest?,
+  ): CharacterPullResult = playerService.pullCharacter(playerId, request?.count ?: 1)
 }

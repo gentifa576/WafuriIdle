@@ -17,6 +17,7 @@ import com.wafuri.idle.domain.model.Team
 import com.wafuri.idle.persistence.runtime.LocalPlayerStateWorkQueue
 import com.wafuri.idle.tests.support.expectedAuthResponse
 import com.wafuri.idle.tests.support.expectedCharacterPullResult
+import com.wafuri.idle.tests.support.expectedCharacterPull
 import com.wafuri.idle.tests.support.expectedErrorResponse
 import com.wafuri.idle.tests.support.expectedPlayer
 import com.wafuri.idle.transport.rest.dto.AuthResponse
@@ -335,9 +336,9 @@ class ControllerTest {
             level = 3,
             gold = 250,
           ),
-        pulledCharacterKey = rolledCharacterKey,
-        grantedCharacterKey = rolledCharacterKey,
-        essenceGranted = 0,
+        count = 1,
+        pulls = listOf(expectedCharacterPull(rolledCharacterKey, rolledCharacterKey, 0)),
+        totalEssenceGranted = 0,
       )
     secondPull shouldBe
       expectedCharacterPullResult(
@@ -351,9 +352,9 @@ class ControllerTest {
             gold = 0,
             essence = 15,
           ),
-        pulledCharacterKey = rolledCharacterKey,
-        grantedCharacterKey = null,
-        essenceGranted = 15,
+        count = 1,
+        pulls = listOf(expectedCharacterPull(rolledCharacterKey, null, 15)),
+        totalEssenceGranted = 15,
       )
     playerResponse(token, playerId) shouldBe
       expectedPlayer(
@@ -365,6 +366,30 @@ class ControllerTest {
         gold = 0,
         essence = 15,
       )
+  }
+
+  @Test
+  fun `character gacha endpoint supports ten pulls in one request`() {
+    val signupResponse = signup("TenPullUser", password = null)
+    val playerId = signupResponse.player.id.toString()
+    val token = signupResponse.sessionToken
+    repeat(100) {
+      progressionService.recordKill(UUID.fromString(playerId), "starter-plains", enemyLevel = 1)
+    }
+
+    val result =
+      auth(token)
+        .contentType("application/json")
+        .body("""{"count":10}""")
+        .post("/players/$playerId/gacha/characters/pull")
+        .then()
+        .statusCode(200)
+        .extract()
+        .`as`(CharacterPullResult::class.java)
+
+    result.count shouldBe 10
+    result.pulls.size shouldBe 10
+    result.player.gold shouldBe 0
   }
 
   @Test

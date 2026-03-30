@@ -2,6 +2,7 @@ package com.wafuri.idle.tests.support
 
 import com.wafuri.idle.application.exception.ValidationException
 import com.wafuri.idle.application.model.CharacterCombatStats
+import com.wafuri.idle.application.model.CharacterPull
 import com.wafuri.idle.application.model.CharacterPullResult
 import com.wafuri.idle.application.model.CombatMemberSnapshot
 import com.wafuri.idle.application.model.CombatSnapshot
@@ -81,12 +82,23 @@ fun expectedTeam(
 
 fun expectedCharacterPullResult(
   player: Player,
-  pulledCharacterKey: String,
-  grantedCharacterKey: String?,
-  essenceGranted: Int,
+  count: Int,
+  pulls: List<CharacterPull>,
+  totalEssenceGranted: Int,
 ): CharacterPullResult =
   CharacterPullResult(
     player = player,
+    count = count,
+    pulls = pulls,
+    totalEssenceGranted = totalEssenceGranted,
+  )
+
+fun expectedCharacterPull(
+  pulledCharacterKey: String,
+  grantedCharacterKey: String?,
+  essenceGranted: Int,
+): CharacterPull =
+  CharacterPull(
     pulledCharacterKey = pulledCharacterKey,
     grantedCharacterKey = grantedCharacterKey,
     essenceGranted = essenceGranted,

@@ -115,7 +115,7 @@
 | `POST /auth/login` | `{ name?, email?, password }` | `{ player, sessionToken, sessionExpiresAt, guestAccount }` | Authenticates by `name + password` or `email + password`. |
 | `POST /auth/logout` | none | `204 No Content` | Revokes the authenticated session family and disconnects active player WebSocket sessions owned by that player. |
 | `POST /players/{id}/starter` | `{ characterKey }` | `204 No Content` | Grants one configured starter to a player that currently owns no characters. |
-| `POST /players/{id}/gacha/characters/pull` | none | `{ player, pulledCharacterKey, grantedCharacterKey?, essenceGranted }` | Spends configured gold for one even-odds character pull across all loaded character templates; duplicate pulls convert into essence instead of granting another copy. |
+| `POST /players/{id}/gacha/characters/pull` | `{ count? }` | `{ player, count, pulls: [{ pulledCharacterKey, grantedCharacterKey?, essenceGranted }], totalEssenceGranted }` | Spends configured gold for `1` or `10` even-odds character pulls across all loaded character templates; duplicates convert into essence instead of granting another copy. |
 | `POST /internal/players/{id}/dirty` | none | `202 Accepted` | Internal node-to-node endpoint only; requires the `InternalNode` JWT role and marks a player dirty on the receiving node. |
 | `POST /teams/{id}/slots/{position}/characters/{characterKey}` | none | `Team` | Assigns an owned character to the selected team position. |
 | `POST /teams/{id}/activate` | none | `Team` | Activates a non-empty team for its owning player. |
@@ -141,7 +141,7 @@
 | Skill auto use | Skill auto-use behavior must not be authored in static character content; treat it as player/runtime configuration. |
 | Character identity | Player-owned characters are unique by `characterKey`; do not introduce per-player character instance IDs unless duplicate ownership becomes a real requirement. |
 | Starting roster | New players begin with no owned characters and may claim exactly one configured starter while their roster is empty. |
-| Character acquisition | Public REST may spend configured gold for a character pull across all loaded character templates with equal odds. If the pulled character is already owned, grant configured essence compensation instead of a duplicate character. |
+| Character acquisition | Public REST may spend configured gold for `1` or `10` character pulls across all loaded character templates with equal odds. If a pulled character is already owned, grant configured essence compensation instead of a duplicate character. Multi-pull batches must apply ownership updates within the same batch so later rolls can become duplicates of earlier unlocks. |
 | Team slots | New players begin with a configured number of empty team slots. |
 | Team assignment | Public REST may assign an owned character to a player-owned team position by `characterKey`. The same owned character may appear across multiple teams, but not twice in the same team. |
 | Equipment assignment | Public REST equips generated inventory items to team positions, not directly to characters. |

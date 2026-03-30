@@ -15,6 +15,10 @@ data class ClaimStarterRequest(
   val characterKey: String,
 )
 
+data class CharacterPullRequest(
+  val count: Int? = null,
+)
+
 data class LoginRequest(
   val name: String?,
   val email: String?,

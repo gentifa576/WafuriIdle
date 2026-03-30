@@ -135,15 +135,18 @@ Current implementation:
 Current direction:
 - starter choice is the initial guaranteed roster entry
 - additional characters come from a gold-funded gacha pull
+- the same gacha action may currently resolve either `1` pull or `10` pulls at once
 - all loaded character templates currently share equal pull odds
 - duplicate pulls do not create another copy of the same character
 - duplicate pulls convert into `essence` compensation
 
 Current implementation:
 - one character pull currently costs `250` gold
+- a ten-pull currently costs `2500` gold
 - duplicate pulls currently grant `15` essence
 - the pull pool is every loaded character template, including starter characters
 - because characters are unique by `characterKey`, pulling an already-owned character leaves the roster unchanged and only grants essence
+- batch pulls resolve in order against the updated roster, so a duplicate can occur later in the same ten-pull after that character was unlocked earlier in the batch
 
 Open questions:
 - future uses for essence

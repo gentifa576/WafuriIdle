@@ -359,20 +359,20 @@ export function CombatScreen() {
                   <strong>Essence: {player.essence}</strong>
                 </div>
                 <div className="button-row">
-                  <button className="primary-cta" disabled={loading} onClick={() => void actions.pullCharacter()}>
-                    {loading ? 'Pulling...' : 'Pull Character'}
+                  <button className="primary-cta" disabled={loading} onClick={() => void actions.pullCharacter(1)}>
+                    {loading ? 'Pulling...' : 'Pull x1'}
+                  </button>
+                  <button className="secondary-button" disabled={loading} onClick={() => void actions.pullCharacter(10)}>
+                    {loading ? 'Pulling...' : 'Pull x10'}
                   </button>
                 </div>
                 {latestPullResult ? (
                   <div className="gacha-result">
                     <strong>Result</strong>
-                    <p>Pulled: {latestPullResult.pulledCharacterKey}</p>
-                    <p>
-                      Outcome:{' '}
-                      {latestPullResult.grantedCharacterKey
-                        ? `Unlocked ${latestPullResult.grantedCharacterKey}`
-                        : `Duplicate converted into ${latestPullResult.essenceGranted} essence`}
-                    </p>
+                    <p>Count: {latestPullResult.count}</p>
+                    <p>Unlocks: {latestPullResult.pulls.filter((pull) => pull.grantedCharacterKey != null).length}</p>
+                    <p>Essence gained: {latestPullResult.totalEssenceGranted}</p>
+                    <p>Pulled: {latestPullResult.pulls.map((pull) => pull.pulledCharacterKey).join(', ')}</p>
                   </div>
                 ) : (
                   <p className="muted">No pull yet.</p>

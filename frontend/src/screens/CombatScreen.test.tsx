@@ -251,4 +251,37 @@ describe('CombatScreen', () => {
 
     expect(await screen.findByText('Combat already running.')).toBeInTheDocument()
   })
+
+  it('supports triggering a ten-pull from the gacha view', async () => {
+    const readyPlayer = guestAuthResponse({ ownedCharacterKeys: ['hero'] })
+
+    mocks.createGuestPlayer.mockResolvedValue(readyPlayer)
+    mocks.getPlayer.mockResolvedValue(readyPlayer.player)
+    mocks.getPlayerTeams.mockResolvedValue([emptyTeam()])
+    mocks.getPlayerInventory.mockResolvedValue([])
+    mocks.pullCharacter.mockResolvedValue({
+      player: { ...readyPlayer.player, gold: 0, essence: 15 },
+      count: 10,
+      pulls: Array.from({ length: 10 }, (_, index) => ({
+        pulledCharacterKey: `hero-${index}`,
+        grantedCharacterKey: `hero-${index}`,
+        essenceGranted: 0,
+      })),
+      totalEssenceGranted: 0,
+    })
+
+    const user = userEvent.setup()
+    render(<CombatScreen />)
+
+    await user.type(screen.getByLabelText('Player name'), 'Scout')
+    await user.click(screen.getByRole('button', { name: 'Create Guest' }))
+    expect(await screen.findByRole('heading', { name: 'Scout' })).toBeInTheDocument()
+    await user.click(await screen.findByText('Gacha'))
+    await user.click(await screen.findByRole('button', { name: 'Pull x10' }))
+
+    await waitFor(() => {
+      expect(mocks.pullCharacter).toHaveBeenCalledWith('player-1', 10)
+      expect(screen.getByText('Count: 10')).toBeInTheDocument()
+    })
+  })
 })

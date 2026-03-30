@@ -3,6 +3,7 @@ package com.wafuri.idle.application.service.player
 import com.wafuri.idle.application.config.GameConfig
 import com.wafuri.idle.application.exception.ResourceNotFoundException
 import com.wafuri.idle.application.exception.ValidationException
+import com.wafuri.idle.application.model.CharacterPull
 import com.wafuri.idle.application.model.CharacterPullResult
 import com.wafuri.idle.application.port.out.PlayerStateWorkQueue
 import com.wafuri.idle.application.port.out.Repository
@@ -59,12 +60,21 @@ class PlayerService(
   }
 
   @Transactional
-  fun pullCharacter(playerId: UUID): CharacterPullResult {
+  fun pullCharacter(
+    playerId: UUID,
+    count: Int = 1,
+  ): CharacterPullResult {
+    if (count !in setOf(1, 10)) {
+      throw ValidationException("Character pull count must be 1 or 10.")
+    }
+
     val player = get(playerId)
     val pullConfig = gameConfig.gacha().characterPull()
     val goldCost = pullConfig.goldCost()
-    if (player.gold < goldCost) {
-      throw ValidationException("Player $playerId does not have enough gold for a character pull.")
+    val totalGoldCost = goldCost * count
+    if (player.gold < totalGoldCost) {
+      val pullLabel = if (count == 1) "a character pull" else "$count character pulls"
+      throw ValidationException("Player $playerId does not have enough gold for $pullLabel.")
     }
 
     val templates = characterTemplateCatalog.all()
@@ -72,27 +82,43 @@ class PlayerService(
       throw ValidationException("Character gacha is unavailable because no character templates are loaded.")
     }
 
-    val pulledCharacterKey = templates[randomSource.nextInt(templates.size)].key
-    val updatedPlayer =
-      if (player.ownedCharacterKeys.contains(pulledCharacterKey)) {
-        player
-          .spendGold(goldCost)
-          .grantEssence(pullConfig.duplicateEssence())
-      } else {
-        player
-          .spendGold(goldCost)
-          .grantCharacter(pulledCharacterKey)
+    var updatedPlayer = player
+    val pulls =
+      buildList(count) {
+        repeat(count) {
+          val pulledCharacterKey = templates[randomSource.nextInt(templates.size)].key
+          val grantedCharacterKey = pulledCharacterKey.takeUnless { updatedPlayer.ownedCharacterKeys.contains(it) }
+          val essenceGranted = if (grantedCharacterKey == null) pullConfig.duplicateEssence() else 0
+
+          updatedPlayer =
+            if (grantedCharacterKey == null) {
+              updatedPlayer
+                .spendGold(goldCost)
+                .grantEssence(essenceGranted)
+            } else {
+              updatedPlayer
+                .spendGold(goldCost)
+                .grantCharacter(grantedCharacterKey)
+            }
+
+          add(
+            CharacterPull(
+              pulledCharacterKey = pulledCharacterKey,
+              grantedCharacterKey = grantedCharacterKey,
+              essenceGranted = essenceGranted,
+            ),
+          )
+        }
       }
+
     val savedPlayer = playerRepository.save(updatedPlayer)
     playerStateWorkQueue.markDirty(playerId)
 
-    val grantedCharacterKey = pulledCharacterKey.takeUnless { player.ownedCharacterKeys.contains(it) }
-    val essenceGranted = if (grantedCharacterKey == null) pullConfig.duplicateEssence() else 0
     return CharacterPullResult(
       player = savedPlayer,
-      pulledCharacterKey = pulledCharacterKey,
-      grantedCharacterKey = grantedCharacterKey,
-      essenceGranted = essenceGranted,
+      count = count,
+      pulls = pulls,
+      totalEssenceGranted = pulls.sumOf { it.essenceGranted },
     )
   }
 
