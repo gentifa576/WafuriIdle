@@ -148,13 +148,34 @@ If you need a different backend origin, set `VITE_API_BASE_URL`.
 - Render the combat scene in the frontend while backend combat remains authoritative.
 
 ## Current Limitations
-- The only automated frontend gate today is `npm run build`.
+- The browser smoke test uses mocked backend REST and WebSocket transport, so it guards frontend regressions without replacing live backend QA.
 - `/debug-client/` is still useful for backend-oriented QA and transport inspection.
 
 ## Build
 ```bash
 npm run build
 ```
+
+## Regression Gates
+Run the full frontend gate with:
+
+```bash
+npm run check
+```
+
+Run the fast unit/component suite only:
+
+```bash
+npm run test:unit
+```
+
+Run the browser smoke suite only:
+
+```bash
+npm run test:e2e
+```
+
+The browser smoke test starts a local Vite server, mocks backend REST and WebSocket traffic in the browser, and verifies the guest-to-combat path.
 
 ## Layout
 - `src/app`: app shell and top-level composition.

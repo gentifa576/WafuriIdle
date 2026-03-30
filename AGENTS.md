@@ -9,7 +9,7 @@
 | Persistence | PostgreSQL-ready persistence |
 | HTTP transport | REST for request/response APIs |
 | Realtime transport | WebSocket for push updates and selected player-intent commands |
-| Test stack | Kotest with MockK; Quarkus test harness for integration tests |
+| Test stack | Kotest with MockK plus Quarkus test harness for backend integration tests; Vitest with Testing Library for frontend unit/component tests; Playwright for frontend browser smoke tests |
 | Linting | Ktlint enforced through Gradle `check` |
 | Local debug UI | Static browser client served by Quarkus with no extra frontend dependency |
 | Product frontend | Separate browser client in `frontend/` using React, TypeScript, Vite, and PixiJS |
@@ -186,6 +186,8 @@
 | Inventory ownership | Inventory ownership rules must be covered by tests. |
 | Unit test framework | Use Kotest. |
 | Mocking | Use MockK instead of manual fake repositories or publishers. |
+| Frontend unit tests | Use Vitest with Testing Library for frontend unit and component coverage. |
+| Frontend browser tests | Use Playwright for frontend smoke coverage; mock backend transport in-browser when the goal is frontend regression detection rather than backend verification. |
 | Kotlin lint fixes | When Kotlin lint/style issues need autofix, run `cd backend && ./gradlew ktlintFormat` instead of manually formatting by hand unless a specific exception is necessary. |
 | Build gate | `./gradlew check` must include lint and tests. |
 
