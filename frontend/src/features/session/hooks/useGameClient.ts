@@ -584,9 +584,11 @@ function combatEquals(left: CombatSnapshot | null, right: CombatSnapshot | null)
     left.zoneId === right.zoneId &&
     left.activeTeamId === right.activeTeamId &&
     left.enemyName === right.enemyName &&
+    left.enemyAttack === right.enemyAttack &&
     left.enemyHp === right.enemyHp &&
     left.enemyMaxHp === right.enemyMaxHp &&
     left.teamDps === right.teamDps &&
+    left.pendingReviveMillis === right.pendingReviveMillis &&
     combatMembersEquals(left.members, right.members)
   )
 }

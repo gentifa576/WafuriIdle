@@ -108,6 +108,7 @@ class CombatServiceTest : StringSpec() {
           zoneId = zone.id,
           activeTeamId = teamId,
           enemyName = "Training Dummy",
+          enemyAttack = 1f,
           enemyHp = 1000f,
           enemyMaxHp = 1000f,
           teamDps = 84f,

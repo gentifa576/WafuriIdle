@@ -94,9 +94,11 @@ class PlayerWebSocketEndpointTest :
           zoneId = "starter-plains",
           activeTeamId = UUID.randomUUID(),
           enemyName = "Training Dummy",
+          enemyAttack = 1f,
           enemyHp = 100f,
           enemyMaxHp = 100f,
           teamDps = 10f,
+          pendingReviveMillis = 0L,
           members = emptyList(),
         )
       val connection = mockk<WebSocketConnection>()

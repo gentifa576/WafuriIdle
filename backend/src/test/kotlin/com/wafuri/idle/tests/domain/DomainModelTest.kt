@@ -135,6 +135,7 @@ class DomainModelTest :
           enemyName = "Training Dummy",
           enemyLevel = 1,
           enemyBaseHp = 10f,
+          enemyAttack = 1f,
           enemyHp = 10f,
           enemyMaxHp = 10f,
           members =
@@ -149,8 +150,10 @@ class DomainModelTest :
             ),
         )
 
-      val buffered = state.advance(elapsedMillis = 500L, damageIntervalMillis = 1000L, respawnDelayMillis = 1000L)
-      val updated = buffered.advance(elapsedMillis = 500L, damageIntervalMillis = 1000L, respawnDelayMillis = 1000L)
+      val buffered =
+        state.advance(500L, 1000L, 1000L, 30_000L, 0.5f)
+      val updated =
+        buffered.advance(500L, 1000L, 1000L, 30_000L, 0.5f)
 
       buffered shouldBe
         expectedCombatState(
@@ -173,7 +176,7 @@ class DomainModelTest :
           enemyName = "Training Dummy",
           enemyHp = 0f,
           enemyMaxHp = 10f,
-          members = listOf(expectedCombatMemberState("warrior", 10f, 3f, 15f, 15f)),
+          members = listOf(expectedCombatMemberState("warrior", 10f, 3f, 14f, 15f)),
         )
     }
 
@@ -187,6 +190,7 @@ class DomainModelTest :
           enemyName = "Training Dummy",
           enemyLevel = 1,
           enemyBaseHp = 10f,
+          enemyAttack = 1f,
           enemyHp = 0f,
           enemyMaxHp = 10f,
           members =
@@ -201,7 +205,8 @@ class DomainModelTest :
             ),
         )
 
-      val updated = state.advance(elapsedMillis = 1500L, damageIntervalMillis = 1000L, respawnDelayMillis = 1000L)
+      val updated =
+        state.advance(1500L, 1000L, 1000L, 30_000L, 0.5f)
 
       updated shouldBe
         expectedCombatState(
@@ -241,5 +246,59 @@ class DomainModelTest :
         )
 
       member shouldBe expectedCombatMemberState("warrior", 10f, 3f, 0f, 15f)
+    }
+
+    "combat state enters down status on a full wipe and revives at half hp after the revive delay" {
+      val state =
+        CombatState(
+          playerId = UUID.randomUUID(),
+          status = CombatStatus.FIGHTING,
+          zoneId = "starter-plains",
+          activeTeamId = UUID.randomUUID(),
+          enemyName = "Training Dummy",
+          enemyLevel = 1,
+          enemyBaseHp = 100f,
+          enemyAttack = 1f,
+          enemyHp = 100f,
+          enemyMaxHp = 100f,
+          members =
+            listOf(
+              CombatMemberState(
+                characterKey = "warrior",
+                attack = 1f,
+                hit = 1f,
+                currentHp = 1f,
+                maxHp = 10f,
+              ),
+            ),
+        )
+
+      val downed =
+        state.advance(1000L, 1000L, 1000L, 30_000L, 0.5f)
+      val revived =
+        downed.advance(30_000L, 1000L, 1000L, 30_000L, 0.5f)
+
+      downed shouldBe
+        expectedCombatState(
+          playerId = state.playerId,
+          status = CombatStatus.DOWN,
+          zoneId = "starter-plains",
+          activeTeamId = state.activeTeamId,
+          enemyName = "Training Dummy",
+          enemyHp = 99f,
+          enemyMaxHp = 100f,
+          members = listOf(expectedCombatMemberState("warrior", 1f, 1f, 0f, 10f)),
+        )
+      revived shouldBe
+        expectedCombatState(
+          playerId = state.playerId,
+          status = CombatStatus.FIGHTING,
+          zoneId = "starter-plains",
+          activeTeamId = state.activeTeamId,
+          enemyName = "Training Dummy",
+          enemyHp = 100f,
+          enemyMaxHp = 100f,
+          members = listOf(expectedCombatMemberState("warrior", 1f, 1f, 5f, 10f)),
+        )
     }
   })

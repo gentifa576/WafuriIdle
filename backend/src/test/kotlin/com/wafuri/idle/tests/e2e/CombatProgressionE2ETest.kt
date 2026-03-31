@@ -153,7 +153,7 @@ class CombatProgressionE2ETest {
         enemyName = "Training Dummy",
         enemyHp = 0f,
         enemyMaxHp = 1000f,
-        members = listOf(expectedCombatMemberState("nimbus", 13.7f, 9.8f, 9.3f, 9.3f)),
+        members = listOf(expectedCombatMemberState("nimbus", 13.7f, 9.8f, 1.3000002f, 9.3f)),
         lastSimulatedAt = wonState.lastSimulatedAt,
       )
 
@@ -194,12 +194,39 @@ class CombatProgressionE2ETest {
   }
 
   @Test
-  fun `combat e2e reaches player level 10 through repeated tick warp wins`() {
+  fun `combat e2e revives a wiped team at half hp after the revive delay`() {
     val prepared = prepareStarterCombat("LevelTenGuest")
     val playerId = prepared.playerId
     val token = prepared.token
 
-    tickWarpService.warpCombatWins(UUID.fromString(playerId), wins = 90)
+    tickWarpService.warpCombatUntilStatus(UUID.fromString(playerId), CombatStatus.WON)
+    val downState = tickWarpService.warpCombatUntilStatus(UUID.fromString(playerId), CombatStatus.DOWN)
+    val revivedState = tickWarpService.warpCombat(UUID.fromString(playerId), java.time.Duration.ofSeconds(30))
+
+    downState shouldBe
+      expectedCombatState(
+        playerId = UUID.fromString(playerId),
+        status = CombatStatus.DOWN,
+        zoneId = "starter-plains",
+        activeTeamId = UUID.fromString(prepared.teamId),
+        enemyName = "Training Dummy",
+        enemyHp = 731.48f,
+        enemyMaxHp = 1000f,
+        members = listOf(expectedCombatMemberState("nimbus", 13.7f, 9.8f, 0f, 9.3f)),
+        lastSimulatedAt = downState.lastSimulatedAt,
+      )
+    revivedState shouldBe
+      expectedCombatState(
+        playerId = UUID.fromString(playerId),
+        status = CombatStatus.FIGHTING,
+        zoneId = "starter-plains",
+        activeTeamId = UUID.fromString(prepared.teamId),
+        enemyName = "Training Dummy",
+        enemyHp = 1000f,
+        enemyMaxHp = 1000f,
+        members = listOf(expectedCombatMemberState("nimbus", 13.7f, 9.8f, 4.65f, 9.3f)),
+        lastSimulatedAt = revivedState.lastSimulatedAt,
+      )
 
     playerResponse(token, playerId) shouldBe
       expectedPlayer(
@@ -207,26 +234,24 @@ class CombatProgressionE2ETest {
         name = "LevelTenGuest",
         ownedCharacterKeys = setOf("nimbus"),
         activeTeamId = UUID.fromString(prepared.teamId),
-        experience = 900,
-        level = 10,
-        gold = 2250,
+        experience = 10,
+        gold = 25,
       )
     zoneProgressResponse(token, playerId) shouldBe
       listOf(
         expectedZoneProgress(
           playerId = UUID.fromString(playerId),
           zoneId = "starter-plains",
-          killCount = 90,
-          level = 10,
+          killCount = 1,
+          level = 1,
         ),
       )
     normalizeInventory(inventoryResponse(token, playerId)) shouldBe
-      List(90) { index ->
+      listOf(
         normalizedInventoryItem(
           playerId = UUID.fromString(playerId),
-          ordinal = index,
-        )
-      }
+        ),
+      )
   }
 
   private fun startCombatOverWebSocket(

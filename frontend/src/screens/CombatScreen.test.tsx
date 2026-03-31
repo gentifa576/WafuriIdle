@@ -252,6 +252,114 @@ describe('CombatScreen', () => {
     expect(await screen.findByText('Combat already running.')).toBeInTheDocument()
   })
 
+  it('renders team hp and enemy retaliation from combat sync', async () => {
+    const readyPlayer = guestAuthResponse({ activeTeamId: 'team-1', ownedCharacterKeys: ['hero'] })
+    const activeTeam = {
+      ...emptyTeam(),
+      characterKeys: ['hero'],
+      slots: [
+        { position: 1, characterKey: 'hero', weaponItemId: null, armorItemId: null, accessoryItemId: null },
+        { position: 2, characterKey: null, weaponItemId: null, armorItemId: null, accessoryItemId: null },
+        { position: 3, characterKey: null, weaponItemId: null, armorItemId: null, accessoryItemId: null },
+      ],
+    }
+
+    mocks.createGuestPlayer.mockResolvedValue(readyPlayer)
+    mocks.getPlayer.mockResolvedValue(readyPlayer.player)
+    mocks.getPlayerTeams.mockResolvedValue([activeTeam])
+    mocks.getPlayerInventory.mockResolvedValue([])
+
+    const user = userEvent.setup()
+    render(<CombatScreen />)
+
+    await user.type(screen.getByLabelText('Player name'), 'Scout')
+    await user.click(screen.getByRole('button', { name: 'Create Guest' }))
+    expect(await screen.findByRole('heading', { name: 'Scout' })).toBeInTheDocument()
+
+    act(() => {
+      mocks.lastSocketOptions?.onMessage({
+        type: 'COMBAT_STATE_SYNC',
+        playerId: 'player-1',
+        snapshot: {
+          playerId: 'player-1',
+          status: 'FIGHTING',
+          zoneId: 'starter-plains',
+          activeTeamId: 'team-1',
+          enemyName: 'Training Slime',
+          enemyAttack: 1,
+          enemyHp: 18,
+          enemyMaxHp: 20,
+          teamDps: 5.5,
+          pendingReviveMillis: 0,
+          members: [
+            {
+              characterKey: 'hero',
+              attack: 10,
+              hit: 0.55,
+              currentHp: 23,
+              maxHp: 24,
+              alive: true,
+            },
+          ],
+        },
+        serverTime: '2099-01-01T00:00:00Z',
+      })
+    })
+
+    expect(await screen.findByText('23 / 24')).toBeInTheDocument()
+    expect(screen.getByText('1.0')).toBeInTheDocument()
+    expect(screen.getByText(/retaliates for 1.0/i)).toBeInTheDocument()
+  })
+
+  it('renders the revive countdown when the team is down', async () => {
+    const readyPlayer = guestAuthResponse({ activeTeamId: 'team-1', ownedCharacterKeys: ['hero'] })
+
+    mocks.createGuestPlayer.mockResolvedValue(readyPlayer)
+    mocks.getPlayer.mockResolvedValue(readyPlayer.player)
+    mocks.getPlayerTeams.mockResolvedValue([emptyTeam()])
+    mocks.getPlayerInventory.mockResolvedValue([])
+
+    const user = userEvent.setup()
+    render(<CombatScreen />)
+
+    await user.type(screen.getByLabelText('Player name'), 'Scout')
+    await user.click(screen.getByRole('button', { name: 'Create Guest' }))
+    expect(await screen.findByRole('heading', { name: 'Scout' })).toBeInTheDocument()
+
+    act(() => {
+      mocks.lastSocketOptions?.onMessage({
+        type: 'COMBAT_STATE_SYNC',
+        playerId: 'player-1',
+        snapshot: {
+          playerId: 'player-1',
+          status: 'DOWN',
+          zoneId: 'starter-plains',
+          activeTeamId: 'team-1',
+          enemyName: 'Training Slime',
+          enemyAttack: 1,
+          enemyHp: 19,
+          enemyMaxHp: 20,
+          teamDps: 0,
+          pendingReviveMillis: 12000,
+          members: [
+            {
+              characterKey: 'hero',
+              attack: 10,
+              hit: 0.55,
+              currentHp: 0,
+              maxHp: 24,
+              alive: false,
+            },
+          ],
+        },
+        serverTime: '2099-01-01T00:00:00Z',
+      })
+    })
+
+    expect(await screen.findByText(/DOWN · Revive in 18s/i)).toBeInTheDocument()
+    expect(screen.getByText(/revives in 18s/i)).toBeInTheDocument()
+  })
+
   it('supports triggering a ten-pull from the gacha view', async () => {
     const readyPlayer = guestAuthResponse({ ownedCharacterKeys: ['hero'] })
 

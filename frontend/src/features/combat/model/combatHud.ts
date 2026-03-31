@@ -6,12 +6,22 @@ export function toCombatHud(snapshot: CombatSnapshot | null) {
       title: 'No active combat',
       subtitle: 'Start combat after activating a team.',
       enemyRatio: 0,
+      teamCurrentHp: 0,
+      teamMaxHp: 0,
     }
   }
 
+  const teamCurrentHp = snapshot.members.reduce((total, member) => total + member.currentHp, 0)
+  const teamMaxHp = snapshot.members.reduce((total, member) => total + member.maxHp, 0)
+
   return {
     title: snapshot.enemyName,
-    subtitle: `${snapshot.status} · DPS ${snapshot.teamDps.toFixed(1)}`,
+    subtitle:
+      snapshot.status === 'DOWN'
+        ? `DOWN · Revive in ${Math.max(0, Math.ceil((30000 - snapshot.pendingReviveMillis) / 1000))}s`
+        : `${snapshot.status} · DPS ${snapshot.teamDps.toFixed(1)} · Retaliate ${snapshot.enemyAttack.toFixed(1)}`,
     enemyRatio: snapshot.enemyMaxHp === 0 ? 0 : snapshot.enemyHp / snapshot.enemyMaxHp,
+    teamCurrentHp,
+    teamMaxHp,
   }
 }

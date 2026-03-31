@@ -79,9 +79,11 @@ export interface CombatSnapshot {
   zoneId: string | null
   activeTeamId: string | null
   enemyName: string | null
+  enemyAttack: number
   enemyHp: number
   enemyMaxHp: number
   teamDps: number
+  pendingReviveMillis: number
   members: CombatMember[]
 }
 

@@ -36,8 +36,11 @@ game:
       - vyron
   combat:
     enemy-max-hp: 1000
+    enemy-attack: 1
     damage-interval: 1s
     respawn-delay: 1s
+    revive-delay: 30s
+    revive-hp-ratio: 0.5
     zone-scaling:
       hp-scaling-constant: 1.0
       reward-scaling-exponent: 0.5

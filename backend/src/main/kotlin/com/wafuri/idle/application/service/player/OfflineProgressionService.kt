@@ -121,80 +121,89 @@ class OfflineProgressionService(
     elapsed: Duration,
     startingZoneProgress: PlayerZoneProgress,
   ): OfflineCombatProjection {
-    val combatConfig = gameConfig.combat()
-    var remaining = elapsed.toMillis().coerceAtLeast(0)
-    var current = state
-    var kills = 0
-    var zoneProgress = startingZoneProgress
-    val killEnemyLevels = mutableListOf<Int>()
-    val damageIntervalMillis = combatConfig.damageInterval().toMillis()
-    val respawnDelayMillis = combatConfig.respawnDelay().toMillis()
-    val killsPerLevel = gameConfig.progression().zone().killsPerLevel()
+    val params =
+      OfflineCombatParams(
+        damageIntervalMillis = gameConfig.combat().damageInterval().toMillis(),
+        respawnDelayMillis = gameConfig.combat().respawnDelay().toMillis(),
+        reviveDelayMillis = gameConfig.combat().reviveDelay().toMillis(),
+        reviveHpRatio = gameConfig.combat().reviveHpRatio(),
+        enemyAttack = gameConfig.combat().enemyAttack(),
+        killsPerLevel = gameConfig.progression().zone().killsPerLevel(),
+      )
+    var projection = MutableOfflineCombatProjection(state, elapsed.toMillis().coerceAtLeast(0), startingZoneProgress)
 
-    while (remaining > 0 && current.status != CombatStatus.IDLE) {
-      if (current.status == CombatStatus.WON) {
-        val toRespawn = (respawnDelayMillis - current.pendingRespawnMillis).coerceAtLeast(0)
-        if (remaining < toRespawn) {
-          current =
-            current.advance(
-              elapsedMillis = remaining,
-              damageIntervalMillis = damageIntervalMillis,
-              respawnDelayMillis = respawnDelayMillis,
-            )
-          remaining = 0
-        } else {
-          current =
-            current.advance(
-              elapsedMillis = toRespawn,
-              damageIntervalMillis = damageIntervalMillis,
-              respawnDelayMillis = respawnDelayMillis,
-            )
-          if (current.status == CombatStatus.FIGHTING) {
-            val enemyMaxHp = scalingRule.enemyHpFor(zoneProgress.level, current.enemyBaseHp)
-            current = current.refreshEnemy(enemyLevel = zoneProgress.level, enemyMaxHp = enemyMaxHp)
-          }
-          remaining -= toRespawn
+    while (projection.canContinue()) {
+      projection =
+        when (projection.state.status) {
+          CombatStatus.WON -> advanceRespawnPhase(projection, params)
+          CombatStatus.DOWN -> advanceRevivePhase(projection, params)
+          CombatStatus.FIGHTING -> advanceFightPhase(projection, params)
+          CombatStatus.IDLE -> projection
         }
-        continue
-      }
-
-      val killTimeMillis = timeToKillMillis(current, damageIntervalMillis)
-      if (killTimeMillis == Long.MAX_VALUE) {
-        current =
-          current.advance(
-            elapsedMillis = remaining,
-            damageIntervalMillis = damageIntervalMillis,
-            respawnDelayMillis = respawnDelayMillis,
-          )
-        remaining = 0
-        continue
-      }
-      if (remaining < killTimeMillis) {
-        current =
-          current.advance(
-            elapsedMillis = remaining,
-            damageIntervalMillis = damageIntervalMillis,
-            respawnDelayMillis = respawnDelayMillis,
-          )
-        remaining = 0
-        continue
-      }
-
-      current =
-        current.advance(
-          elapsedMillis = killTimeMillis,
-          damageIntervalMillis = damageIntervalMillis,
-          respawnDelayMillis = respawnDelayMillis,
-        )
-      remaining -= killTimeMillis
-      if (current.status == CombatStatus.WON) {
-        kills += 1
-        killEnemyLevels += current.enemyLevel
-        zoneProgress = zoneProgress.recordKill(killsPerLevel)
-      }
     }
 
-    return OfflineCombatProjection(state = current, kills = kills, killEnemyLevels = killEnemyLevels)
+    return projection.toResult()
+  }
+
+  private fun advanceRespawnPhase(
+    projection: MutableOfflineCombatProjection,
+    params: OfflineCombatParams,
+  ): MutableOfflineCombatProjection {
+    val waitMillis = (params.respawnDelayMillis - projection.state.pendingRespawnMillis).coerceAtLeast(0)
+    return advanceRecoveryPhase(projection, waitMillis, params)
+  }
+
+  private fun advanceRevivePhase(
+    projection: MutableOfflineCombatProjection,
+    params: OfflineCombatParams,
+  ): MutableOfflineCombatProjection {
+    val waitMillis = (params.reviveDelayMillis - projection.state.pendingReviveMillis).coerceAtLeast(0)
+    return advanceRecoveryPhase(projection, waitMillis, params)
+  }
+
+  private fun advanceRecoveryPhase(
+    projection: MutableOfflineCombatProjection,
+    waitMillis: Long,
+    params: OfflineCombatParams,
+  ): MutableOfflineCombatProjection {
+    val elapsedMillis = minOf(projection.remainingMillis, waitMillis)
+    val advanced = projection.state.advance(elapsedMillis, params.damageIntervalMillis, params.respawnDelayMillis, params.reviveDelayMillis, params.reviveHpRatio)
+    val recovered =
+      if (elapsedMillis == waitMillis && advanced.status == CombatStatus.FIGHTING) {
+        refreshEnemyForZoneLevel(advanced, projection.zoneProgress.level, params.enemyAttack)
+      } else {
+        advanced
+      }
+    return projection.copy(state = recovered, remainingMillis = projection.remainingMillis - elapsedMillis)
+  }
+
+  private fun advanceFightPhase(
+    projection: MutableOfflineCombatProjection,
+    params: OfflineCombatParams,
+  ): MutableOfflineCombatProjection {
+    val killTimeMillis = timeToKillMillis(projection.state, params.damageIntervalMillis)
+    val elapsedMillis =
+      when {
+        killTimeMillis == Long.MAX_VALUE -> projection.remainingMillis
+        projection.remainingMillis < killTimeMillis -> projection.remainingMillis
+        else -> killTimeMillis
+      }
+    val advanced = projection.state.advance(elapsedMillis, params.damageIntervalMillis, params.respawnDelayMillis, params.reviveDelayMillis, params.reviveHpRatio)
+    val defeatedEnemy = projection.state.enemyHp > 0f && advanced.enemyHp == 0f
+    return if (!defeatedEnemy) {
+      projection.copy(state = advanced, remainingMillis = projection.remainingMillis - elapsedMillis)
+    } else {
+      projection.recordKill(advanced, elapsedMillis, params.killsPerLevel)
+    }
+  }
+
+  private fun refreshEnemyForZoneLevel(
+    state: CombatState,
+    zoneLevel: Int,
+    enemyAttack: Float,
+  ): CombatState {
+    val enemyMaxHp = scalingRule.enemyHpFor(zoneLevel, state.enemyBaseHp)
+    return state.refreshEnemy(zoneLevel, enemyAttack, enemyMaxHp)
   }
 
   private fun timeToKillMillis(
@@ -218,6 +227,40 @@ class OfflineProgressionService(
       }
     return firstStepDelay + ((stepsToKill - 1L) * damageIntervalMillis)
   }
+}
+
+private data class OfflineCombatParams(
+  val damageIntervalMillis: Long,
+  val respawnDelayMillis: Long,
+  val reviveDelayMillis: Long,
+  val reviveHpRatio: Float,
+  val enemyAttack: Float,
+  val killsPerLevel: Int,
+)
+
+private data class MutableOfflineCombatProjection(
+  val state: CombatState,
+  val remainingMillis: Long,
+  val zoneProgress: PlayerZoneProgress,
+  val kills: Int = 0,
+  val killEnemyLevels: List<Int> = emptyList(),
+) {
+  fun canContinue(): Boolean = remainingMillis > 0 && state.status != CombatStatus.IDLE
+
+  fun recordKill(
+    nextState: CombatState,
+    elapsedMillis: Long,
+    killsPerLevel: Int,
+  ): MutableOfflineCombatProjection =
+    copy(
+      state = nextState,
+      remainingMillis = remainingMillis - elapsedMillis,
+      zoneProgress = zoneProgress.recordKill(killsPerLevel),
+      kills = kills + 1,
+      killEnemyLevels = killEnemyLevels + nextState.enemyLevel,
+    )
+
+  fun toResult(): OfflineCombatProjection = OfflineCombatProjection(state, kills, killEnemyLevels)
 }
 
 data class OfflineProgressionResult(

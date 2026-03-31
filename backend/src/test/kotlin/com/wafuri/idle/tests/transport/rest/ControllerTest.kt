@@ -16,8 +16,8 @@ import com.wafuri.idle.domain.model.Rarity
 import com.wafuri.idle.domain.model.Team
 import com.wafuri.idle.persistence.runtime.LocalPlayerStateWorkQueue
 import com.wafuri.idle.tests.support.expectedAuthResponse
-import com.wafuri.idle.tests.support.expectedCharacterPullResult
 import com.wafuri.idle.tests.support.expectedCharacterPull
+import com.wafuri.idle.tests.support.expectedCharacterPullResult
 import com.wafuri.idle.tests.support.expectedErrorResponse
 import com.wafuri.idle.tests.support.expectedPlayer
 import com.wafuri.idle.transport.rest.dto.AuthResponse

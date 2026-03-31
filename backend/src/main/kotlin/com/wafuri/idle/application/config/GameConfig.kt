@@ -34,9 +34,15 @@ interface GameConfig {
   interface Combat {
     fun enemyMaxHp(): Float
 
+    fun enemyAttack(): Float
+
     fun damageInterval(): Duration
 
     fun respawnDelay(): Duration
+
+    fun reviveDelay(): Duration
+
+    fun reviveHpRatio(): Float
 
     fun zoneScaling(): ZoneScaling
 

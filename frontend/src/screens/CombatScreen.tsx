@@ -309,6 +309,14 @@ export function CombatScreen() {
                   <strong>{combat?.teamDps.toFixed(1) ?? '0.0'}</strong>
                 </div>
                 <div>
+                  <span className="label">Team HP</span>
+                  <strong>{hud.teamCurrentHp.toFixed(0)} / {hud.teamMaxHp.toFixed(0)}</strong>
+                </div>
+                <div>
+                  <span className="label">Enemy ATK</span>
+                  <strong>{combat?.enemyAttack.toFixed(1) ?? '0.0'}</strong>
+                </div>
+                <div>
                   <span className="label">Zone</span>
                   <strong>{combat?.zoneId ?? topZone?.zoneId ?? 'starter-plains'}</strong>
                 </div>
@@ -518,7 +526,12 @@ export function CombatScreen() {
                 <article className="workspace-card">
                   <span className="label">Enemy</span>
                   <strong>{combat?.enemyName ?? 'Awaiting spawn'}</strong>
-                  <p>{combat?.status ?? 'Idle'} state</p>
+                  <p>
+                    {combat?.status ?? 'Idle'} state
+                    {combat?.status === 'DOWN'
+                      ? ` · revives in ${Math.max(0, Math.ceil((30000 - (combat?.pendingReviveMillis ?? 0)) / 1000))}s`
+                      : ` · retaliates for ${combat?.enemyAttack.toFixed(1) ?? '0.0'}`}
+                  </p>
                 </article>
                 <section className="workspace-card">
                   <span className="label">Active Team</span>

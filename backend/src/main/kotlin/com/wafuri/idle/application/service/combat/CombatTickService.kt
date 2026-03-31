@@ -51,9 +51,11 @@ class CombatTickService(
     val refreshedState = state.refreshTeam(teamStats.teamId, teamStats.toCombatMembers(state.members))
     val advancedState =
       refreshedState.advance(
-        elapsedMillis = elapsed.toMillis(),
-        damageIntervalMillis = combatConfig.damageInterval().toMillis(),
-        respawnDelayMillis = combatConfig.respawnDelay().toMillis(),
+        elapsed.toMillis(),
+        combatConfig.damageInterval().toMillis(),
+        combatConfig.respawnDelay().toMillis(),
+        combatConfig.reviveDelay().toMillis(),
+        combatConfig.reviveHpRatio(),
       )
     val scaledState = refreshRespawnedEnemy(playerId, refreshedState, advancedState)
     val nextState =
@@ -61,7 +63,7 @@ class CombatTickService(
 
     if (nextState != state) {
       combatStateRepository.save(nextState)
-      if (state.status != CombatStatus.WON && nextState.status == CombatStatus.WON) {
+      if (state.enemyHp > 0f && nextState.enemyHp == 0f) {
         val zoneId = requireNotNull(nextState.zoneId) { "Won combat must retain a zone id." }
         progressionService.recordKill(playerId, zoneId, nextState.enemyLevel)
         combatLootService.rollLoot(playerId, zoneId, refreshedState.enemyLevel)
@@ -83,12 +85,16 @@ class CombatTickService(
     previousState: com.wafuri.idle.domain.model.CombatState,
     nextState: com.wafuri.idle.domain.model.CombatState,
   ): com.wafuri.idle.domain.model.CombatState {
-    if (previousState.status != CombatStatus.WON || nextState.status != CombatStatus.FIGHTING) {
+    if (previousState.status !in setOf(CombatStatus.WON, CombatStatus.DOWN) || nextState.status != CombatStatus.FIGHTING) {
       return nextState
     }
     val zoneId = requireNotNull(nextState.zoneId) { "Respawned combat must retain a zone id." }
     val zoneLevel = progressionService.requireZoneProgress(playerId, zoneId).level
     val scaledEnemyHp = scalingRule.enemyHpFor(zoneLevel, nextState.enemyBaseHp)
-    return nextState.refreshEnemy(enemyLevel = zoneLevel, enemyMaxHp = scaledEnemyHp)
+    return nextState.refreshEnemy(
+      enemyLevel = zoneLevel,
+      enemyAttack = gameConfig.combat().enemyAttack(),
+      enemyMaxHp = scaledEnemyHp,
+    )
   }
 }

@@ -36,6 +36,7 @@ class CombatService(
     val zone = zoneTemplateCatalog.default()
     val zoneLevel = progressionService.requireZoneProgress(playerId, zone.id).level
     val enemyBaseHp = gameConfig.combat().enemyMaxHp()
+    val enemyAttack = gameConfig.combat().enemyAttack()
     val currentState = combatStateRepository.findById(playerId) ?: CombatState(playerId = playerId)
     val startedState =
       currentState.start(
@@ -44,6 +45,7 @@ class CombatService(
         enemyName = zone.enemies.first(),
         enemyLevel = zoneLevel,
         enemyBaseHp = enemyBaseHp,
+        enemyAttack = enemyAttack,
         enemyMaxHp = scalingRule.enemyHpFor(zoneLevel, enemyBaseHp),
         members = teamStats.toCombatMembers(),
       )

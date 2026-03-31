@@ -48,9 +48,11 @@ data class CombatSnapshot(
   val zoneId: String?,
   val activeTeamId: UUID?,
   val enemyName: String?,
+  val enemyAttack: Float,
   val enemyHp: Float,
   val enemyMaxHp: Float,
   val teamDps: Float,
+  val pendingReviveMillis: Long,
   val members: List<CombatMemberSnapshot>,
 )
 
@@ -70,9 +72,11 @@ fun CombatState.toSnapshot(): CombatSnapshot =
     zoneId = zoneId,
     activeTeamId = activeTeamId,
     enemyName = enemyName,
+    enemyAttack = enemyAttack,
     enemyHp = enemyHp,
     enemyMaxHp = enemyMaxHp,
     teamDps = teamDps,
+    pendingReviveMillis = pendingReviveMillis,
     members =
       members.map { member ->
         CombatMemberSnapshot(

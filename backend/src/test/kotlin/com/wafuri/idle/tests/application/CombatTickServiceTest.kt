@@ -120,7 +120,7 @@ class CombatTickServiceTest : StringSpec() {
           enemyName = "Training Dummy",
           enemyHp = 916f,
           enemyMaxHp = 1000f,
-          members = listOf(expectedCombatMemberState("warrior", 12f, 7f, 11f, 11f)),
+          members = listOf(expectedCombatMemberState("warrior", 12f, 7f, 10f, 11f)),
           lastSimulatedAt = savedState?.lastSimulatedAt,
         )
       verify(exactly = 1) { playerStateWorkQueue.markDirty(playerId) }
@@ -144,7 +144,7 @@ class CombatTickServiceTest : StringSpec() {
       every { combatStateRepository.findActiveByZoneId("starter-plains") } answers { listOf(currentState) }
       every { activePlayerRegistry.activePlayerIds() } returns setOf(playerId)
       every { combatStateRepository.findById(playerId) } answers { currentState }
-      every { combatStatService.teamStatsForPlayer(playerId, currentState.members) } returns
+      every { combatStatService.teamStatsForPlayer(playerId, any()) } returns
         expectedSingleMemberTeamCombatStats(teamId = teamId, attack = 12f, hit = 7f, maxHp = 11f)
       every { combatStateRepository.save(any()) } answers {
         firstArg<CombatState>().also { currentState = it }
@@ -164,7 +164,7 @@ class CombatTickServiceTest : StringSpec() {
           enemyName = "Training Dummy",
           enemyHp = 916f,
           enemyMaxHp = 1000f,
-          members = listOf(expectedCombatMemberState("warrior", 12f, 7f, 11f, 11f)),
+          members = listOf(expectedCombatMemberState("warrior", 12f, 7f, 10f, 11f)),
           pendingDamageMillis = 200L,
           lastSimulatedAt = currentState.lastSimulatedAt,
         )
@@ -180,7 +180,7 @@ class CombatTickServiceTest : StringSpec() {
           enemyName = "Training Dummy",
           enemyHp = 832f,
           enemyMaxHp = 1000f,
-          members = listOf(expectedCombatMemberState("warrior", 12f, 7f, 11f, 11f)),
+          members = listOf(expectedCombatMemberState("warrior", 12f, 7f, 9f, 11f)),
           lastSimulatedAt = currentState.lastSimulatedAt,
         )
       verify(exactly = 2) { playerStateWorkQueue.markDirty(playerId) }
@@ -290,11 +290,70 @@ class CombatTickServiceTest : StringSpec() {
           enemyName = "Training Dummy",
           enemyHp = 0f,
           enemyMaxHp = 10f,
-          members = listOf(expectedCombatMemberState("warrior", 12f, 7f, 11f, 11f)),
+          members = listOf(expectedCombatMemberState("warrior", 12f, 7f, 10f, 11f)),
           lastSimulatedAt = currentState.lastSimulatedAt,
         )
       verify(exactly = 1) { progressionService.recordKill(playerId, "starter-plains", 1) }
       verify(exactly = 1) { combatLootService.rollLoot(playerId, "starter-plains", 1) }
+    }
+
+    "tick leaves a wiped team down and revives it at half hp after the revive delay" {
+      val playerId = UUID.randomUUID()
+      val teamId = UUID.randomUUID()
+      var currentState =
+        expectedSingleMemberCombatState(
+          playerId = playerId,
+          teamId = teamId,
+          attack = 1f,
+          hit = 1f,
+          currentHp = 1f,
+          maxHp = 10f,
+          enemyHp = 1000f,
+          enemyMaxHp = 1000f,
+        )
+
+      every { combatStateRepository.findActiveByZoneId("starter-plains") } answers { listOf(currentState) }
+      every { activePlayerRegistry.activePlayerIds() } returns setOf(playerId)
+      every { combatStateRepository.findById(playerId) } answers { currentState }
+      every { combatStatService.teamStatsForPlayer(playerId, any()) } returns
+        expectedSingleMemberTeamCombatStats(teamId = teamId, characterKey = "warrior", attack = 1f, hit = 1f, maxHp = 10f)
+      every { combatStateRepository.save(any()) } answers {
+        firstArg<CombatState>().also { currentState = it }
+      }
+      every { playerStateWorkQueue.markDirty(playerId) } just runs
+      every { combatLootService.rollLoot(any(), any(), any()) } returns null
+      every { progressionService.recordKill(any(), any(), any()) } returns Unit
+      every { progressionService.requireZoneProgress(playerId, "starter-plains") } returns mockk { every { level } returns 1 }
+
+      service.tickZone("starter-plains", Duration.ofSeconds(1))
+
+      currentState shouldBe
+        expectedCombatState(
+          playerId = playerId,
+          status = CombatStatus.DOWN,
+          zoneId = "starter-plains",
+          activeTeamId = teamId,
+          enemyName = "Training Dummy",
+          enemyHp = 999f,
+          enemyMaxHp = 1000f,
+          members = listOf(expectedCombatMemberState("warrior", 1f, 1f, 0f, 10f)),
+          lastSimulatedAt = currentState.lastSimulatedAt,
+        )
+
+      service.tickZone("starter-plains", Duration.ofSeconds(30))
+
+      currentState shouldBe
+        expectedCombatState(
+          playerId = playerId,
+          status = CombatStatus.FIGHTING,
+          zoneId = "starter-plains",
+          activeTeamId = teamId,
+          enemyName = "Training Dummy",
+          enemyHp = 1000f,
+          enemyMaxHp = 1000f,
+          members = listOf(expectedCombatMemberState("warrior", 1f, 1f, 5f, 10f)),
+          lastSimulatedAt = currentState.lastSimulatedAt,
+        )
     }
 
     "tick refreshes combat members when team composition changes" {
@@ -463,7 +522,7 @@ class CombatTickServiceTest : StringSpec() {
           enemyName = "Training Dummy",
           enemyHp = 950f,
           enemyMaxHp = 1000f,
-          members = listOf(expectedCombatMemberState("warrior", 10f, 5f, 10f, 10f)),
+          members = listOf(expectedCombatMemberState("warrior", 10f, 5f, 9f, 10f)),
           lastSimulatedAt = stateA.lastSimulatedAt,
         )
       stateB shouldBe
@@ -475,7 +534,7 @@ class CombatTickServiceTest : StringSpec() {
           enemyName = "Forest Slime",
           enemyHp = 960f,
           enemyMaxHp = 1000f,
-          members = listOf(expectedCombatMemberState("warrior", 8f, 5f, 10f, 10f)),
+          members = listOf(expectedCombatMemberState("warrior", 8f, 5f, 9f, 10f)),
           lastSimulatedAt = stateB.lastSimulatedAt,
         )
       verify(exactly = 1) { playerStateWorkQueue.markDirty(playerA) }

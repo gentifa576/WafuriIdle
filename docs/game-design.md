@@ -165,6 +165,7 @@ Current combat direction:
 - combat then progresses on the server
 - combat currently uses the active team
 - team DPS is derived from living members only
+- enemies currently use a flat config-driven retaliation attack value
 
 Current stat derivation:
 - `attack = strength.base + strength.increment * (playerLevel - 1)`
@@ -192,7 +193,12 @@ Current loop direction:
 - combat auto-continues after respawn
 - zone is the unit that groups combat processing
 - when team stat refresh changes a combat member's max HP, current HP preserves the existing current-to-max ratio instead of keeping the old flat HP value
-- enemy HP scaling is currently the only implemented enemy-side zone scaling; enemy damage is not authored yet
+- each 1s combat damage step applies team damage first and then immediate enemy retaliation in the same resolution
+- current enemy retaliation deals flat config-driven `enemyAttack` damage with no mitigation
+- retaliation currently consumes team HP across living members in team order
+- if every combat member reaches `0 HP`, the team enters a downed state for `30s`
+- after that down timer, the same team revives at `50%` HP and combat resumes against a fresh full-HP enemy
+- enemy HP scaling is currently the only implemented enemy-side zone scaling; enemy retaliation damage is not zone-scaled yet
 - zone reward scaling currently reuses the same zone multiplier with a softer exponent so reward growth stays below enemy HP growth
 
 ## Zones

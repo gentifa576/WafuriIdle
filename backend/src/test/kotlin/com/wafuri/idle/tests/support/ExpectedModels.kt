@@ -281,11 +281,13 @@ fun expectedCombatState(
   enemyName: String? = null,
   enemyLevel: Int = 0,
   enemyBaseHp: Float = 0f,
+  enemyAttack: Float = 0f,
   enemyHp: Float = 0f,
   enemyMaxHp: Float = 0f,
   members: List<CombatMemberState> = emptyList(),
   pendingDamageMillis: Long = 0,
   pendingRespawnMillis: Long = 0,
+  pendingReviveMillis: Long = 0,
   lastSimulatedAt: Instant? = null,
 ): CombatState =
   CombatState(
@@ -303,11 +305,13 @@ fun expectedCombatState(
       } else {
         enemyMaxHp
       },
+    enemyAttack = if (status == CombatStatus.IDLE) 0f else enemyAttack.coerceAtLeast(1f),
     enemyHp = enemyHp,
     enemyMaxHp = enemyMaxHp,
     members = members,
     pendingDamageMillis = pendingDamageMillis,
     pendingRespawnMillis = pendingRespawnMillis,
+    pendingReviveMillis = pendingReviveMillis,
     lastSimulatedAt = lastSimulatedAt,
   )
 
@@ -324,10 +328,12 @@ fun expectedSingleMemberCombatState(
   enemyName: String = "Training Dummy",
   enemyLevel: Int = 1,
   enemyBaseHp: Float? = null,
+  enemyAttack: Float = 1f,
   enemyHp: Float,
   enemyMaxHp: Float,
   pendingDamageMillis: Long = 0,
   pendingRespawnMillis: Long = 0,
+  pendingReviveMillis: Long = 0,
   lastSimulatedAt: Instant? = null,
 ): CombatState =
   expectedCombatState(
@@ -338,11 +344,13 @@ fun expectedSingleMemberCombatState(
     enemyName = enemyName,
     enemyLevel = enemyLevel,
     enemyBaseHp = enemyBaseHp ?: enemyMaxHp,
+    enemyAttack = enemyAttack,
     enemyHp = enemyHp,
     enemyMaxHp = enemyMaxHp,
     members = listOf(expectedCombatMemberState(characterKey, attack, hit, currentHp, maxHp)),
     pendingDamageMillis = pendingDamageMillis,
     pendingRespawnMillis = pendingRespawnMillis,
+    pendingReviveMillis = pendingReviveMillis,
     lastSimulatedAt = lastSimulatedAt,
   )
 
@@ -369,9 +377,11 @@ fun expectedCombatSnapshot(
   zoneId: String?,
   activeTeamId: UUID?,
   enemyName: String?,
+  enemyAttack: Float,
   enemyHp: Float,
   enemyMaxHp: Float,
   teamDps: Float,
+  pendingReviveMillis: Long = 0,
   members: List<CombatMemberSnapshot>,
 ): CombatSnapshot =
   CombatSnapshot(
@@ -380,9 +390,11 @@ fun expectedCombatSnapshot(
     zoneId = zoneId,
     activeTeamId = activeTeamId,
     enemyName = enemyName,
+    enemyAttack = enemyAttack,
     enemyHp = enemyHp,
     enemyMaxHp = enemyMaxHp,
     teamDps = teamDps,
+    pendingReviveMillis = pendingReviveMillis,
     members = members,
   )
 

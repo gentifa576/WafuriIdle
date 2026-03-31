@@ -78,8 +78,8 @@ class OfflineProgressionServiceTest : StringSpec() {
           teamId = teamId,
           attack = 10f,
           hit = 1f,
-          currentHp = 10f,
-          maxHp = 10f,
+          currentHp = 1000f,
+          maxHp = 1000f,
           enemyHp = 100f,
           enemyMaxHp = 100f,
           lastSimulatedAt = null,
@@ -107,8 +107,8 @@ class OfflineProgressionServiceTest : StringSpec() {
           teamId = teamId,
           attack = 10f,
           hit = 1f,
-          currentHp = 10f,
-          maxHp = 10f,
+          currentHp = 1000f,
+          maxHp = 1000f,
           enemyHp = 100f,
           enemyMaxHp = 100f,
           lastSimulatedAt = Instant.now().minus(Duration.ofMinutes(6)),
@@ -127,7 +127,7 @@ class OfflineProgressionServiceTest : StringSpec() {
 
       every { combatStateRepository.findById(playerId) } returns state
       every { combatStatService.teamStatsForPlayer(playerId, state.members) } returns
-        expectedSingleMemberTeamCombatStats(teamId = teamId, attack = 10f, hit = 1f, maxHp = 10f)
+        expectedSingleMemberTeamCombatStats(teamId = teamId, attack = 10f, hit = 1f, maxHp = 1000f)
       every { progressionService.requirePlayer(playerId) } returnsMany listOf(beforePlayer, afterPlayer)
       every { progressionService.requireZoneProgress(playerId, zoneId) } returnsMany listOf(beforeZone, afterZone)
       every { progressionService.recordKill(playerId, zoneId, any()) } just runs
@@ -172,8 +172,8 @@ class OfflineProgressionServiceTest : StringSpec() {
           teamId = teamId,
           attack = 10f,
           hit = 1f,
-          currentHp = 10f,
-          maxHp = 10f,
+          currentHp = 1000f,
+          maxHp = 1000f,
           enemyHp = 100f,
           enemyMaxHp = 100f,
           lastSimulatedAt = Instant.now().minus(Duration.ofMinutes(4)),
@@ -185,7 +185,7 @@ class OfflineProgressionServiceTest : StringSpec() {
 
       every { combatStateRepository.findById(playerId) } returns state
       every { combatStatService.teamStatsForPlayer(playerId, state.members) } returns
-        expectedSingleMemberTeamCombatStats(teamId = teamId, attack = 10f, hit = 1f, maxHp = 10f)
+        expectedSingleMemberTeamCombatStats(teamId = teamId, attack = 10f, hit = 1f, maxHp = 1000f)
       every { progressionService.requirePlayer(playerId) } returnsMany listOf(beforePlayer, afterPlayer)
       every { progressionService.requireZoneProgress(playerId, zoneId) } returnsMany listOf(beforeZone, afterZone)
       every { progressionService.recordKill(playerId, zoneId, any()) } just runs
@@ -218,14 +218,14 @@ class OfflineProgressionServiceTest : StringSpec() {
           teamId = teamId,
           attack = 10f,
           hit = 1f,
-          currentHp = 10f,
-          maxHp = 10f,
+          currentHp = 1000f,
+          maxHp = 1000f,
           enemyHp = 100f,
           enemyMaxHp = 100f,
           lastSimulatedAt = Instant.now().minus(offlineDuration),
         )
       val teamStats =
-        expectedSingleMemberTeamCombatStats(teamId = teamId, attack = 10f, hit = 1f, maxHp = 10f)
+        expectedSingleMemberTeamCombatStats(teamId = teamId, attack = 10f, hit = 1f, maxHp = 1000f)
 
       val offlineCombatStateRepository = mockk<CombatStateRepository>()
       val offlineCombatStatService = mockk<CombatStatService>()

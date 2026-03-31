@@ -13,8 +13,11 @@ fun gameConfig(
   characterPullGoldCost: Int = 250,
   duplicateEssence: Int = 15,
   enemyMaxHp: Float = 1000f,
+  enemyAttack: Float = 1f,
   damageInterval: Duration = Duration.ofSeconds(1),
   respawnDelay: Duration = Duration.ofSeconds(1),
+  reviveDelay: Duration = Duration.ofSeconds(30),
+  reviveHpRatio: Float = 0.5f,
   zoneHpScalingConstant: Float = 1f,
   rewardScalingExponent: Float = 0.5f,
   tutorialEndLevel: Int = 19,
@@ -65,8 +68,11 @@ fun gameConfig(
   every { characterPullConfig.goldCost() } returns characterPullGoldCost
   every { characterPullConfig.duplicateEssence() } returns duplicateEssence
   every { combatConfig.enemyMaxHp() } returns enemyMaxHp
+  every { combatConfig.enemyAttack() } returns enemyAttack
   every { combatConfig.damageInterval() } returns damageInterval
   every { combatConfig.respawnDelay() } returns respawnDelay
+  every { combatConfig.reviveDelay() } returns reviveDelay
+  every { combatConfig.reviveHpRatio() } returns reviveHpRatio
   every { combatConfig.zoneScaling() } returns zoneScalingConfig
   every { combatConfig.loot() } returns lootConfig
   every { lootConfig.baseItemDropRate() } returns baseItemDropRate
