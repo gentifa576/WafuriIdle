@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { EquipmentSlot, InventoryItemSnapshot } from '../core/types/api'
 import { CombatViewport } from '../features/combat/components/CombatViewport'
-import { toCombatHud } from '../features/combat/model/combatHud'
+import { reviveSecondsRemaining, toCombatHud } from '../features/combat/model/combatHud'
 import { useGameClient } from '../features/session/hooks/useGameClient'
 
 type WorkspaceView = 'combat' | 'characters' | 'team' | 'inventory' | 'gacha'
@@ -17,6 +17,8 @@ export function CombatScreen() {
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [guestNamePlaceholder, setGuestNamePlaceholder] = useState(() => randomGuestName())
   const [selectedTeamId, setSelectedTeamId] = useState('')
+  const [countdownNowMs, setCountdownNowMs] = useState(() => Date.now())
+  const downSnapshotStartedAtMs = useRef<number | null>(null)
   const {
     player,
     teams,
@@ -34,7 +36,6 @@ export function CombatScreen() {
     error,
     actions,
   } = useGameClient()
-  const hud = toCombatHud(combat)
   const activeTeam = useMemo(() => teams.find((team) => team.id === player?.activeTeamId) ?? teams[0] ?? null, [player?.activeTeamId, teams])
   const selectedTeam = useMemo(() => teams.find((team) => team.id === selectedTeamId) ?? activeTeam ?? teams[0] ?? null, [activeTeam, selectedTeamId, teams])
   const selectedStarter = useMemo(
@@ -58,6 +59,21 @@ export function CombatScreen() {
   const memberLabels = useMemo(() => Object.fromEntries(ownedCharacters.map((character) => [character.key, character.name])), [ownedCharacters])
   const topZone = zoneProgress[0] ?? null
   const needsStarterChoice = player != null && player.ownedCharacterKeys.length === 0
+  const displayedPendingReviveMillis =
+    combat?.status === 'DOWN'
+      ? Math.min(
+          30_000,
+          combat.pendingReviveMillis + Math.max(0, countdownNowMs - (downSnapshotStartedAtMs.current ?? countdownNowMs)),
+        )
+      : combat?.pendingReviveMillis ?? 0
+  const reviveSeconds = reviveSecondsRemaining(displayedPendingReviveMillis)
+  const hud =
+    combat?.status === 'DOWN'
+      ? {
+          ...toCombatHud(combat),
+          subtitle: `DOWN · Revive in ${reviveSeconds}s`,
+        }
+      : toCombatHud(combat)
 
   useEffect(() => {
     if (selectedTeamId && teams.some((team) => team.id === selectedTeamId)) {
@@ -72,6 +88,22 @@ export function CombatScreen() {
     }
     setSelectedStarterKey(starterTemplates[0]?.key ?? '')
   }, [selectedStarterKey, starterTemplates])
+
+  useEffect(() => {
+    if (combat?.status !== 'DOWN') {
+      downSnapshotStartedAtMs.current = null
+      return
+    }
+
+    downSnapshotStartedAtMs.current = Date.now()
+    setCountdownNowMs(Date.now())
+    const intervalId = window.setInterval(() => {
+      setCountdownNowMs(Date.now())
+    }, 1000)
+    return () => {
+      window.clearInterval(intervalId)
+    }
+  }, [combat?.playerId, combat?.status, combat?.pendingReviveMillis])
 
   if (!player) {
     return (
@@ -529,7 +561,7 @@ export function CombatScreen() {
                   <p>
                     {combat?.status ?? 'Idle'} state
                     {combat?.status === 'DOWN'
-                      ? ` · revives in ${Math.max(0, Math.ceil((30000 - (combat?.pendingReviveMillis ?? 0)) / 1000))}s`
+                      ? ` · revives in ${reviveSeconds}s`
                       : ` · retaliates for ${combat?.enemyAttack.toFixed(1) ?? '0.0'}`}
                   </p>
                 </article>

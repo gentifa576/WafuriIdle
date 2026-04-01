@@ -108,6 +108,7 @@
 | Loop separation | WebSocket state sync must not be responsible for advancing combat simulation. |
 | Publish timing | Player and combat publishes should each include small jitter to avoid synchronized fan-out spikes. |
 | Change gating | Player state should not be published when the authoritative state content is unchanged. |
+| Down publish gating | Combat-state sync should publish when combat enters `DOWN`, then suppress repeated `DOWN` countdown-only syncs until combat leaves `DOWN`; clients should count revive time locally from the last `pendingReviveMillis` snapshot and reconcile on the next combat sync. |
 | Offline summary dedupe | When an offline progression summary is published for a zone, redundant zone level-up notifications for that same zone should be omitted from the same publish cycle. |
 
 ## Current Capabilities
@@ -176,7 +177,7 @@
 | Source | State sync is driven by the server tick loop. |
 | Tick rate | The default state-sync tick cadence is 200ms. |
 | Jitter | Publish timing includes a small jitter window before sending. |
-| Publish rule | Tick processing skips WebSocket publish when the player's state content did not change. |
+| Publish rule | Tick processing skips WebSocket publish when the player's state content did not change. Combat syncs also suppress repeated `DOWN` countdown-only snapshots after the initial `DOWN` publish until combat resumes or otherwise leaves `DOWN`. |
 | Payload | Event payloads are player-scoped messages `{ type, playerId, snapshot }` for player-state sync, `{ type, playerId, snapshot, serverTime }` for combat-state sync, `{ type, playerId, zoneId, level, serverTime }` for zone level-up notifications, `{ type, playerId, offlineDurationMillis, kills, experienceGained, goldGained, playerLevel, playerLevelsGained, zoneId, zoneLevel, zoneLevelsGained, rewards, serverTime }` for offline progression summaries, and `{ type, playerId, commandType, message, serverTime }` for WebSocket command validation failures. `START_COMBAT` may return either an immediate combat-state sync payload or a command error payload on the player channel. Combat snapshots now include `enemyAttack` and `pendingReviveMillis` alongside enemy HP and team member HP. |
 | Event dedupe | If an offline progression summary for a zone is present in a player publish batch, separate zone level-up notifications for that same zone are suppressed because the summary already carries the final zone level and levels gained. |
 | Snapshot | Player-state `snapshot` contains player identity, player EXP/level, gold, essence, owned character roster with shared character level, per-zone progression, inventory with static item metadata plus generated item level and scaled item stat values, and server time. Combat state is sent as a separate sync message and includes enemy HP, `enemyAttack`, team DPS, `pendingReviveMillis`, and per-member HP/alive state. |

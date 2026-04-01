@@ -509,7 +509,7 @@ export class CombatScene {
 
   private shouldAnimateCombat() {
     const snapshot = this.pendingState.snapshot
-    return snapshot != null && snapshot.status !== 'IDLE' && snapshot.members.length > 0
+    return snapshot != null && snapshot.status !== 'IDLE' && snapshot.status !== 'DOWN' && snapshot.members.length > 0
   }
 
   private resetToPathStart() {

@@ -358,6 +358,10 @@ describe('CombatScreen', () => {
 
     expect(await screen.findByText(/DOWN · Revive in 18s/i)).toBeInTheDocument()
     expect(screen.getByText(/revives in 18s/i)).toBeInTheDocument()
+    await act(async () => {
+      await new Promise((resolve) => window.setTimeout(resolve, 1100))
+    })
+    expect(await screen.findByText(/DOWN · Revive in 17s/i)).toBeInTheDocument()
   })
 
   it('supports triggering a ten-pull from the gacha view', async () => {

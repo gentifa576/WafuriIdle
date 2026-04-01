@@ -4,6 +4,7 @@ import com.wafuri.idle.application.model.CombatSnapshot
 import com.wafuri.idle.application.model.PlayerStateContent
 import com.wafuri.idle.application.model.PlayerStateSnapshot
 import com.wafuri.idle.application.port.out.PlayerStateChangeTracker
+import com.wafuri.idle.domain.model.CombatStatus
 import jakarta.enterprise.context.ApplicationScoped
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -39,7 +40,10 @@ class InMemoryPlayerStateChangeTracker : PlayerStateChangeTracker {
   ): Boolean {
     val shouldPublish = AtomicBoolean(false)
     lastPublishedCombat.compute(playerId) { _, previousSnapshot ->
-      if (previousSnapshot != snapshot) {
+      val repeatedDownTick =
+        previousSnapshot?.status == CombatStatus.DOWN &&
+          snapshot?.status == CombatStatus.DOWN
+      if (!repeatedDownTick && previousSnapshot != snapshot) {
         shouldPublish.set(true)
       }
       snapshot

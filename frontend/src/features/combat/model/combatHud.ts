@@ -18,10 +18,14 @@ export function toCombatHud(snapshot: CombatSnapshot | null) {
     title: snapshot.enemyName,
     subtitle:
       snapshot.status === 'DOWN'
-        ? `DOWN · Revive in ${Math.max(0, Math.ceil((30000 - snapshot.pendingReviveMillis) / 1000))}s`
+        ? `DOWN · Revive in ${reviveSecondsRemaining(snapshot.pendingReviveMillis)}s`
         : `${snapshot.status} · DPS ${snapshot.teamDps.toFixed(1)} · Retaliate ${snapshot.enemyAttack.toFixed(1)}`,
     enemyRatio: snapshot.enemyMaxHp === 0 ? 0 : snapshot.enemyHp / snapshot.enemyMaxHp,
     teamCurrentHp,
     teamMaxHp,
   }
+}
+
+export function reviveSecondsRemaining(pendingReviveMillis: number) {
+  return Math.max(0, Math.ceil((30000 - pendingReviveMillis) / 1000))
 }
