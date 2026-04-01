@@ -11,6 +11,7 @@ import com.wafuri.idle.application.port.out.PlayerZoneProgressRepository
 import com.wafuri.idle.application.port.out.Repository
 import com.wafuri.idle.application.service.character.CharacterTemplateCatalog
 import com.wafuri.idle.application.service.scaling.ScalingRule
+import com.wafuri.idle.domain.model.CombatStatus
 import com.wafuri.idle.domain.model.Player
 import jakarta.enterprise.context.ApplicationScoped
 import java.time.Instant
@@ -68,5 +69,9 @@ class PlayerStateSnapshotService(
     )
   }
 
-  fun combatSnapshotFor(playerId: UUID) = combatStateRepository.findById(playerId)?.toSnapshot()
+  fun combatSnapshotFor(playerId: UUID) =
+    combatStateRepository
+      .findById(playerId)
+      ?.takeUnless { it.status == CombatStatus.IDLE }
+      ?.toSnapshot()
 }

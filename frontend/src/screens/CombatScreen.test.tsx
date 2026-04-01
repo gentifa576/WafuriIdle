@@ -50,6 +50,9 @@ const mocks = vi.hoisted(() => {
     sendStartCombat: vi.fn((socketArg: WebSocket) => {
       ;(socketArg as unknown as typeof state.socket).send(JSON.stringify({ type: 'START_COMBAT' }))
     }),
+    sendStopCombat: vi.fn((socketArg: WebSocket) => {
+      ;(socketArg as unknown as typeof state.socket).send(JSON.stringify({ type: 'STOP_COMBAT' }))
+    }),
     reset() {
       sessionPlayerId = null
       sessionExpiresAt = null
@@ -77,6 +80,7 @@ const mocks = vi.hoisted(() => {
       this.unequipTeamItem.mockReset()
       this.createPlayerSocket.mockClear()
       this.sendStartCombat.mockClear()
+      this.sendStopCombat.mockClear()
     },
   }
 
@@ -113,6 +117,7 @@ vi.mock('../core/api/teamApi', () => ({
 vi.mock('../core/api/wsClient', () => ({
   createPlayerSocket: mocks.createPlayerSocket,
   sendStartCombat: mocks.sendStartCombat,
+  sendStopCombat: mocks.sendStopCombat,
 }))
 
 vi.mock('../features/combat/components/CombatViewport', () => ({
@@ -362,6 +367,50 @@ describe('CombatScreen', () => {
       await new Promise((resolve) => window.setTimeout(resolve, 1100))
     })
     expect(await screen.findByText(/DOWN · Revive in 17s/i)).toBeInTheDocument()
+  })
+
+  it('sends a stop combat command from the combat view', async () => {
+    const readyPlayer = guestAuthResponse({ activeTeamId: 'team-1', ownedCharacterKeys: ['hero'] })
+
+    mocks.createGuestPlayer.mockResolvedValue(readyPlayer)
+    mocks.getPlayer.mockResolvedValue(readyPlayer.player)
+    mocks.getPlayerTeams.mockResolvedValue([emptyTeam()])
+    mocks.getPlayerInventory.mockResolvedValue([])
+
+    const user = userEvent.setup()
+    render(<CombatScreen />)
+
+    await user.type(screen.getByLabelText('Player name'), 'Scout')
+    await user.click(screen.getByRole('button', { name: 'Create Guest' }))
+    expect(await screen.findByRole('heading', { name: 'Scout' })).toBeInTheDocument()
+
+    act(() => {
+      mocks.lastSocketOptions?.onMessage({
+        type: 'COMBAT_STATE_SYNC',
+        playerId: 'player-1',
+        snapshot: {
+          playerId: 'player-1',
+          status: 'FIGHTING',
+          zoneId: 'starter-plains',
+          activeTeamId: 'team-1',
+          enemyName: 'Training Slime',
+          enemyAttack: 1,
+          enemyHp: 18,
+          enemyMaxHp: 20,
+          teamDps: 5.5,
+          pendingReviveMillis: 0,
+          members: [],
+        },
+        serverTime: '2099-01-01T00:00:00Z',
+      })
+    })
+
+    await user.click(screen.getByRole('button', { name: 'Stop Combat' }))
+
+    await waitFor(() => {
+      expect(mocks.sendStopCombat).toHaveBeenCalledTimes(1)
+      expect(mocks.socket.send).toHaveBeenCalledWith(JSON.stringify({ type: 'STOP_COMBAT' }))
+    })
   })
 
   it('supports triggering a ten-pull from the gacha view', async () => {

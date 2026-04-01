@@ -104,6 +104,17 @@ class PlayerWebSocketEndpoint {
             serverTime = Instant.now(),
           )
         }
+        PlayerSocketCommandType.STOP_COMBAT -> {
+          logger.atInfo().addKeyValue("playerId", playerId).log("Received websocket combat stop command.")
+          val snapshot = combatService.stop(parsedPlayerId)
+          playerStateChangeTracker.invalidate(parsedPlayerId)
+          playerStateWorkQueue.markDirty(parsedPlayerId)
+          CombatStateMessage(
+            playerId = parsedPlayerId,
+            snapshot = snapshot,
+            serverTime = Instant.now(),
+          )
+        }
       }
     } catch (exception: ValidationException) {
       logger
@@ -137,4 +148,5 @@ data class PlayerSocketCommand(
 
 enum class PlayerSocketCommandType {
   START_COMBAT,
+  STOP_COMBAT,
 }

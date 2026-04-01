@@ -2,12 +2,14 @@ package com.wafuri.idle.application.service.team
 
 import com.wafuri.idle.application.exception.ResourceNotFoundException
 import com.wafuri.idle.application.exception.ValidationException
+import com.wafuri.idle.application.port.out.CombatStateRepository
 import com.wafuri.idle.application.port.out.PlayerStateWorkQueue
 import com.wafuri.idle.application.port.out.Repository
 import com.wafuri.idle.application.port.out.TeamRepository
 import com.wafuri.idle.application.service.character.CharacterTemplateCatalog
 import com.wafuri.idle.application.service.combat.CombatStatService
 import com.wafuri.idle.domain.model.CharacterTemplate
+import com.wafuri.idle.domain.model.CombatStatus
 import com.wafuri.idle.domain.model.DomainRuleViolationException
 import com.wafuri.idle.domain.model.Player
 import com.wafuri.idle.domain.model.Team
@@ -22,6 +24,7 @@ class TeamService(
   private val characterTemplateCatalog: CharacterTemplateCatalog,
   private val playerStateWorkQueue: PlayerStateWorkQueue,
   private val combatStatService: CombatStatService,
+  private val combatStateRepository: CombatStateRepository,
 ) {
   @Transactional
   fun create(playerId: UUID): Team {
@@ -51,6 +54,7 @@ class TeamService(
     if (player.id != actorPlayerId) {
       throw ValidationException("Team does not belong to the authenticated player.")
     }
+    requirePlayerNotDowned(team.playerId)
     if (!player.ownedCharacterKeys.contains(characterKey)) {
       throw ValidationException("Character $characterKey is not owned by the player.")
     }
@@ -85,6 +89,7 @@ class TeamService(
     if (player.id != actorPlayerId) {
       throw ValidationException("Team does not belong to the authenticated player.")
     }
+    requirePlayerNotDowned(team.playerId)
     if (team.characterKeys.isEmpty()) {
       throw ValidationException("Team must have at least one character before it can be activated.")
     }
@@ -96,5 +101,11 @@ class TeamService(
     combatStatService.invalidatePlayer(team.playerId)
     playerStateWorkQueue.markDirty(team.playerId)
     return team
+  }
+
+  private fun requirePlayerNotDowned(playerId: UUID) {
+    if (combatStateRepository.findById(playerId)?.status == CombatStatus.DOWN) {
+      throw ValidationException("Team changes are unavailable while the player's combat is downed.")
+    }
   }
 }

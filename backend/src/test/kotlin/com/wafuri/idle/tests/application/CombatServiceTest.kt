@@ -129,5 +129,23 @@ class CombatServiceTest : StringSpec() {
       savedState shouldBe expectedState
       verify(exactly = 1) { playerStateWorkQueue.markDirty(playerId) }
     }
+
+    "stop combat resets the player to idle combat state" {
+      val playerId = UUID.randomUUID()
+      val player = expectedPlayer(playerId, "Alice")
+      var savedState: CombatState? = null
+
+      every { playerRepository.findById(playerId) } returns player
+      every { combatStateRepository.save(any()) } answers {
+        firstArg<CombatState>().also { savedState = it }
+      }
+      every { playerStateWorkQueue.markDirty(playerId) } just runs
+
+      val result = service.stop(playerId)
+
+      result shouldBe null
+      savedState shouldBe CombatState(playerId)
+      verify(exactly = 1) { playerStateWorkQueue.markDirty(playerId) }
+    }
   }
 }

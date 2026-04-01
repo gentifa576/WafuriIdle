@@ -1,17 +1,22 @@
 package com.wafuri.idle.tests.application
 
 import com.wafuri.idle.application.exception.ValidationException
+import com.wafuri.idle.application.port.out.CombatStateRepository
 import com.wafuri.idle.application.port.out.PlayerStateWorkQueue
 import com.wafuri.idle.application.port.out.Repository
 import com.wafuri.idle.application.port.out.TeamRepository
 import com.wafuri.idle.application.service.character.CharacterTemplateCatalog
 import com.wafuri.idle.application.service.combat.CombatStatService
 import com.wafuri.idle.application.service.team.TeamService
+import com.wafuri.idle.domain.model.CombatStatus
 import com.wafuri.idle.domain.model.Player
 import com.wafuri.idle.domain.model.Team
 import com.wafuri.idle.domain.model.TeamMemberSlot
 import com.wafuri.idle.tests.support.expectedPlayer
+import com.wafuri.idle.tests.support.expectedSingleMemberCombatState
 import com.wafuri.idle.tests.support.expectedTeam
+import com.wafuri.idle.tests.support.expectedValidationException
+import com.wafuri.idle.tests.support.shouldMatchExpected
 import com.wafuri.idle.tests.support.warriorTemplate
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
@@ -31,6 +36,7 @@ class TeamServiceTest : StringSpec() {
   private lateinit var characterTemplateCatalog: CharacterTemplateCatalog
   private lateinit var playerStateWorkQueue: PlayerStateWorkQueue
   private lateinit var combatStatService: CombatStatService
+  private lateinit var combatStateRepository: CombatStateRepository
   private lateinit var teamSlot: CapturingSlot<Team>
   private lateinit var service: TeamService
 
@@ -41,8 +47,18 @@ class TeamServiceTest : StringSpec() {
       characterTemplateCatalog = mockk()
       playerStateWorkQueue = mockk()
       combatStatService = mockk()
+      combatStateRepository = mockk()
       teamSlot = slot()
-      service = TeamService(playerRepository, teamRepository, characterTemplateCatalog, playerStateWorkQueue, combatStatService)
+      service =
+        TeamService(
+          playerRepository,
+          teamRepository,
+          characterTemplateCatalog,
+          playerStateWorkQueue,
+          combatStatService,
+          combatStateRepository,
+        )
+      every { combatStateRepository.findById(any()) } returns null
     }
 
     "create team for player" {
@@ -124,6 +140,37 @@ class TeamServiceTest : StringSpec() {
       verify(exactly = 1) { playerStateWorkQueue.markDirty(player.id) }
     }
 
+    "assign character to team is blocked while combat is down" {
+      val player = Player(UUID.randomUUID(), "Alice", ownedCharacterKeys = setOf("warrior"))
+      val team = Team(UUID.randomUUID(), player.id)
+
+      every { teamRepository.findById(team.id) } returns team
+      every { playerRepository.findById(player.id) } returns player
+      every {
+        combatStateRepository.findById(player.id)
+      } returns
+        expectedSingleMemberCombatState(
+          player.id,
+          team.id,
+          attack = 10f,
+          hit = 10f,
+          currentHp = 0f,
+          maxHp = 100f,
+          status = CombatStatus.DOWN,
+          enemyHp = 50f,
+          enemyMaxHp = 50f,
+        )
+
+      val thrown =
+        shouldThrow<ValidationException> {
+          service.assignCharacter(player.id, team.id, 1, "warrior")
+        }
+
+      thrown.shouldMatchExpected(
+        expectedValidationException("Team changes are unavailable while the player's combat is downed."),
+      )
+    }
+
     "activate team sets player's active team" {
       val player = Player(UUID.randomUUID(), "Alice", ownedCharacterKeys = setOf("warrior"))
       val team =
@@ -147,6 +194,42 @@ class TeamServiceTest : StringSpec() {
       updatedPlayers.last() shouldBe expectedPlayer
       verify(exactly = 1) { combatStatService.invalidatePlayer(player.id) }
       verify(exactly = 1) { playerStateWorkQueue.markDirty(player.id) }
+    }
+
+    "activate team is blocked while combat is down" {
+      val player = Player(UUID.randomUUID(), "Alice", ownedCharacterKeys = setOf("warrior"))
+      val team =
+        Team(
+          UUID.randomUUID(),
+          player.id,
+          slots = listOf(TeamMemberSlot(1, "warrior"), TeamMemberSlot(2), TeamMemberSlot(3)),
+        )
+
+      every { teamRepository.findById(team.id) } returns team
+      every { playerRepository.findById(player.id) } returns player
+      every {
+        combatStateRepository.findById(player.id)
+      } returns
+        expectedSingleMemberCombatState(
+          player.id,
+          team.id,
+          attack = 10f,
+          hit = 10f,
+          currentHp = 0f,
+          maxHp = 100f,
+          status = CombatStatus.DOWN,
+          enemyHp = 50f,
+          enemyMaxHp = 50f,
+        )
+
+      val thrown =
+        shouldThrow<ValidationException> {
+          service.activate(player.id, team.id)
+        }
+
+      thrown.shouldMatchExpected(
+        expectedValidationException("Team changes are unavailable while the player's combat is downed."),
+      )
     }
   }
 }

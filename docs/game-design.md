@@ -162,6 +162,7 @@ Open questions:
 Current combat direction:
 - combat is server-authoritative
 - combat starts from an explicit player command
+- combat can also be stopped explicitly by the player
 - combat then progresses on the server
 - combat currently uses the active team
 - team DPS is derived from living members only
@@ -197,7 +198,8 @@ Current loop direction:
 - current enemy retaliation deals flat config-driven `enemyAttack` damage with no mitigation
 - retaliation currently consumes team HP across living members in team order
 - if every combat member reaches `0 HP`, the team enters a downed state for `30s`
-- after that down timer, the same team revives at `50%` HP and combat resumes against a fresh full-HP enemy
+- while the team is downed, combat-relevant team edits are blocked; players cannot swap characters, activate another team, or equip and unequip items until combat leaves `DOWN`
+- after that down timer, the same team revives at `50%` HP and combat resumes against a fresh full-HP enemy unless the player explicitly stops combat first
 - enemy HP scaling is currently the only implemented enemy-side zone scaling; enemy retaliation damage is not zone-scaled yet
 - zone reward scaling currently reuses the same zone multiplier with a softer exponent so reward growth stays below enemy HP growth
 

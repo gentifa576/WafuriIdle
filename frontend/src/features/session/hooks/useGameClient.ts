@@ -13,7 +13,7 @@ import {
   pullCharacter,
   signUpPlayer,
 } from '../../../core/api/playerApi'
-import { sendStartCombat, createPlayerSocket } from '../../../core/api/wsClient'
+import { createPlayerSocket, sendStartCombat, sendStopCombat } from '../../../core/api/wsClient'
 import { activateTeam, assignCharacterToTeam, equipTeamItem, unequipTeamItem } from '../../../core/api/teamApi'
 import type {
   CharacterPull,
@@ -418,6 +418,19 @@ export function useGameClient() {
         setError(null)
         sendStartCombat(socket)
         appendActivity(`Sent combat start for ${player.name}`)
+      },
+      async stopCombat() {
+        if (!player) {
+          return
+        }
+        const socket = socketRef.current
+        if (socketStatus !== 'connected' || !socket || socket.readyState !== WebSocket.OPEN) {
+          setError('Connect to the game server before stopping combat.')
+          return
+        }
+        setError(null)
+        sendStopCombat(socket)
+        appendActivity(`Sent combat stop for ${player.name}`)
       },
       dismissNotification(id: string) {
         setNotifications((current) => current.filter((notification) => notification.id !== id))

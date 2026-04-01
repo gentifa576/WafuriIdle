@@ -54,4 +54,13 @@ class CombatService(
     playerStateWorkQueue.markDirty(playerId)
     return savedState.toSnapshot()
   }
+
+  @Transactional
+  fun stop(playerId: UUID): CombatSnapshot? {
+    playerRepository.findById(playerId)
+      ?: throw ResourceNotFoundException("Player $playerId was not found.")
+    val savedState = combatStateRepository.save(CombatState(playerId = playerId))
+    playerStateWorkQueue.markDirty(playerId)
+    return savedState.takeUnless { it.status == com.wafuri.idle.domain.model.CombatStatus.IDLE }?.toSnapshot()
+  }
 }

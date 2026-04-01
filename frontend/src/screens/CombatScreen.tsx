@@ -551,6 +551,9 @@ export function CombatScreen() {
                   <button className="primary-cta" disabled={loading || !activeTeamId} onClick={() => void actions.startCombat()}>
                     Start Combat
                   </button>
+                  <button className="ghost-button" disabled={loading || combat == null} onClick={() => void actions.stopCombat()}>
+                    Stop Combat
+                  </button>
                   <button className="ghost-button" disabled={loading} onClick={() => void actions.refreshPlayer()}>
                     Refresh State
                   </button>

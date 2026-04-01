@@ -236,6 +236,58 @@ class PlayerWebSocketTest {
   }
 
   @Test
+  fun `player websocket accepts combat stop commands and clears combat state`() {
+    val signupResponse = signupGuest("SocketStopCombat")
+    val playerId = signupResponse.player.id.toString()
+    val token = signupResponse.sessionToken
+    val teamId = teamsResponse(token, playerId).first().id.toString()
+
+    given()
+      .header("Authorization", "Bearer $token")
+      .contentType("application/json")
+      .body("""{"characterKey":"nimbus"}""")
+      .post("/players/$playerId/starter")
+      .then()
+      .statusCode(204)
+
+    given()
+      .header("Authorization", "Bearer $token")
+      .post("/teams/$teamId/slots/1/characters/nimbus")
+      .then()
+      .statusCode(200)
+
+    given()
+      .header("Authorization", "Bearer $token")
+      .post("/teams/$teamId/activate")
+      .then()
+      .statusCode(200)
+
+    val collector = MessageCollector()
+    val session = connect(collector, playerId, token)
+    try {
+      collector.opened.await(5, TimeUnit.SECONDS) shouldBe true
+      waitForActivePlayer(signupResponse.player.id)
+      collector.messages.poll(5, TimeUnit.SECONDS).shouldNotBeNull()
+
+      session.asyncRemote.sendText("""{"type":"START_COMBAT"}""")
+      collector.messages.poll(5, TimeUnit.SECONDS).shouldNotBeNull()
+      waitForCombatState(playerId).status shouldBe CombatStatus.FIGHTING
+
+      session.asyncRemote.sendText("""{"type":"STOP_COMBAT"}""")
+
+      val stopMessage = collector.messages.poll(5, TimeUnit.SECONDS)
+      stopMessage.shouldNotBeNull()
+      val combatMessage = objectMapper.readValue(stopMessage, com.wafuri.idle.application.model.CombatStateMessage::class.java)
+      combatMessage.type shouldBe EventType.COMBAT_STATE_SYNC
+      combatMessage.snapshot.shouldBeNull()
+
+      combatStateRepository.findById(signupResponse.player.id)?.status shouldBe CombatStatus.IDLE
+    } finally {
+      session.close()
+    }
+  }
+
+  @Test
   fun `player websocket rejects connections for a different player id`() {
     val playerA = signupGuest("SocketOwnerA")
     val playerB = signupGuest("SocketOwnerB")

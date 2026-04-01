@@ -120,6 +120,40 @@ class PlayerWebSocketEndpointTest :
       }
     }
 
+    "onMessage stops combat from websocket command and returns a cleared acknowledgement payload" {
+      val playerId = UUID.randomUUID()
+      val endpoint =
+        PlayerWebSocketEndpoint().apply {
+          registry = mockk()
+          playerStateChangeTracker = mockk()
+          playerStateWorkQueue = mockk()
+          offlineProgressionService = mockk()
+          backgroundExecutor = mockk()
+          combatService = mockk()
+          authSessionService = mockk()
+          jwt = mockk()
+        }
+
+      every { endpoint.combatService.stop(playerId) } returns null
+      val connection = mockk<WebSocketConnection>()
+      every { connection.pathParam("playerId") } returns playerId.toString()
+      every { endpoint.jwt.subject } returns playerId.toString()
+      every { endpoint.authSessionService.requireActive(endpoint.jwt) } just runs
+      every { endpoint.playerStateChangeTracker.invalidate(playerId) } just runs
+      every { endpoint.playerStateWorkQueue.markDirty(playerId) } just runs
+
+      val response = endpoint.onMessage(PlayerSocketCommand(PlayerSocketCommandType.STOP_COMBAT), connection)
+      val combatResponse = response as CombatStateMessage
+
+      combatResponse.playerId shouldBe playerId
+      combatResponse.snapshot shouldBe null
+      verifyOrder {
+        endpoint.combatService.stop(playerId)
+        endpoint.playerStateChangeTracker.invalidate(playerId)
+        endpoint.playerStateWorkQueue.markDirty(playerId)
+      }
+    }
+
     "requireAuthorizedPlayer rejects a different player id" {
       val endpoint = PlayerWebSocketEndpoint()
       endpoint.jwt = mockk()

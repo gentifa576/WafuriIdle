@@ -32,3 +32,7 @@ export function createPlayerSocket(playerId: string, options: PlayerSocketOption
 export function sendStartCombat(socket: WebSocket) {
   socket.send(JSON.stringify({ type: 'START_COMBAT' }))
 }
+
+export function sendStopCombat(socket: WebSocket) {
+  socket.send(JSON.stringify({ type: 'STOP_COMBAT' }))
+}
