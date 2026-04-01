@@ -6,6 +6,7 @@ import com.wafuri.idle.application.port.out.InventoryRepository
 import com.wafuri.idle.application.port.out.PlayerStateWorkQueue
 import com.wafuri.idle.application.port.out.Repository
 import com.wafuri.idle.application.port.out.TeamRepository
+import com.wafuri.idle.application.service.combat.CombatStatService
 import com.wafuri.idle.domain.model.DomainRuleViolationException
 import com.wafuri.idle.domain.model.EquipmentSlot
 import com.wafuri.idle.domain.model.Player
@@ -19,6 +20,7 @@ class EquipmentService(
   private val inventoryRepository: InventoryRepository,
   private val teamRepository: TeamRepository,
   private val playerStateWorkQueue: PlayerStateWorkQueue,
+  private val combatStatService: CombatStatService,
 ) {
   @Transactional
   fun equip(
@@ -66,6 +68,7 @@ class EquipmentService(
 
     teamRepository.save(updatedTeam)
     inventoryRepository.save(updatedItem)
+    combatStatService.invalidatePlayer(player.id)
     playerStateWorkQueue.markDirty(player.id)
   }
 
@@ -104,6 +107,7 @@ class EquipmentService(
 
     teamRepository.save(updatedTeam)
     inventoryRepository.save(updatedItem)
+    combatStatService.invalidatePlayer(player.id)
     playerStateWorkQueue.markDirty(player.id)
   }
 }

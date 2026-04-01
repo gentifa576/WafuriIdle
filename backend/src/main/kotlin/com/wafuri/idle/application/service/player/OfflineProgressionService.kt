@@ -167,7 +167,14 @@ class OfflineProgressionService(
     params: OfflineCombatParams,
   ): MutableOfflineCombatProjection {
     val elapsedMillis = minOf(projection.remainingMillis, waitMillis)
-    val advanced = projection.state.advance(elapsedMillis, params.damageIntervalMillis, params.respawnDelayMillis, params.reviveDelayMillis, params.reviveHpRatio)
+    val advanced =
+      projection.state.advance(
+        elapsedMillis,
+        params.damageIntervalMillis,
+        params.respawnDelayMillis,
+        params.reviveDelayMillis,
+        params.reviveHpRatio,
+      )
     val recovered =
       if (elapsedMillis == waitMillis && advanced.status == CombatStatus.FIGHTING) {
         refreshEnemyForZoneLevel(advanced, projection.zoneProgress.level, params.enemyAttack)
@@ -188,7 +195,14 @@ class OfflineProgressionService(
         projection.remainingMillis < killTimeMillis -> projection.remainingMillis
         else -> killTimeMillis
       }
-    val advanced = projection.state.advance(elapsedMillis, params.damageIntervalMillis, params.respawnDelayMillis, params.reviveDelayMillis, params.reviveHpRatio)
+    val advanced =
+      projection.state.advance(
+        elapsedMillis,
+        params.damageIntervalMillis,
+        params.respawnDelayMillis,
+        params.reviveDelayMillis,
+        params.reviveHpRatio,
+      )
     val defeatedEnemy = projection.state.enemyHp > 0f && advanced.enemyHp == 0f
     return if (!defeatedEnemy) {
       projection.copy(state = advanced, remainingMillis = projection.remainingMillis - elapsedMillis)

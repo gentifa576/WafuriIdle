@@ -15,6 +15,7 @@ import com.wafuri.idle.domain.model.Player
 import com.wafuri.idle.domain.model.StatType
 import jakarta.enterprise.context.ApplicationScoped
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 
 @ApplicationScoped
 class CombatStatService(
@@ -25,36 +26,42 @@ class CombatStatService(
   private val combatPassiveService: CombatPassiveService,
   private val scalingRule: ScalingRule,
 ) {
-  fun teamStatsForPlayer(playerId: UUID): TeamCombatStats = teamStatsForPlayer(playerId, emptyList())
+  private val cachedPlayerBaseStats = ConcurrentHashMap<UUID, PlayerCombatBaseStats>()
 
   fun teamStatsForPlayer(
     playerId: UUID,
-    existingMembers: List<CombatMemberState>,
+    existingMembers: List<CombatMemberState> = emptyList(),
   ): TeamCombatStats {
+    val cached =
+      cachedPlayerBaseStats.computeIfAbsent(playerId) {
+        loadPlayerCombatBaseStats(playerId)
+      }
+    val resolvedCharacterStats =
+      combatPassiveService.applyLeaderPassive(
+        cached.teamCharacterKeys,
+        cached.baseCharacterStats,
+        existingMembers,
+      )
+    return TeamCombatStats(cached.teamId, resolvedCharacterStats)
+  }
+
+  fun invalidatePlayer(playerId: UUID) {
+    cachedPlayerBaseStats.remove(playerId)
+  }
+
+  private fun loadPlayerCombatBaseStats(playerId: UUID): PlayerCombatBaseStats {
     val player =
       playerRepository.findById(playerId)
         ?: throw ResourceNotFoundException("Player $playerId was not found.")
     val activeTeamId =
       player.activeTeamId
         ?: throw ValidationException("Player does not have an active team.")
-    return teamStats(activeTeamId, existingMembers)
-  }
-
-  fun teamStats(teamId: UUID): TeamCombatStats = teamStats(teamId, emptyList())
-
-  fun teamStats(
-    teamId: UUID,
-    existingMembers: List<CombatMemberState>,
-  ): TeamCombatStats {
     val team =
-      teamRepository.findById(teamId)
-        ?: throw ResourceNotFoundException("Team $teamId was not found.")
+      teamRepository.findById(activeTeamId)
+        ?: throw ResourceNotFoundException("Team $activeTeamId was not found.")
     if (team.characterKeys.isEmpty()) {
       throw ValidationException("Team must contain at least one character to enter combat.")
     }
-    val player =
-      playerRepository.findById(team.playerId)
-        ?: throw ResourceNotFoundException("Player ${team.playerId} was not found.")
 
     val baseCharacterStats =
       team.slots.mapNotNull { teamSlot ->
@@ -78,30 +85,15 @@ class CombatStatService(
             }
           }
         CharacterCombatStats(
-          characterKey = characterKey,
-          attack = template.strength.atLevel(player.level) + equippedItems.sumOf { attackBonus(it).toDouble() }.toFloat(),
-          hit = template.agility.atLevel(player.level) + equippedItems.sumOf { hitBonus(it).toDouble() }.toFloat(),
-          maxHp = template.vitality.atLevel(player.level) + equippedItems.sumOf { hpBonus(it).toDouble() }.toFloat(),
+          characterKey,
+          template.strength.atLevel(player.level) + equippedItems.sumOf { statBonus(it, StatType.STRENGTH).toDouble() }.toFloat(),
+          template.agility.atLevel(player.level) + equippedItems.sumOf { statBonus(it, StatType.AGILITY).toDouble() }.toFloat(),
+          template.vitality.atLevel(player.level) + equippedItems.sumOf { statBonus(it, StatType.VITALITY).toDouble() }.toFloat(),
         )
       }
-    val resolvedCharacterStats =
-      combatPassiveService.applyLeaderPassive(
-        teamCharacterKeys = team.characterKeys,
-        characterStats = baseCharacterStats,
-        existingMembers = existingMembers,
-      )
 
-    return TeamCombatStats(
-      teamId = team.id,
-      characterStats = resolvedCharacterStats,
-    )
+    return PlayerCombatBaseStats(team.id, team.characterKeys, baseCharacterStats)
   }
-
-  private fun attackBonus(inventoryItem: InventoryItem): Float = statBonus(inventoryItem, StatType.STRENGTH)
-
-  private fun hitBonus(inventoryItem: InventoryItem): Float = statBonus(inventoryItem, StatType.AGILITY)
-
-  private fun hpBonus(inventoryItem: InventoryItem): Float = statBonus(inventoryItem, StatType.VITALITY)
 
   private fun statBonus(
     inventoryItem: InventoryItem,
@@ -111,4 +103,10 @@ class CombatStatService(
       .filter { it.type == statType }
       .sumOf { it.value.toDouble() }
       .toFloat()
+
+  private data class PlayerCombatBaseStats(
+    val teamId: UUID,
+    val teamCharacterKeys: List<String>,
+    val baseCharacterStats: List<CharacterCombatStats>,
+  )
 }

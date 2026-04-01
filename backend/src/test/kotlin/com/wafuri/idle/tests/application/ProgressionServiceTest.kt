@@ -6,6 +6,7 @@ import com.wafuri.idle.application.port.out.PlayerMessageQueue
 import com.wafuri.idle.application.port.out.PlayerStateWorkQueue
 import com.wafuri.idle.application.port.out.PlayerZoneProgressRepository
 import com.wafuri.idle.application.port.out.Repository
+import com.wafuri.idle.application.service.combat.CombatStatService
 import com.wafuri.idle.application.service.player.ProgressionService
 import com.wafuri.idle.application.service.scaling.ScalingRule
 import com.wafuri.idle.domain.model.Player
@@ -27,6 +28,7 @@ class ProgressionServiceTest : StringSpec() {
   private lateinit var playerZoneProgressRepository: PlayerZoneProgressRepository
   private lateinit var playerEventQueue: PlayerMessageQueue
   private lateinit var playerStateWorkQueue: PlayerStateWorkQueue
+  private lateinit var combatStatService: CombatStatService
   private lateinit var config: GameConfig
   private lateinit var service: ProgressionService
 
@@ -36,6 +38,7 @@ class ProgressionServiceTest : StringSpec() {
       playerZoneProgressRepository = mockk()
       playerEventQueue = mockk()
       playerStateWorkQueue = mockk()
+      combatStatService = mockk()
       config = gameConfig(killExperience = 25, experiencePerLevel = 100, zoneKillsPerLevel = 3)
       service =
         ProgressionService(
@@ -43,6 +46,7 @@ class ProgressionServiceTest : StringSpec() {
           playerZoneProgressRepository,
           playerEventQueue,
           playerStateWorkQueue,
+          combatStatService,
           ScalingRule(config),
           config,
         )
@@ -63,12 +67,14 @@ class ProgressionServiceTest : StringSpec() {
       }
       every { playerEventQueue.enqueue(any()) } just runs
       every { playerStateWorkQueue.markDirty(playerId) } just runs
+      every { combatStatService.invalidatePlayer(any()) } just runs
 
       service.recordKill(playerId, zoneId)
 
       savedPlayer shouldBe expectedPlayer(id = playerId, name = "Alice", experience = 25, level = 1, gold = 25)
       savedProgress shouldBe expectedZoneProgress(playerId = playerId, zoneId = zoneId, killCount = 1, level = 1)
       verify(exactly = 0) { playerEventQueue.enqueue(any()) }
+      verify(exactly = 0) { combatStatService.invalidatePlayer(any()) }
       verify(exactly = 1) { playerStateWorkQueue.markDirty(playerId) }
     }
 
@@ -87,6 +93,7 @@ class ProgressionServiceTest : StringSpec() {
       }
       every { playerEventQueue.enqueue(any()) } just runs
       every { playerStateWorkQueue.markDirty(playerId) } just runs
+      every { combatStatService.invalidatePlayer(any()) } just runs
 
       service.recordKill(playerId, zoneId, enemyLevel = 50)
 
@@ -116,6 +123,7 @@ class ProgressionServiceTest : StringSpec() {
       }
       every { playerEventQueue.enqueue(any()) } just runs
       every { playerStateWorkQueue.markDirty(playerId) } just runs
+      every { combatStatService.invalidatePlayer(playerId) } just runs
 
       service.recordKill(playerId, zoneId)
 
@@ -130,6 +138,7 @@ class ProgressionServiceTest : StringSpec() {
           ),
         )
       }
+      verify(exactly = 1) { combatStatService.invalidatePlayer(playerId) }
     }
   }
 }

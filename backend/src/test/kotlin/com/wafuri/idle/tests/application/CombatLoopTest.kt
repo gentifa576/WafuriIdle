@@ -8,10 +8,9 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.ints.shouldBeGreaterThan
+import io.mockk.coEvery
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
-import io.mockk.runs
 import java.time.Duration
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -38,7 +37,12 @@ class CombatLoopTest : StringSpec() {
       var activeZones: Set<String> = setOf(zoneId)
 
       every { combatStateRepository.findActiveZoneIds() } answers { activeZones }
-      every { combatTickService.tickZone(zoneId, any()) } answers { tickCount.incrementAndGet() }
+      coEvery {
+        combatTickService.tickZone(zoneId, any())
+      } answers {
+        tickCount.incrementAndGet()
+        Unit
+      }
 
       loop.start()
       Thread.sleep(50)
@@ -55,7 +59,7 @@ class CombatLoopTest : StringSpec() {
 
     "combat loop does not create zone jobs when there are no active zones" {
       every { combatStateRepository.findActiveZoneIds() } returns emptySet()
-      every { combatTickService.tickZone(any(), any()) } just runs
+      coEvery { combatTickService.tickZone(any(), any()) } returns Unit
 
       loop.start()
       Thread.sleep(30)

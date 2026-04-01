@@ -6,6 +6,7 @@ import com.wafuri.idle.application.port.out.PlayerStateWorkQueue
 import com.wafuri.idle.application.port.out.Repository
 import com.wafuri.idle.application.port.out.TeamRepository
 import com.wafuri.idle.application.service.character.CharacterTemplateCatalog
+import com.wafuri.idle.application.service.combat.CombatStatService
 import com.wafuri.idle.domain.model.CharacterTemplate
 import com.wafuri.idle.domain.model.DomainRuleViolationException
 import com.wafuri.idle.domain.model.Player
@@ -20,6 +21,7 @@ class TeamService(
   private val teamRepository: TeamRepository,
   private val characterTemplateCatalog: CharacterTemplateCatalog,
   private val playerStateWorkQueue: PlayerStateWorkQueue,
+  private val combatStatService: CombatStatService,
 ) {
   @Transactional
   fun create(playerId: UUID): Team {
@@ -62,6 +64,7 @@ class TeamService(
       }
 
     val savedTeam = teamRepository.save(updatedTeam)
+    combatStatService.invalidatePlayer(team.playerId)
     playerStateWorkQueue.markDirty(team.playerId)
     return savedTeam
   }
@@ -90,6 +93,7 @@ class TeamService(
     }
 
     playerRepository.save(player.activateTeam(team.id))
+    combatStatService.invalidatePlayer(team.playerId)
     playerStateWorkQueue.markDirty(team.playerId)
     return team
   }

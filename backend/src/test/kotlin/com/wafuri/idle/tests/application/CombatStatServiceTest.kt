@@ -20,11 +20,13 @@ import com.wafuri.idle.tests.support.expectedTeam
 import com.wafuri.idle.tests.support.expectedTeamCombatStats
 import com.wafuri.idle.tests.support.gameConfig
 import com.wafuri.idle.tests.support.rangerTemplate
+import com.wafuri.idle.tests.support.warriorTemplate
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import java.util.UUID
 
 class CombatStatServiceTest : StringSpec() {
@@ -53,8 +55,15 @@ class CombatStatServiceTest : StringSpec() {
     }
 
     "team stats derive attack hit and hp from template growth at player level" {
-      val player = expectedPlayer(id = UUID.randomUUID(), name = "Alice", ownedCharacterKeys = setOf("warrior", "cleric"), level = 3)
       val teamId = UUID.randomUUID()
+      val player =
+        expectedPlayer(
+          id = UUID.randomUUID(),
+          name = "Alice",
+          ownedCharacterKeys = setOf("warrior", "cleric"),
+          level = 3,
+          activeTeamId = teamId,
+        )
       val team =
         expectedTeam(
           id = teamId,
@@ -86,7 +95,7 @@ class CombatStatServiceTest : StringSpec() {
       every { playerRepository.findById(player.id) } returns player
       characterTemplateCatalog.replace(listOf(warrior, cleric))
 
-      val result = service.teamStats(teamId)
+      val result = service.teamStatsForPlayer(player.id)
       val expected =
         expectedTeamCombatStats(
           teamId = teamId,
@@ -122,8 +131,15 @@ class CombatStatServiceTest : StringSpec() {
     }
 
     "leader aura passive buffs team attack when condition matches" {
-      val player = expectedPlayer(id = UUID.randomUUID(), name = "Alice", ownedCharacterKeys = setOf("cleric", "ranger"), level = 2)
       val teamId = UUID.randomUUID()
+      val player =
+        expectedPlayer(
+          id = UUID.randomUUID(),
+          name = "Alice",
+          ownedCharacterKeys = setOf("cleric", "ranger"),
+          level = 2,
+          activeTeamId = teamId,
+        )
       val team =
         expectedTeam(
           id = teamId,
@@ -135,7 +151,7 @@ class CombatStatServiceTest : StringSpec() {
       every { playerRepository.findById(player.id) } returns player
       characterTemplateCatalog.replace(listOf(clericTemplate(), rangerTemplate()))
 
-      val result = service.teamStats(teamId)
+      val result = service.teamStatsForPlayer(player.id)
 
       result shouldBe
         expectedTeamCombatStats(
@@ -156,6 +172,72 @@ class CombatStatServiceTest : StringSpec() {
       shouldThrow<ValidationException> {
         service.teamStatsForPlayer(player.id)
       }
+    }
+
+    "player combat stats cache base repository reads until invalidated" {
+      val teamId = UUID.randomUUID()
+      val player =
+        expectedPlayer(id = UUID.randomUUID(), name = "Alice", ownedCharacterKeys = setOf("warrior"), level = 2, activeTeamId = teamId)
+      val team =
+        expectedTeam(
+          id = teamId,
+          playerId = player.id,
+          slots = listOf(TeamMemberSlot(1, "warrior"), TeamMemberSlot(2), TeamMemberSlot(3)),
+        )
+
+      every { playerRepository.findById(player.id) } returns player
+      every { teamRepository.findById(teamId) } returns team
+      characterTemplateCatalog.replace(listOf(warriorTemplate()))
+
+      service.teamStatsForPlayer(player.id)
+      service.teamStatsForPlayer(player.id)
+
+      verify(exactly = 1) { playerRepository.findById(player.id) }
+      verify(exactly = 1) { teamRepository.findById(teamId) }
+
+      service.invalidatePlayer(player.id)
+      service.teamStatsForPlayer(player.id)
+
+      verify(exactly = 2) { playerRepository.findById(player.id) }
+      verify(exactly = 2) { teamRepository.findById(teamId) }
+    }
+
+    "player combat stats reapply leader passive from cache using current member state" {
+      val teamId = UUID.randomUUID()
+      val player =
+        expectedPlayer(
+          id = UUID.randomUUID(),
+          name = "Alice",
+          ownedCharacterKeys = setOf("cleric", "ranger"),
+          level = 2,
+          activeTeamId = teamId,
+        )
+      val team =
+        expectedTeam(
+          id = teamId,
+          playerId = player.id,
+          slots = listOf(TeamMemberSlot(1, "cleric"), TeamMemberSlot(2, "ranger"), TeamMemberSlot(3)),
+        )
+
+      every { playerRepository.findById(player.id) } returns player
+      every { teamRepository.findById(teamId) } returns team
+      characterTemplateCatalog.replace(listOf(clericTemplate(), rangerTemplate()))
+
+      val buffed = service.teamStatsForPlayer(player.id)
+      val unbuffed =
+        service.teamStatsForPlayer(
+          player.id,
+          existingMembers =
+            listOf(
+              expectedCombatMemberState("cleric", 5.7f, 4.6f, 9.2f, 9.2f),
+              expectedCombatMemberState("ranger", 9f, 13.8f, 0f, 10.3f),
+            ),
+        )
+
+      buffed.characterStats.first { it.characterKey == "cleric" }.attack shouldBe 8.549999f
+      unbuffed.characterStats.first { it.characterKey == "cleric" }.attack shouldBe 5.7f
+      verify(exactly = 1) { playerRepository.findById(player.id) }
+      verify(exactly = 1) { teamRepository.findById(teamId) }
     }
   }
 }

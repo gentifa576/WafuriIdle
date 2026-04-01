@@ -4,7 +4,11 @@ import com.wafuri.idle.application.port.out.CombatStateRepository
 import com.wafuri.idle.application.service.combat.CombatTickService
 import com.wafuri.idle.domain.model.CombatState
 import com.wafuri.idle.domain.model.CombatStatus
+import com.wafuri.idle.transport.websocket.PlayerWebSocketRegistry
+import io.mockk.mockk
+import io.quarkus.websockets.next.WebSocketConnection
 import jakarta.enterprise.context.ApplicationScoped
+import kotlinx.coroutines.runBlocking
 import java.time.Duration
 import java.util.UUID
 
@@ -12,12 +16,23 @@ import java.util.UUID
 class TestTickWarpService(
   private val combatStateRepository: CombatStateRepository,
   private val combatTickService: CombatTickService,
+  private val playerWebSocketRegistry: PlayerWebSocketRegistry,
 ) {
   fun warpCombat(
     playerId: UUID,
     elapsed: Duration,
   ): CombatState {
-    combatTickService.tickPlayer(playerId, elapsed)
+    val state = requireState(playerId)
+    val zoneId = requireNotNull(state.zoneId) { "Combat state for player $playerId does not have a zone id." }
+    val session = mockk<WebSocketConnection>(relaxed = true)
+    playerWebSocketRegistry.register(playerId, session)
+    try {
+      runBlocking {
+        combatTickService.tickZone(zoneId, elapsed)
+      }
+    } finally {
+      playerWebSocketRegistry.unregister(playerId, session)
+    }
     return requireState(playerId)
   }
 

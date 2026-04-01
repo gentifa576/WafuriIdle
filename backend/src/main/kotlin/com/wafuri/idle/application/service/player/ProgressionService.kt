@@ -7,6 +7,7 @@ import com.wafuri.idle.application.port.out.PlayerMessageQueue
 import com.wafuri.idle.application.port.out.PlayerStateWorkQueue
 import com.wafuri.idle.application.port.out.PlayerZoneProgressRepository
 import com.wafuri.idle.application.port.out.Repository
+import com.wafuri.idle.application.service.combat.CombatStatService
 import com.wafuri.idle.application.service.scaling.ScalingRule
 import com.wafuri.idle.domain.model.Player
 import com.wafuri.idle.domain.model.PlayerZoneProgress
@@ -21,6 +22,7 @@ class ProgressionService(
   private val playerZoneProgressRepository: PlayerZoneProgressRepository,
   private val playerEventQueue: PlayerMessageQueue,
   private val playerStateWorkQueue: PlayerStateWorkQueue,
+  private val combatStatService: CombatStatService,
   private val scalingRule: ScalingRule,
   private val gameConfig: GameConfig,
 ) {
@@ -44,6 +46,9 @@ class ProgressionService(
     val updatedPlayer = rewardedPlayer.grantGold((playerProgressionConfig.killGold() * rewardMultiplier).roundToInt())
     if (updatedPlayer != player) {
       playerRepository.save(updatedPlayer)
+      if (updatedPlayer.level != player.level) {
+        combatStatService.invalidatePlayer(playerId)
+      }
     }
 
     val currentProgress =

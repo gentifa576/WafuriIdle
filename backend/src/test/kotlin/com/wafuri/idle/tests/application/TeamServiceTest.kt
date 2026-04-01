@@ -5,6 +5,7 @@ import com.wafuri.idle.application.port.out.PlayerStateWorkQueue
 import com.wafuri.idle.application.port.out.Repository
 import com.wafuri.idle.application.port.out.TeamRepository
 import com.wafuri.idle.application.service.character.CharacterTemplateCatalog
+import com.wafuri.idle.application.service.combat.CombatStatService
 import com.wafuri.idle.application.service.team.TeamService
 import com.wafuri.idle.domain.model.Player
 import com.wafuri.idle.domain.model.Team
@@ -29,6 +30,7 @@ class TeamServiceTest : StringSpec() {
   private lateinit var teamRepository: TeamRepository
   private lateinit var characterTemplateCatalog: CharacterTemplateCatalog
   private lateinit var playerStateWorkQueue: PlayerStateWorkQueue
+  private lateinit var combatStatService: CombatStatService
   private lateinit var teamSlot: CapturingSlot<Team>
   private lateinit var service: TeamService
 
@@ -38,8 +40,9 @@ class TeamServiceTest : StringSpec() {
       teamRepository = mockk()
       characterTemplateCatalog = mockk()
       playerStateWorkQueue = mockk()
+      combatStatService = mockk()
       teamSlot = slot()
-      service = TeamService(playerRepository, teamRepository, characterTemplateCatalog, playerStateWorkQueue)
+      service = TeamService(playerRepository, teamRepository, characterTemplateCatalog, playerStateWorkQueue, combatStatService)
     }
 
     "create team for player" {
@@ -104,6 +107,7 @@ class TeamServiceTest : StringSpec() {
       every { teamRepository.save(any()) } answers {
         firstArg<Team>().also { savedTeams += it }
       }
+      every { combatStatService.invalidatePlayer(player.id) } just runs
       every { playerStateWorkQueue.markDirty(player.id) } just runs
 
       val updatedTeam = service.assignCharacter(player.id, team.id, 1, characterKey)
@@ -116,6 +120,7 @@ class TeamServiceTest : StringSpec() {
 
       updatedTeam shouldBe expectedTeam
       savedTeams.last() shouldBe expectedTeam
+      verify(exactly = 1) { combatStatService.invalidatePlayer(player.id) }
       verify(exactly = 1) { playerStateWorkQueue.markDirty(player.id) }
     }
 
@@ -132,6 +137,7 @@ class TeamServiceTest : StringSpec() {
       every { teamRepository.findById(team.id) } returns team
       every { playerRepository.findById(player.id) } returns player
       every { playerRepository.save(any()) } answers { firstArg<Player>().also { updatedPlayers += it } }
+      every { combatStatService.invalidatePlayer(player.id) } just runs
       every { playerStateWorkQueue.markDirty(player.id) } just runs
 
       val activatedTeam = service.activate(player.id, team.id)
@@ -139,6 +145,7 @@ class TeamServiceTest : StringSpec() {
 
       activatedTeam shouldBe team
       updatedPlayers.last() shouldBe expectedPlayer
+      verify(exactly = 1) { combatStatService.invalidatePlayer(player.id) }
       verify(exactly = 1) { playerStateWorkQueue.markDirty(player.id) }
     }
   }

@@ -5,10 +5,14 @@ import com.wafuri.idle.application.port.out.ActivePlayerRegistry
 import com.wafuri.idle.application.port.out.CombatStateRepository
 import com.wafuri.idle.application.port.out.PlayerStateWorkQueue
 import com.wafuri.idle.application.service.player.ProgressionService
+import com.wafuri.idle.application.service.runInNewTransaction
 import com.wafuri.idle.application.service.scaling.ScalingRule
 import com.wafuri.idle.domain.model.CombatStatus
 import jakarta.enterprise.context.ApplicationScoped
-import jakarta.transaction.Transactional
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.Instant
 import java.util.UUID
@@ -24,22 +28,47 @@ class CombatTickService(
   private val scalingRule: ScalingRule,
   private val gameConfig: GameConfig,
 ) {
-  @Transactional
-  fun tickZone(
+  private val logger = LoggerFactory.getLogger(CombatTickService::class.java)
+
+  suspend fun tickZone(
     zoneId: String,
     elapsed: Duration,
   ) {
-    val activePlayerIds = activePlayerRegistry.activePlayerIds()
-    combatStateRepository.findActiveByZoneId(zoneId).forEach { state ->
-      if (state.playerId in activePlayerIds) {
-        tickPlayer(state.playerId, elapsed)
-      }
+    coroutineScope {
+      val activePlayerIds = activePlayerRegistry.activePlayerIds()
+      val combatConfig = gameConfig.combat()
+      val now = Instant.now()
+      combatStateRepository
+        .findActiveByZoneId(zoneId)
+        .mapNotNull { state ->
+          state.playerId
+            .takeIf { it in activePlayerIds }
+            ?.let { playerId ->
+              async {
+                runCatching {
+                  runInNewTransaction {
+                    tickPlayerTransactional(playerId, elapsed, combatConfig, now)
+                  }
+                }.onFailure { exception ->
+                  logger
+                    .atError()
+                    .setCause(exception)
+                    .addKeyValue("zoneId", zoneId)
+                    .addKeyValue("playerId", playerId)
+                    .addKeyValue("elapsedMillis", elapsed.toMillis())
+                    .log("Player combat tick failed.")
+                }
+              }
+            }
+        }.awaitAll()
     }
   }
 
-  fun tickPlayer(
+  private fun tickPlayerTransactional(
     playerId: UUID,
     elapsed: Duration,
+    combatConfig: GameConfig.Combat,
+    now: Instant,
   ) {
     val state = combatStateRepository.findById(playerId) ?: return
     if (state.status == CombatStatus.IDLE) {
@@ -47,7 +76,6 @@ class CombatTickService(
     }
 
     val teamStats = combatStatService.teamStatsForPlayer(playerId, state.members)
-    val combatConfig = gameConfig.combat()
     val refreshedState = state.refreshTeam(teamStats.teamId, teamStats.toCombatMembers(state.members))
     val advancedState =
       refreshedState.advance(
@@ -58,8 +86,7 @@ class CombatTickService(
         combatConfig.reviveHpRatio(),
       )
     val scaledState = refreshRespawnedEnemy(playerId, refreshedState, advancedState)
-    val nextState =
-      scaledState.copy(lastSimulatedAt = Instant.now())
+    val nextState = scaledState.copy(lastSimulatedAt = now)
 
     if (nextState != state) {
       combatStateRepository.save(nextState)

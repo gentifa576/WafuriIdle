@@ -5,6 +5,7 @@ import com.wafuri.idle.application.port.out.InventoryRepository
 import com.wafuri.idle.application.port.out.PlayerStateWorkQueue
 import com.wafuri.idle.application.port.out.Repository
 import com.wafuri.idle.application.port.out.TeamRepository
+import com.wafuri.idle.application.service.combat.CombatStatService
 import com.wafuri.idle.application.service.inventory.EquipmentService
 import com.wafuri.idle.domain.model.EquipmentSlot
 import com.wafuri.idle.domain.model.InventoryItem
@@ -30,6 +31,7 @@ class EquipmentServiceTest : StringSpec() {
   private lateinit var inventoryRepository: InventoryRepository
   private lateinit var teamRepository: TeamRepository
   private lateinit var playerStateWorkQueue: PlayerStateWorkQueue
+  private lateinit var combatStatService: CombatStatService
   private lateinit var service: EquipmentService
 
   init {
@@ -38,7 +40,8 @@ class EquipmentServiceTest : StringSpec() {
       inventoryRepository = mockk()
       teamRepository = mockk()
       playerStateWorkQueue = mockk()
-      service = EquipmentService(playerRepository, inventoryRepository, teamRepository, playerStateWorkQueue)
+      combatStatService = mockk()
+      service = EquipmentService(playerRepository, inventoryRepository, teamRepository, playerStateWorkQueue, combatStatService)
     }
 
     "equip validates ownership and slot" {
@@ -101,12 +104,14 @@ class EquipmentServiceTest : StringSpec() {
         firstArg<InventoryItem>().also { savedItems += it }
       }
       every { teamRepository.save(any()) } answers { firstArg<Team>() }
+      every { combatStatService.invalidatePlayer(playerId) } just runs
       every { playerStateWorkQueue.markDirty(playerId) } just runs
 
       service.unequip(playerId, teamId, 1, EquipmentSlot.WEAPON)
 
       savedItems.last().equippedTeamId.shouldBeNull()
       savedItems.last().equippedPosition.shouldBeNull()
+      verify(exactly = 1) { combatStatService.invalidatePlayer(playerId) }
       verify(exactly = 1) { playerStateWorkQueue.markDirty(playerId) }
     }
   }

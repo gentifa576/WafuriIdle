@@ -50,6 +50,8 @@
 | --- | --- |
 | Change confirmation | Before making code or file changes, confirm the requested change with the user first. |
 | Clarification | If any requirement or expected behavior is ambiguous, ask follow-up questions until the scope is fully clear before editing files. |
+| Decision tracking | Before recording a finalized architecture or implementation decision in `AGENTS.md`, draft a brief summary and ask the user to confirm the decision. Once confirmed, record it in `AGENTS.md` in the same change if future work depends on it; do not rely on session memory for repo rules. |
+| Validation compliance | After any code change, do not stop at targeted or localized tests when `AGENTS.md` defines a required build gate. Run the required gate before closing the task unless the user explicitly waives it or the gate is blocked, and if blocked state the blocker clearly. |
 
 ## Architecture
 | Area | Rule |
@@ -66,6 +68,7 @@
 | Cluster combat ownership | Zone-oriented combat grouping is per server instance only; multiple instances may process combats for the same `zoneId` because combat state is currently player-scoped, not globally zone-scoped. |
 | Zone job lifecycle | Combat zone jobs should exist only while a zone has active players/combat state and must stop when the zone becomes empty. |
 | Combat damage cadence | Combat damage resolves on a separate 1s server-side cadence using elapsed-time correction, not on every 200ms tick. Each damage step applies team damage first, then immediate enemy retaliation in that same resolution step. |
+| Combat stat caching | Live combat must not rebuild player/team/inventory-derived combat stats from repositories every tick. Cache those derived stats node-locally per player and invalidate them on combat-relevant mutations. |
 | Combat continuation | After an enemy dies, combat auto-continues after a configured respawn delay. |
 | Team model | Players may own multiple teams, but only one team may be active at a time. |
 | Team loadout model | Teams are positional loadouts with exactly 3 member slots; each slot owns its character reference and weapon, armor, and accessory assignment. |

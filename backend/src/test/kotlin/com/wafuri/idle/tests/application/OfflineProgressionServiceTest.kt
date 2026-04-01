@@ -31,6 +31,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
+import kotlinx.coroutines.runBlocking
 import java.time.Duration
 import java.time.Instant
 import java.util.UUID
@@ -314,11 +315,15 @@ class OfflineProgressionServiceTest : StringSpec() {
       val offlineResult = requireNotNull(offlineService.applyIfNeeded(playerId))
       val actualOfflineDurationMillis = offlineResult.offlineDuration.toMillis()
       repeat((actualOfflineDurationMillis / 200L).toInt()) {
-        liveTickService.tickPlayer(playerId, Duration.ofMillis(200))
+        runBlocking {
+          liveTickService.tickZone(zoneId, Duration.ofMillis(200))
+        }
       }
       val remainderMillis = actualOfflineDurationMillis % 200L
       if (remainderMillis > 0L) {
-        liveTickService.tickPlayer(playerId, Duration.ofMillis(remainderMillis))
+        runBlocking {
+          liveTickService.tickZone(zoneId, Duration.ofMillis(remainderMillis))
+        }
       }
 
       offlineResult shouldBe
