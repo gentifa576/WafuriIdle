@@ -34,12 +34,12 @@ class JpaPlayerRepository(
 
 private fun PlayerEntity.toDomain(): Player =
   Player(
-    id = id,
-    name = name,
+    id,
+    name,
+    ownedCharacterKeys = ownedCharacterKeys.toSet(),
+    activeTeamId = activeTeamId,
     experience = experience,
     level = level,
     gold = gold,
     essence = essence,
-    ownedCharacterKeys = ownedCharacterKeys.toSet(),
-    activeTeamId = activeTeamId,
   )

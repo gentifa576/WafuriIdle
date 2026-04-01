@@ -33,10 +33,10 @@ class InventoryService(
     val inventoryItem =
       inventoryRepository.save(
         InventoryItem(
-          id = UUID.randomUUID(),
-          playerId = playerId,
-          item = item,
-          itemLevel = itemLevel,
+          UUID.randomUUID(),
+          playerId,
+          item,
+          itemLevel,
           rarity = rarity,
         ),
       )

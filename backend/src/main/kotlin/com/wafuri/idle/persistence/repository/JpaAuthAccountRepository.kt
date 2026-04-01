@@ -48,10 +48,10 @@ class JpaAuthAccountRepository(
 
 private fun AuthAccountEntity.toDomain(): AuthAccount =
   AuthAccount(
-    playerId = playerId,
-    username = username,
-    email = email,
-    passwordHash = passwordHash,
-    passwordSalt = passwordSalt,
-    role = role,
+    playerId,
+    username,
+    email,
+    passwordHash,
+    passwordSalt,
+    role,
   )

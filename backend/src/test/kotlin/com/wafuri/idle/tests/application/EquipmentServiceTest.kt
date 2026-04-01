@@ -47,7 +47,7 @@ class EquipmentServiceTest : StringSpec() {
     "equip validates ownership and slot" {
       val playerId = UUID.randomUUID()
       val teamId = UUID.randomUUID()
-      val player = expectedPlayer(id = playerId, name = "Alice", ownedCharacterKeys = setOf("warrior"))
+      val player = expectedPlayer(playerId, "Alice", ownedCharacterKeys = setOf("warrior"))
       val team =
         expectedTeam(
           id = teamId,
@@ -75,7 +75,7 @@ class EquipmentServiceTest : StringSpec() {
       val playerId = UUID.randomUUID()
       val inventoryItemId = UUID.randomUUID()
       val teamId = UUID.randomUUID()
-      val player = expectedPlayer(id = playerId, name = "Alice", ownedCharacterKeys = setOf("warrior"))
+      val player = expectedPlayer(playerId, "Alice", ownedCharacterKeys = setOf("warrior"))
       val team =
         expectedTeam(
           id = teamId,

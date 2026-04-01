@@ -36,9 +36,9 @@ class JpaItemRepository(
 
 private fun ItemEntity.toDomain(): Item =
   Item(
-    name = name,
-    displayName = displayName,
-    type = type,
-    baseStat = baseStat,
-    subStatPool = subStatPool,
+    name,
+    displayName,
+    type,
+    baseStat,
+    subStatPool,
   )

@@ -55,7 +55,7 @@ class EquipmentService(
 
     val updatedItem =
       try {
-        inventoryItem.equip(playerId = player.id, teamId = teamId, position = position, slot = slot)
+        inventoryItem.equip(player.id, teamId, position, slot)
       } catch (exception: DomainRuleViolationException) {
         throw ValidationException(exception.message ?: "Equipment validation failed.", exception)
       }

@@ -44,65 +44,33 @@ fun expectedPlayer(
   level: Int = 1,
   gold: Int = 0,
   essence: Int = 0,
-): Player =
-  Player(
-    id = id,
-    name = name,
-    ownedCharacterKeys = ownedCharacterKeys,
-    activeTeamId = activeTeamId,
-    experience = experience,
-    level = level,
-    gold = gold,
-    essence = essence,
-  )
+): Player = Player(id, name, ownedCharacterKeys, activeTeamId, experience, level, gold, essence)
 
 fun expectedZoneProgress(
   playerId: UUID,
   zoneId: String,
   killCount: Int = 0,
   level: Int = 1,
-): PlayerZoneProgress =
-  PlayerZoneProgress(
-    playerId = playerId,
-    zoneId = zoneId,
-    killCount = killCount,
-    level = level,
-  )
+): PlayerZoneProgress = PlayerZoneProgress(playerId, zoneId, killCount, level)
 
 fun expectedTeam(
   id: UUID,
   playerId: UUID,
   slots: List<TeamMemberSlot> = Team.defaultSlots(),
-): Team =
-  Team(
-    id = id,
-    playerId = playerId,
-    slots = slots,
-  )
+): Team = Team(id, playerId, slots)
 
 fun expectedCharacterPullResult(
   player: Player,
   count: Int,
   pulls: List<CharacterPull>,
   totalEssenceGranted: Int,
-): CharacterPullResult =
-  CharacterPullResult(
-    player = player,
-    count = count,
-    pulls = pulls,
-    totalEssenceGranted = totalEssenceGranted,
-  )
+): CharacterPullResult = CharacterPullResult(player, count, pulls, totalEssenceGranted)
 
 fun expectedCharacterPull(
   pulledCharacterKey: String,
   grantedCharacterKey: String?,
   essenceGranted: Int,
-): CharacterPull =
-  CharacterPull(
-    pulledCharacterKey = pulledCharacterKey,
-    grantedCharacterKey = grantedCharacterKey,
-    essenceGranted = essenceGranted,
-  )
+): CharacterPull = CharacterPull(pulledCharacterKey, grantedCharacterKey, essenceGranted)
 
 fun expectedOfflineProgressionResult(
   playerId: UUID,
@@ -155,24 +123,14 @@ fun expectedOfflineProgressionMessage(
 fun expectedOfflineRewardSummary(
   itemName: String,
   count: Int,
-): OfflineRewardSummary =
-  OfflineRewardSummary(
-    itemName = itemName,
-    count = count,
-  )
+): OfflineRewardSummary = OfflineRewardSummary(itemName, count)
 
 fun expectedAuthResponse(
   player: Player,
   guestAccount: Boolean,
   sessionToken: String = "",
   sessionExpiresAt: String = "",
-): AuthResponse =
-  AuthResponse(
-    player = player,
-    sessionToken = sessionToken,
-    sessionExpiresAt = sessionExpiresAt,
-    guestAccount = guestAccount,
-  )
+): AuthResponse = AuthResponse(player, sessionToken, sessionExpiresAt, guestAccount)
 
 fun expectedErrorResponse(message: String): ErrorResponse = ErrorResponse(message)
 
@@ -182,23 +140,13 @@ fun expectedOwnedCharacterSnapshot(
   key: String,
   name: String,
   level: Int,
-): OwnedCharacterSnapshot =
-  OwnedCharacterSnapshot(
-    key = key,
-    name = name,
-    level = level,
-  )
+): OwnedCharacterSnapshot = OwnedCharacterSnapshot(key, name, level)
 
 fun expectedZoneProgressSnapshot(
   zoneId: String,
   killCount: Int,
   level: Int,
-): ZoneProgressSnapshot =
-  ZoneProgressSnapshot(
-    zoneId = zoneId,
-    killCount = killCount,
-    level = level,
-  )
+): ZoneProgressSnapshot = ZoneProgressSnapshot(zoneId, killCount, level)
 
 fun expectedPlayerStateSnapshot(
   playerId: UUID,
@@ -213,16 +161,16 @@ fun expectedPlayerStateSnapshot(
   serverTime: Instant = Instant.EPOCH,
 ): PlayerStateSnapshot =
   PlayerStateSnapshot(
-    playerId = playerId,
-    playerName = playerName,
-    playerExperience = playerExperience,
-    playerLevel = playerLevel,
-    playerGold = playerGold,
-    playerEssence = playerEssence,
-    ownedCharacters = ownedCharacters,
-    zoneProgress = zoneProgress,
-    inventory = inventory,
-    serverTime = serverTime,
+    playerId,
+    playerName,
+    playerExperience,
+    playerLevel,
+    playerGold,
+    playerEssence,
+    ownedCharacters,
+    zoneProgress,
+    inventory,
+    serverTime,
   )
 
 fun expectedBasicPlayerStateSnapshot(
@@ -251,12 +199,7 @@ fun expectedPlayerStateMessage(
   playerId: UUID,
   snapshot: PlayerStateSnapshot,
   type: EventType = EventType.PLAYER_STATE_SYNC,
-): PlayerStateMessage =
-  PlayerStateMessage(
-    type = type,
-    playerId = playerId,
-    snapshot = snapshot,
-  )
+): PlayerStateMessage = PlayerStateMessage(type, playerId, snapshot)
 
 fun expectedCombatMemberState(
   characterKey: String,
@@ -264,14 +207,7 @@ fun expectedCombatMemberState(
   hit: Float,
   currentHp: Float,
   maxHp: Float,
-): CombatMemberState =
-  CombatMemberState(
-    characterKey = characterKey,
-    attack = attack,
-    hit = hit,
-    currentHp = currentHp,
-    maxHp = maxHp,
-  )
+): CombatMemberState = CombatMemberState(characterKey, attack, hit, currentHp, maxHp)
 
 fun expectedCombatState(
   playerId: UUID,
@@ -361,15 +297,7 @@ fun expectedCombatMemberSnapshot(
   currentHp: Float,
   maxHp: Float,
   alive: Boolean,
-): CombatMemberSnapshot =
-  CombatMemberSnapshot(
-    characterKey = characterKey,
-    attack = attack,
-    hit = hit,
-    currentHp = currentHp,
-    maxHp = maxHp,
-    alive = alive,
-  )
+): CombatMemberSnapshot = CombatMemberSnapshot(characterKey, attack, hit, currentHp, maxHp, alive)
 
 fun expectedCombatSnapshot(
   playerId: UUID,
@@ -385,17 +313,17 @@ fun expectedCombatSnapshot(
   members: List<CombatMemberSnapshot>,
 ): CombatSnapshot =
   CombatSnapshot(
-    playerId = playerId,
-    status = status,
-    zoneId = zoneId,
-    activeTeamId = activeTeamId,
-    enemyName = enemyName,
-    enemyAttack = enemyAttack,
-    enemyHp = enemyHp,
-    enemyMaxHp = enemyMaxHp,
-    teamDps = teamDps,
-    pendingReviveMillis = pendingReviveMillis,
-    members = members,
+    playerId,
+    status,
+    zoneId,
+    activeTeamId,
+    enemyName,
+    enemyAttack,
+    enemyHp,
+    enemyMaxHp,
+    teamDps,
+    pendingReviveMillis,
+    members,
   )
 
 fun expectedCharacterCombatStats(
@@ -403,22 +331,12 @@ fun expectedCharacterCombatStats(
   attack: Float,
   hit: Float,
   maxHp: Float,
-): CharacterCombatStats =
-  CharacterCombatStats(
-    characterKey = characterKey,
-    attack = attack,
-    hit = hit,
-    maxHp = maxHp,
-  )
+): CharacterCombatStats = CharacterCombatStats(characterKey, attack, hit, maxHp)
 
 fun expectedTeamCombatStats(
   teamId: UUID,
   characterStats: List<CharacterCombatStats>,
-): TeamCombatStats =
-  TeamCombatStats(
-    teamId = teamId,
-    characterStats = characterStats,
-  )
+): TeamCombatStats = TeamCombatStats(teamId, characterStats)
 
 fun expectedSingleMemberTeamCombatStats(
   teamId: UUID,
@@ -439,12 +357,4 @@ fun expectedInventoryItem(
   itemLevel: Int = 1,
   equippedTeamId: UUID? = null,
   equippedPosition: Int? = null,
-): InventoryItem =
-  InventoryItem(
-    id = id,
-    playerId = playerId,
-    item = item,
-    itemLevel = itemLevel,
-    equippedTeamId = equippedTeamId,
-    equippedPosition = equippedPosition,
-  )
+): InventoryItem = InventoryItem(id, playerId, item, itemLevel, equippedTeamId = equippedTeamId, equippedPosition = equippedPosition)

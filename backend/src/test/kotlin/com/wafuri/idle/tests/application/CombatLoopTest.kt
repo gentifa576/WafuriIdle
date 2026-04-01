@@ -27,7 +27,7 @@ class CombatLoopTest : StringSpec() {
         CombatLoop(
           combatStateRepository,
           combatTickService,
-          gameConfig(tickInterval = Duration.ofMillis(10)),
+          gameConfig(Duration.ofMillis(10)),
         )
     }
 

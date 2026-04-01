@@ -18,7 +18,7 @@ class StatListConverter : AttributeConverter<List<Stat>, String> {
       .map { entry ->
         val parts = entry.split(KEY_VALUE_SEPARATOR, limit = 2)
         require(parts.size == 2) { "Inventory sub stat must be stored as STAT:value." }
-        Stat(type = StatType.valueOf(parts[0]), value = parts[1].toFloat())
+        Stat(StatType.valueOf(parts[0]), parts[1].toFloat())
       }
 
   companion object {

@@ -23,17 +23,17 @@ class JpaCharacterTemplateRepository(
 
   override fun toDomain(entity: CharacterTemplateEntity): CharacterTemplate =
     CharacterTemplate(
-      key = entity.key,
-      name = entity.name,
-      strength = StatGrowth(base = entity.strengthBase, increment = entity.strengthIncrement),
-      agility = StatGrowth(base = entity.agilityBase, increment = entity.agilityIncrement),
-      intelligence = StatGrowth(base = entity.intelligenceBase, increment = entity.intelligenceIncrement),
-      wisdom = StatGrowth(base = entity.wisdomBase, increment = entity.wisdomIncrement),
-      vitality = StatGrowth(base = entity.vitalityBase, increment = entity.vitalityIncrement),
-      image = entity.image,
-      tags = entity.tags,
-      skill = entity.skillDefinition?.let { objectMapper.readValue(it, SkillDefinition::class.java) },
-      passive = entity.passiveDefinition?.let { objectMapper.readValue(it, PassiveDefinition::class.java) },
+      entity.key,
+      entity.name,
+      StatGrowth(entity.strengthBase, entity.strengthIncrement),
+      StatGrowth(entity.agilityBase, entity.agilityIncrement),
+      StatGrowth(entity.intelligenceBase, entity.intelligenceIncrement),
+      StatGrowth(entity.wisdomBase, entity.wisdomIncrement),
+      StatGrowth(entity.vitalityBase, entity.vitalityIncrement),
+      entity.image,
+      entity.tags,
+      entity.skillDefinition?.let { objectMapper.readValue(it, SkillDefinition::class.java) },
+      entity.passiveDefinition?.let { objectMapper.readValue(it, PassiveDefinition::class.java) },
     )
 
   override fun toEntity(

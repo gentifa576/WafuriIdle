@@ -20,9 +20,9 @@ class JpaTeamRepository(
 
   override fun toDomain(entity: TeamEntity): Team =
     Team(
-      id = entity.id,
-      playerId = entity.playerId,
-      slots = objectMapper.readValue(entity.slotsJson, object : TypeReference<List<TeamMemberSlot>>() {}),
+      entity.id,
+      entity.playerId,
+      objectMapper.readValue(entity.slotsJson, object : TypeReference<List<TeamMemberSlot>>() {}),
     )
 
   override fun toEntity(

@@ -58,8 +58,8 @@ class CombatStatServiceTest : StringSpec() {
       val teamId = UUID.randomUUID()
       val player =
         expectedPlayer(
-          id = UUID.randomUUID(),
-          name = "Alice",
+          UUID.randomUUID(),
+          "Alice",
           ownedCharacterKeys = setOf("warrior", "cleric"),
           level = 3,
           activeTeamId = teamId,
@@ -98,11 +98,11 @@ class CombatStatServiceTest : StringSpec() {
       val result = service.teamStatsForPlayer(player.id)
       val expected =
         expectedTeamCombatStats(
-          teamId = teamId,
+          teamId,
           characterStats =
             listOf(
-              expectedCharacterCombatStats(characterKey = "warrior", attack = 16f, hit = 9.2f, maxHp = 14.6f),
-              expectedCharacterCombatStats(characterKey = "cleric", attack = 6.4f, hit = 5.2f, maxHp = 10.4f),
+              expectedCharacterCombatStats("warrior", 16f, 9.2f, 14.6f),
+              expectedCharacterCombatStats("cleric", 6.4f, 5.2f, 10.4f),
             ),
         )
 
@@ -118,12 +118,12 @@ class CombatStatServiceTest : StringSpec() {
       val teamId = UUID.randomUUID()
       val stats =
         expectedTeamCombatStats(
-          teamId = teamId,
-          characterStats = listOf(expectedCharacterCombatStats(characterKey = "warrior", attack = 16f, hit = 9.2f, maxHp = 14.6f)),
+          teamId,
+          listOf(expectedCharacterCombatStats("warrior", 16f, 9.2f, 14.6f)),
         )
 
       stats.toCombatMembers(
-        existingMembers = listOf(expectedCombatMemberState("warrior", 14f, 8f, currentHp = 5f, maxHp = 10f)),
+        listOf(expectedCombatMemberState("warrior", 14f, 8f, currentHp = 5f, maxHp = 10f)),
       ) shouldBe
         listOf(
           expectedCombatMemberState("warrior", 16f, 9.2f, currentHp = 7.3f, maxHp = 14.6f),
@@ -134,8 +134,8 @@ class CombatStatServiceTest : StringSpec() {
       val teamId = UUID.randomUUID()
       val player =
         expectedPlayer(
-          id = UUID.randomUUID(),
-          name = "Alice",
+          UUID.randomUUID(),
+          "Alice",
           ownedCharacterKeys = setOf("cleric", "ranger"),
           level = 2,
           activeTeamId = teamId,
@@ -155,17 +155,17 @@ class CombatStatServiceTest : StringSpec() {
 
       result shouldBe
         expectedTeamCombatStats(
-          teamId = teamId,
+          teamId,
           characterStats =
             listOf(
-              expectedCharacterCombatStats(characterKey = "cleric", attack = 8.549999f, hit = 4.6f, maxHp = 9.2f),
-              expectedCharacterCombatStats(characterKey = "ranger", attack = 13.5f, hit = 13.8f, maxHp = 10.3f),
+              expectedCharacterCombatStats("cleric", 8.549999f, 4.6f, 9.2f),
+              expectedCharacterCombatStats("ranger", 13.5f, 13.8f, 10.3f),
             ),
         )
     }
 
     "player combat stats require an active team" {
-      val player = expectedPlayer(id = UUID.randomUUID(), name = "Alice")
+      val player = expectedPlayer(UUID.randomUUID(), "Alice")
 
       every { playerRepository.findById(player.id) } returns player
 
@@ -177,7 +177,7 @@ class CombatStatServiceTest : StringSpec() {
     "player combat stats cache base repository reads until invalidated" {
       val teamId = UUID.randomUUID()
       val player =
-        expectedPlayer(id = UUID.randomUUID(), name = "Alice", ownedCharacterKeys = setOf("warrior"), level = 2, activeTeamId = teamId)
+        expectedPlayer(UUID.randomUUID(), "Alice", ownedCharacterKeys = setOf("warrior"), level = 2, activeTeamId = teamId)
       val team =
         expectedTeam(
           id = teamId,
@@ -206,8 +206,8 @@ class CombatStatServiceTest : StringSpec() {
       val teamId = UUID.randomUUID()
       val player =
         expectedPlayer(
-          id = UUID.randomUUID(),
-          name = "Alice",
+          UUID.randomUUID(),
+          "Alice",
           ownedCharacterKeys = setOf("cleric", "ranger"),
           level = 2,
           activeTeamId = teamId,

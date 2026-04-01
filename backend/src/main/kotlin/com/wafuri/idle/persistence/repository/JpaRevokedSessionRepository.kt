@@ -14,11 +14,7 @@ class JpaRevokedSessionRepository(
   RevokedSessionRepository {
   override fun entityId(domain: RevokedSession): UUID = domain.sessionId
 
-  override fun toDomain(entity: RevokedSessionEntity): RevokedSession =
-    RevokedSession(
-      sessionId = entity.sessionId,
-      expiresAt = entity.expiresAt,
-    )
+  override fun toDomain(entity: RevokedSessionEntity): RevokedSession = RevokedSession(entity.sessionId, entity.expiresAt)
 
   override fun toEntity(
     domain: RevokedSession,

@@ -47,16 +47,16 @@ class AuthService(
     val hashedPassword = passwordHashService.hash(normalizedPassword ?: generateGuestPassword())
     authAccountRepository.save(
       AuthAccount(
-        playerId = player.id,
-        username = normalizedUsername,
-        email = normalizedEmail,
-        passwordHash = hashedPassword.hash,
-        passwordSalt = hashedPassword.salt,
-        role = AuthScope.USER,
+        player.id,
+        normalizedUsername,
+        normalizedEmail,
+        hashedPassword.hash,
+        hashedPassword.salt,
+        AuthScope.USER,
       ),
     )
 
-    return createSession(player, guestAccount = normalizedEmail == null, role = AuthScope.USER)
+    return createSession(player, normalizedEmail == null, AuthScope.USER)
   }
 
   @Transactional

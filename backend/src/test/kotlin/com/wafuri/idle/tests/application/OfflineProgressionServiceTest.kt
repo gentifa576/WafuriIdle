@@ -114,10 +114,10 @@ class OfflineProgressionServiceTest : StringSpec() {
           enemyMaxHp = 100f,
           lastSimulatedAt = Instant.now().minus(Duration.ofMinutes(6)),
         )
-      val beforePlayer = expectedPlayer(id = playerId, name = "Alice")
-      val afterPlayer = expectedPlayer(id = playerId, name = "Alice", experience = 320, level = 4, gold = 800)
-      val beforeZone = expectedZoneProgress(playerId = playerId, zoneId = zoneId)
-      val afterZone = expectedZoneProgress(playerId = playerId, zoneId = zoneId, killCount = 32, level = 4)
+      val beforePlayer = expectedPlayer(playerId, "Alice")
+      val afterPlayer = expectedPlayer(playerId, "Alice", experience = 320, level = 4, gold = 800)
+      val beforeZone = expectedZoneProgress(playerId, zoneId)
+      val afterZone = expectedZoneProgress(playerId, zoneId, 32, 4)
       val item =
         expectedInventoryItem(
           id = UUID.randomUUID(),
@@ -128,7 +128,7 @@ class OfflineProgressionServiceTest : StringSpec() {
 
       every { combatStateRepository.findById(playerId) } returns state
       every { combatStatService.teamStatsForPlayer(playerId, state.members) } returns
-        expectedSingleMemberTeamCombatStats(teamId = teamId, attack = 10f, hit = 1f, maxHp = 1000f)
+        expectedSingleMemberTeamCombatStats(teamId, attack = 10f, hit = 1f, maxHp = 1000f)
       every { progressionService.requirePlayer(playerId) } returnsMany listOf(beforePlayer, afterPlayer)
       every { progressionService.requireZoneProgress(playerId, zoneId) } returnsMany listOf(beforeZone, afterZone)
       every { progressionService.recordKill(playerId, zoneId, any()) } just runs
@@ -142,19 +142,19 @@ class OfflineProgressionServiceTest : StringSpec() {
       val actualResult = requireNotNull(result)
       val expectedResult =
         expectedOfflineProgressionResult(
-          playerId = playerId,
-          offlineDuration = actualResult.offlineDuration,
-          kills = 30,
-          zoneId = zoneId,
-          rewards = listOf(expectedOfflineRewardSummary(itemName = "sword_0001", count = 30)),
+          playerId,
+          actualResult.offlineDuration,
+          30,
+          zoneId,
+          listOf(expectedOfflineRewardSummary("sword_0001", 30)),
         ).copy(experienceGained = 320, goldGained = 800)
       val expectedSummary =
         expectedOfflineProgressionMessage(
-          playerId = playerId,
-          offlineDuration = actualResult.offlineDuration,
-          kills = 30,
-          zoneId = zoneId,
-          rewards = listOf(expectedOfflineRewardSummary(itemName = "sword_0001", count = 30)),
+          playerId,
+          actualResult.offlineDuration,
+          30,
+          zoneId,
+          listOf(expectedOfflineRewardSummary("sword_0001", 30)),
         ).copy(experienceGained = 320, goldGained = 800)
 
       actualResult shouldBe expectedResult
@@ -179,14 +179,14 @@ class OfflineProgressionServiceTest : StringSpec() {
           enemyMaxHp = 100f,
           lastSimulatedAt = Instant.now().minus(Duration.ofMinutes(4)),
         )
-      val beforePlayer = expectedPlayer(id = playerId, name = "Alice")
-      val afterPlayer = expectedPlayer(id = playerId, name = "Alice", experience = 210, level = 3, gold = 525)
-      val beforeZone = expectedZoneProgress(playerId = playerId, zoneId = zoneId)
-      val afterZone = expectedZoneProgress(playerId = playerId, zoneId = zoneId, killCount = 21, level = 3)
+      val beforePlayer = expectedPlayer(playerId, "Alice")
+      val afterPlayer = expectedPlayer(playerId, "Alice", experience = 210, level = 3, gold = 525)
+      val beforeZone = expectedZoneProgress(playerId, zoneId)
+      val afterZone = expectedZoneProgress(playerId, zoneId, 21, 3)
 
       every { combatStateRepository.findById(playerId) } returns state
       every { combatStatService.teamStatsForPlayer(playerId, state.members) } returns
-        expectedSingleMemberTeamCombatStats(teamId = teamId, attack = 10f, hit = 1f, maxHp = 1000f)
+        expectedSingleMemberTeamCombatStats(teamId, attack = 10f, hit = 1f, maxHp = 1000f)
       every { progressionService.requirePlayer(playerId) } returnsMany listOf(beforePlayer, afterPlayer)
       every { progressionService.requireZoneProgress(playerId, zoneId) } returnsMany listOf(beforeZone, afterZone)
       every { progressionService.recordKill(playerId, zoneId, any()) } just runs
@@ -199,11 +199,11 @@ class OfflineProgressionServiceTest : StringSpec() {
 
       actualResult shouldBe
         expectedOfflineProgressionResult(
-          playerId = playerId,
-          offlineDuration = actualResult.offlineDuration,
-          kills = 20,
-          zoneId = zoneId,
-          rewards = emptyList(),
+          playerId,
+          actualResult.offlineDuration,
+          20,
+          zoneId,
+          emptyList(),
         ).copy(experienceGained = 210, goldGained = 525)
       verify(exactly = 0) { playerEventQueue.enqueue(any()) }
     }
@@ -226,7 +226,7 @@ class OfflineProgressionServiceTest : StringSpec() {
           lastSimulatedAt = Instant.now().minus(offlineDuration),
         )
       val teamStats =
-        expectedSingleMemberTeamCombatStats(teamId = teamId, attack = 10f, hit = 1f, maxHp = 1000f)
+        expectedSingleMemberTeamCombatStats(teamId, attack = 10f, hit = 1f, maxHp = 1000f)
 
       val offlineCombatStateRepository = mockk<CombatStateRepository>()
       val offlineCombatStatService = mockk<CombatStatService>()
@@ -274,8 +274,8 @@ class OfflineProgressionServiceTest : StringSpec() {
       every { offlineCombatStatService.teamStatsForPlayer(playerId, any()) } returns teamStats
       every { offlineProgressionServicePort.requirePlayer(playerId) } answers {
         Player(
-          id = playerId,
-          name = "Alice",
+          playerId,
+          "Alice",
           experience = offlineKills * 10,
           level = 1 + (offlineKills / 10),
           gold = offlineKills * 25,
@@ -283,8 +283,8 @@ class OfflineProgressionServiceTest : StringSpec() {
       }
       every { offlineProgressionServicePort.requireZoneProgress(playerId, zoneId) } answers {
         PlayerZoneProgress(
-          playerId = playerId,
-          zoneId = zoneId,
+          playerId,
+          zoneId,
           killCount = offlineKills,
           level = 1 + (offlineKills / 10),
         )
@@ -303,8 +303,8 @@ class OfflineProgressionServiceTest : StringSpec() {
       every { livePlayerStateWorkQueue.markDirty(playerId) } just runs
       every { liveProgressionService.requireZoneProgress(playerId, zoneId) } answers {
         PlayerZoneProgress(
-          playerId = playerId,
-          zoneId = zoneId,
+          playerId,
+          zoneId,
           killCount = liveKills,
           level = 1 + (liveKills / 10),
         )

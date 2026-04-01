@@ -54,7 +54,7 @@ class TeamServiceTest : StringSpec() {
 
       val team = service.create(player.id)
 
-      team shouldBe expectedTeam(id = team.id, playerId = player.id)
+      team shouldBe expectedTeam(team.id, player.id)
       verify(exactly = 1) { teamRepository.save(any()) }
       verify(exactly = 1) { playerStateWorkQueue.markDirty(player.id) }
     }
@@ -113,8 +113,8 @@ class TeamServiceTest : StringSpec() {
       val updatedTeam = service.assignCharacter(player.id, team.id, 1, characterKey)
       val expectedTeam =
         expectedTeam(
-          id = team.id,
-          playerId = player.id,
+          team.id,
+          player.id,
           slots = listOf(TeamMemberSlot(1, "warrior"), TeamMemberSlot(2), TeamMemberSlot(3)),
         )
 
@@ -141,7 +141,7 @@ class TeamServiceTest : StringSpec() {
       every { playerStateWorkQueue.markDirty(player.id) } just runs
 
       val activatedTeam = service.activate(player.id, team.id)
-      val expectedPlayer = expectedPlayer(id = player.id, name = "Alice", ownedCharacterKeys = setOf("warrior"), activeTeamId = team.id)
+      val expectedPlayer = expectedPlayer(player.id, "Alice", ownedCharacterKeys = setOf("warrior"), activeTeamId = team.id)
 
       activatedTeam shouldBe team
       updatedPlayers.last() shouldBe expectedPlayer

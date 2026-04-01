@@ -61,7 +61,7 @@ class PlayerServiceTest : StringSpec() {
       val player = service.provision("Alice")
 
       service.get(player.id) shouldBe player
-      player shouldBe expectedPlayer(id = player.id, name = "Alice")
+      player shouldBe expectedPlayer(player.id, "Alice")
       verify(exactly = 1) { playerRepository.save(any()) }
       verify(exactly = 3) { teamRepository.save(any()) }
       verify(exactly = 1) { playerRepository.findById(player.id) }
@@ -114,11 +114,7 @@ class PlayerServiceTest : StringSpec() {
           count = 1,
           pulls =
             listOf(
-              expectedCharacterPull(
-                pulledCharacterKey = "warrior",
-                grantedCharacterKey = "warrior",
-                essenceGranted = 0,
-              ),
+              expectedCharacterPull("warrior", "warrior", 0),
             ),
           totalEssenceGranted = 0,
         )
@@ -142,11 +138,7 @@ class PlayerServiceTest : StringSpec() {
           count = 1,
           pulls =
             listOf(
-              expectedCharacterPull(
-                pulledCharacterKey = "warrior",
-                grantedCharacterKey = null,
-                essenceGranted = 15,
-              ),
+              expectedCharacterPull("warrior", null, 15),
             ),
           totalEssenceGranted = 15,
         )

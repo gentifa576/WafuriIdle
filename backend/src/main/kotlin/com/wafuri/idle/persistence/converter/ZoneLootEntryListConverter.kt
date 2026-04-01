@@ -17,7 +17,7 @@ class ZoneLootEntryListConverter : AttributeConverter<List<ZoneLootEntry>, Strin
       .map { entry ->
         val parts = entry.split(KEY_VALUE_SEPARATOR, limit = 2)
         require(parts.size == 2) { "Zone loot entry must be stored as itemName:weight." }
-        ZoneLootEntry(itemName = parts[0], weight = parts[1].toInt())
+        ZoneLootEntry(parts[0], parts[1].toInt())
       }
 
   companion object {

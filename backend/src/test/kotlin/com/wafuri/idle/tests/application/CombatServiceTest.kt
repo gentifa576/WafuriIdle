@@ -64,17 +64,17 @@ class CombatServiceTest : StringSpec() {
     "start combat uses the player's current team stats" {
       val playerId = UUID.randomUUID()
       val teamId = UUID.randomUUID()
-      val player = expectedPlayer(id = playerId, name = "Alice")
-      val teamStats = expectedSingleMemberTeamCombatStats(teamId = teamId, attack = 12f, hit = 7f, maxHp = 11f)
+      val player = expectedPlayer(playerId, "Alice")
+      val teamStats = expectedSingleMemberTeamCombatStats(teamId, attack = 12f, hit = 7f, maxHp = 11f)
       var savedState: CombatState? = null
       val zone =
         ZoneTemplate(
-          id = "starter-plains",
-          name = "Starter Plains",
-          levelRange = LevelRange(1, 10),
-          eventRefs = emptyList(),
-          lootTable = emptyList(),
-          enemies = listOf("Training Dummy"),
+          "starter-plains",
+          "Starter Plains",
+          LevelRange(1, 10),
+          emptyList(),
+          emptyList(),
+          listOf("Training Dummy"),
         )
 
       every { playerRepository.findById(playerId) } returns player
@@ -90,8 +90,8 @@ class CombatServiceTest : StringSpec() {
       val result = service.start(playerId)
       val expectedState =
         expectedSingleMemberCombatState(
-          playerId = playerId,
-          teamId = teamId,
+          playerId,
+          teamId,
           attack = 12f,
           hit = 7f,
           currentHp = 11f,
@@ -103,24 +103,24 @@ class CombatServiceTest : StringSpec() {
         )
       val expectedSnapshot =
         expectedCombatSnapshot(
-          playerId = playerId,
-          status = CombatStatus.FIGHTING,
-          zoneId = zone.id,
-          activeTeamId = teamId,
-          enemyName = "Training Dummy",
-          enemyAttack = 1f,
-          enemyHp = 1000f,
-          enemyMaxHp = 1000f,
-          teamDps = 84f,
+          playerId,
+          CombatStatus.FIGHTING,
+          zone.id,
+          teamId,
+          "Training Dummy",
+          1f,
+          1000f,
+          1000f,
+          84f,
           members =
             listOf(
               expectedCombatMemberSnapshot(
-                characterKey = "warrior",
-                attack = 12f,
-                hit = 7f,
-                currentHp = 11f,
-                maxHp = 11f,
-                alive = true,
+                "warrior",
+                12f,
+                7f,
+                11f,
+                11f,
+                true,
               ),
             ),
         )

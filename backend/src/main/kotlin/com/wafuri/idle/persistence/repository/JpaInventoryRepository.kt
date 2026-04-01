@@ -64,10 +64,10 @@ class JpaInventoryRepository(
 
 private fun InventoryItemEntity.toDomain(item: Item): InventoryItem =
   InventoryItem(
-    id = id,
-    playerId = playerId,
-    item = item,
-    itemLevel = itemLevel,
+    id,
+    playerId,
+    item,
+    itemLevel,
     subStats = subStats,
     rarity = rarity,
     upgrade = upgrade,

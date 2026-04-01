@@ -37,7 +37,7 @@ class JpaClusterNodeRepository(
 
 private fun ClusterNodeEntity.toDomain(): ClusterNode =
   ClusterNode(
-    instanceId = instanceId,
-    internalBaseUrl = internalBaseUrl,
-    lastHeartbeatAt = lastHeartbeatAt,
+    instanceId,
+    internalBaseUrl,
+    lastHeartbeatAt,
   )

@@ -47,14 +47,10 @@ class JpaPlayerZoneProgressRepository(
 
 private fun PlayerZoneProgressEntity.toDomain(): PlayerZoneProgress =
   PlayerZoneProgress(
-    playerId = requireNotNull(id.playerId),
-    zoneId = requireNotNull(id.zoneId),
-    killCount = killCount,
-    level = level,
+    requireNotNull(id.playerId),
+    requireNotNull(id.zoneId),
+    killCount,
+    level,
   )
 
-private fun PlayerZoneProgress.toEntityId(): PlayerZoneProgressEntityId =
-  PlayerZoneProgressEntityId(
-    playerId = playerId,
-    zoneId = zoneId,
-  )
+private fun PlayerZoneProgress.toEntityId(): PlayerZoneProgressEntityId = PlayerZoneProgressEntityId(playerId, zoneId)

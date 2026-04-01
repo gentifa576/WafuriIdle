@@ -44,10 +44,10 @@ class JpaZoneTemplateRepository(
 
 private fun ZoneTemplateEntity.toDomain(): ZoneTemplate =
   ZoneTemplate(
-    id = id,
-    name = name,
-    levelRange = LevelRange(min = minLevel, max = maxLevel),
-    eventRefs = eventRefs,
-    lootTable = lootTable,
-    enemies = enemies,
+    id,
+    name,
+    LevelRange(minLevel, maxLevel),
+    eventRefs,
+    lootTable,
+    enemies,
   )

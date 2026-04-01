@@ -13,7 +13,7 @@ class StatConverter : AttributeConverter<Stat, String> {
   override fun convertToEntityAttribute(dbData: String?): Stat {
     val parts = dbData.orEmpty().split(SEPARATOR, limit = 2)
     require(parts.size == 2) { "Stat must be stored as STAT:value." }
-    return Stat(type = StatType.valueOf(parts[0]), value = parts[1].toFloat())
+    return Stat(StatType.valueOf(parts[0]), parts[1].toFloat())
   }
 
   companion object {

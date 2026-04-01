@@ -34,21 +34,21 @@ class JwtTokenService(
         .expiresAt(expiresAt)
         .sign()
     return AuthSessionResult(
-      player = null,
-      sessionToken = sessionToken,
-      sessionExpiresAt = expiresAt,
-      guestAccount = guestAccount,
+      null,
+      sessionToken,
+      expiresAt,
+      guestAccount,
     )
   }
 
   fun refresh(jwt: JsonWebToken): RefreshedToken =
     mint(
-      playerId = UUID.fromString(jwt.subject),
-      username = jwt.name,
-      guestAccount = jwt.getClaim<Any>("guestAccount") as? Boolean ?: false,
-      role = AuthScope.valueOf(jwt.getClaim<Any>("role") as? String ?: AuthScope.USER.name),
-      sessionId = jwt.getClaim<String>("sid")?.let(UUID::fromString) ?: UUID.randomUUID(),
-    ).let { RefreshedToken(token = it.sessionToken, expiresAt = it.sessionExpiresAt) }
+      UUID.fromString(jwt.subject),
+      jwt.name,
+      jwt.getClaim<Any>("guestAccount") as? Boolean ?: false,
+      AuthScope.valueOf(jwt.getClaim<Any>("role") as? String ?: AuthScope.USER.name),
+      jwt.getClaim<String>("sid")?.let(UUID::fromString) ?: UUID.randomUUID(),
+    ).let { RefreshedToken(it.sessionToken, it.sessionExpiresAt) }
 
   fun mintInternalNode(instanceId: String): String {
     val issuedAt = Instant.now()
