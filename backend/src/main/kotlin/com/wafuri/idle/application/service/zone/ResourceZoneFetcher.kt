@@ -14,22 +14,21 @@ import jakarta.enterprise.context.ApplicationScoped
 class ResourceZoneFetcher(
   private val objectMapper: ObjectMapper,
 ) : ZoneFetcher {
+  private val typeReference = object : TypeReference<List<ResourceZoneTemplateRecord>>() {}
+
   override fun fetch(): List<ZoneTemplate> {
     val stream = javaClass.classLoader.getResourceAsStream(RESOURCE_PATH) ?: return emptyList()
     return stream.use { input ->
       objectMapper
-        .readValue(input, object : TypeReference<List<ResourceZoneTemplateRecord>>() {})
+        .readValue(input, typeReference)
         .map { record ->
           ZoneTemplate(
-            id = record.id,
-            name = record.name,
-            levelRange = LevelRange(min = record.levelRange.first, max = record.levelRange.last),
-            eventRefs = emptyList(),
-            lootTable =
-              record.lootTable.map { loot ->
-                ZoneLootEntry(itemName = loot.itemName, weight = loot.weight)
-              },
-            enemies = record.enemies,
+            record.id,
+            record.name,
+            LevelRange(record.levelRange.first, record.levelRange.last),
+            emptyList(),
+            record.lootTable.map(Companion::fromLootRecord),
+            record.enemies,
           )
         }
     }
@@ -37,6 +36,8 @@ class ResourceZoneFetcher(
 
   companion object {
     private const val RESOURCE_PATH = "zones/zones.json"
+
+    private fun fromLootRecord(record: ResourceZoneLootEntryRecord): ZoneLootEntry = ZoneLootEntry(record.itemName, record.weight)
   }
 }
 

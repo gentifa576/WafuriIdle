@@ -43,4 +43,27 @@ class InMemoryPlayerStateChangeTrackerTest :
       tracker.shouldPublishCombatState(playerId, laterDownSnapshot) shouldBe false
       tracker.shouldPublishCombatState(playerId, fightingSnapshot) shouldBe true
     }
+
+    "combat publish emits once when combat clears to idle" {
+      val tracker = InMemoryPlayerStateChangeTracker()
+      val playerId = UUID.randomUUID()
+      val teamId = UUID.randomUUID()
+      val fightingSnapshot =
+        expectedCombatSnapshot(
+          playerId,
+          CombatStatus.FIGHTING,
+          "starter-plains",
+          teamId,
+          "Training Slime",
+          1f,
+          20f,
+          20f,
+          5.5f,
+          members = listOf(expectedCombatMemberSnapshot("hero", 10f, 0.55f, 24f, 24f, true)),
+        )
+
+      tracker.shouldPublishCombatState(playerId, fightingSnapshot) shouldBe true
+      tracker.shouldPublishCombatState(playerId, null) shouldBe true
+      tracker.shouldPublishCombatState(playerId, null) shouldBe false
+    }
   })

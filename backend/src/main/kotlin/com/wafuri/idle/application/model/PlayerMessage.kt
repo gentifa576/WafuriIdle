@@ -14,16 +14,16 @@ sealed interface PlayerMessage : PlayerPayload {
 }
 
 data class PlayerStateMessage(
-  override val type: EventType = EventType.PLAYER_STATE_SYNC,
   override val playerId: UUID,
   val snapshot: PlayerStateSnapshot,
+  override val type: EventType = EventType.PLAYER_STATE_SYNC,
 ) : PlayerMessage
 
 data class CombatStateMessage(
-  override val type: EventType = EventType.COMBAT_STATE_SYNC,
   override val playerId: UUID,
   val snapshot: CombatSnapshot?,
   val serverTime: Instant,
+  override val type: EventType = EventType.COMBAT_STATE_SYNC,
 ) : PlayerMessage
 
 data class ZoneLevelUpMessage(
@@ -77,9 +77,9 @@ data class OfflineProgressionMessage(
 }
 
 data class CommandErrorMessage(
-  override val type: EventType = EventType.COMMAND_ERROR,
   override val playerId: UUID,
   val commandType: String,
   val message: String,
   val serverTime: Instant,
+  override val type: EventType = EventType.COMMAND_ERROR,
 ) : PlayerMessage

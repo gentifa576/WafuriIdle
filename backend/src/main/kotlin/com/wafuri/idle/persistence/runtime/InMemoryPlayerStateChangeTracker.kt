@@ -13,18 +13,14 @@ import java.util.concurrent.atomic.AtomicBoolean
 @ApplicationScoped
 class InMemoryPlayerStateChangeTracker : PlayerStateChangeTracker {
   private val lastPublishedContent: MutableMap<UUID, PlayerStateContent> = ConcurrentHashMap()
-  private val lastPublishedCombat: MutableMap<UUID, CombatSnapshot?> = ConcurrentHashMap()
+  private val lastPublishedCombat: MutableMap<UUID, CombatSnapshot> = ConcurrentHashMap()
 
   override fun shouldPublishPlayerState(snapshot: PlayerStateSnapshot): Boolean {
     val newContent = snapshot.content()
     val shouldPublish = AtomicBoolean(false)
     lastPublishedContent.compute(snapshot.playerId) { _, previousContent ->
       when {
-        previousContent == null -> {
-          shouldPublish.set(true)
-          newContent
-        }
-        previousContent != newContent -> {
+        previousContent == null || previousContent != newContent -> {
           shouldPublish.set(true)
           newContent
         }
@@ -38,11 +34,15 @@ class InMemoryPlayerStateChangeTracker : PlayerStateChangeTracker {
     playerId: UUID,
     snapshot: CombatSnapshot?,
   ): Boolean {
+    if (snapshot == null) {
+      return lastPublishedCombat.remove(playerId) != null
+    }
+
     val shouldPublish = AtomicBoolean(false)
     lastPublishedCombat.compute(playerId) { _, previousSnapshot ->
       val repeatedDownTick =
         previousSnapshot?.status == CombatStatus.DOWN &&
-          snapshot?.status == CombatStatus.DOWN
+          snapshot.status == CombatStatus.DOWN
       if (!repeatedDownTick && previousSnapshot != snapshot) {
         shouldPublish.set(true)
       }

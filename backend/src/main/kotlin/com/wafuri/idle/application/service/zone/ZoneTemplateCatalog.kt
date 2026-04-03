@@ -21,11 +21,7 @@ class ZoneTemplateCatalog {
 
   fun find(zoneId: String): ZoneTemplate? = zones.get()[zoneId]
 
-  fun require(zoneId: String): ZoneTemplate =
-    find(zoneId)
-      ?: throw ResourceNotFoundException("Zone template $zoneId was not found.")
+  fun require(zoneId: String): ZoneTemplate = find(zoneId) ?: throw ResourceNotFoundException("Zone template $zoneId was not found.")
 
-  fun default(): ZoneTemplate =
-    all().firstOrNull()
-      ?: throw ResourceNotFoundException("No zone templates are available.")
+  fun default(): ZoneTemplate = all().firstOrNull() ?: throw ResourceNotFoundException("No zone templates are available.")
 }

@@ -44,6 +44,5 @@ class PlayerSyncLoop(
   @PreDestroy
   fun stop() {
     tickJob?.cancel()
-    scope.cancel()
   }
 }

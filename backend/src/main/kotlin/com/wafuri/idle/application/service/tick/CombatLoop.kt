@@ -26,7 +26,7 @@ class CombatLoop(
 ) {
   private val logger = LoggerFactory.getLogger(CombatLoop::class.java)
   private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-  private val zoneJobs = ConcurrentHashMap<String, Job>()
+  internal val zoneJobs = ConcurrentHashMap<String, Job>()
   private var coordinatorJob: Job? = null
 
   @PostConstruct
@@ -46,8 +46,6 @@ class CombatLoop(
         }
       }
   }
-
-  internal fun activeZoneJobIds(): Set<String> = zoneJobs.keys.toSet()
 
   internal fun syncZoneJobs(
     intervalMillis: Long =

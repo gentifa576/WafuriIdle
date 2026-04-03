@@ -34,11 +34,9 @@ class GameTickService(
   suspend fun tick() =
     coroutineScope {
       collectSnapshotsToPublish()
-        .flatMap { publication ->
-          publication.messages().map { message ->
-            async {
-              playerMessagePublisher.publish(message)
-            }
+        .flatMap {
+          it.messages().map { message ->
+            async { playerMessagePublisher.publish(message) }
           }
         }.awaitAll()
     }
@@ -49,7 +47,7 @@ class GameTickService(
     val queuedEventsByPlayerId = playerEventQueue.drainGroupedByPlayerId()
     val playerIds = activePlayerIds + playerStateWorkQueue.drainDirtyPlayerIds() + queuedEventsByPlayerId.keys
     return playerIds
-      .mapNotNull { playerId -> publicationOrNull(playerId, queuedEventsByPlayerId[playerId].orEmpty()) }
+      .mapNotNull { publicationOrNull(it, queuedEventsByPlayerId[it].orEmpty()) }
   }
 
   private fun publicationOrNull(
@@ -66,12 +64,12 @@ class GameTickService(
       }
       val compactedEvents = compactEvents(events)
       PendingPlayerStatePublication(
-        playerId = playerId,
-        events = compactedEvents,
-        playerSnapshot = playerSnapshot.takeIf { publishPlayerState },
-        combatSnapshot = combatSnapshot,
-        publishCombatState = publishCombatState,
-        serverTime = Instant.now(),
+        playerId,
+        compactedEvents,
+        playerSnapshot.takeIf { publishPlayerState },
+        combatSnapshot,
+        publishCombatState,
+        Instant.now(),
       )
     } catch (_: ResourceNotFoundException) {
       null
@@ -86,9 +84,7 @@ class GameTickService(
     if (offlineZones.isEmpty()) {
       return events
     }
-    return events.filterNot { event ->
-      event is ZoneLevelUpMessage && event.zoneId in offlineZones
-    }
+    return events.filterNot { it is ZoneLevelUpMessage && it.zoneId in offlineZones }
   }
 }
 
@@ -103,22 +99,9 @@ data class PendingPlayerStatePublication(
   fun messages(): List<PlayerMessage> =
     buildList {
       addAll(events.map { it.publishAt(serverTime) })
-      playerSnapshot?.let { snapshot ->
-        add(
-          PlayerStateMessage(
-            playerId = snapshot.playerId,
-            snapshot = snapshot,
-          ),
-        )
-      }
+      playerSnapshot?.let { add(PlayerStateMessage(it.playerId, it)) }
       if (publishCombatState) {
-        add(
-          CombatStateMessage(
-            playerId = playerId,
-            snapshot = combatSnapshot,
-            serverTime = serverTime,
-          ),
-        )
+        add(CombatStateMessage(playerId, combatSnapshot, serverTime))
       }
     }
 }

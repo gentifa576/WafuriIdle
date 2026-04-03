@@ -47,13 +47,13 @@ class CombatLoopTest : StringSpec() {
       loop.start()
       Thread.sleep(50)
 
-      loop.activeZoneJobIds() shouldContain zoneId
+      loop.zoneJobs.keys shouldContain zoneId
       tickCount.get() shouldBeGreaterThan 0
 
       activeZones = emptySet()
       Thread.sleep(40)
 
-      loop.activeZoneJobIds() shouldNotContain zoneId
+      loop.zoneJobs.keys shouldNotContain zoneId
       loop.stop()
     }
 
@@ -64,7 +64,7 @@ class CombatLoopTest : StringSpec() {
       loop.start()
       Thread.sleep(30)
 
-      loop.activeZoneJobIds() shouldNotContain "starter-plains"
+      loop.zoneJobs.keys shouldNotContain "starter-plains"
       loop.stop()
     }
   }

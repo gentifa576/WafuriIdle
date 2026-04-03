@@ -69,7 +69,7 @@ class PlayerWebSocketEndpoint {
         playerStateWorkQueue.markDirty(parsedPlayerId)
       }.onFailure { throwable ->
         logger
-          .atWarn()
+          .atError()
           .setCause(throwable)
           .addKeyValue("playerId", parsedPlayerId)
           .log("Offline progression apply failed during websocket open.")
@@ -98,37 +98,25 @@ class PlayerWebSocketEndpoint {
           val snapshot = combatService.start(parsedPlayerId)
           playerStateChangeTracker.invalidate(parsedPlayerId)
           playerStateWorkQueue.markDirty(parsedPlayerId)
-          CombatStateMessage(
-            playerId = parsedPlayerId,
-            snapshot = snapshot,
-            serverTime = Instant.now(),
-          )
+          CombatStateMessage(parsedPlayerId, snapshot, Instant.now())
         }
         PlayerSocketCommandType.STOP_COMBAT -> {
           logger.atInfo().addKeyValue("playerId", playerId).log("Received websocket combat stop command.")
           val snapshot = combatService.stop(parsedPlayerId)
           playerStateChangeTracker.invalidate(parsedPlayerId)
           playerStateWorkQueue.markDirty(parsedPlayerId)
-          CombatStateMessage(
-            playerId = parsedPlayerId,
-            snapshot = snapshot,
-            serverTime = Instant.now(),
-          )
+          CombatStateMessage(parsedPlayerId, snapshot, Instant.now())
         }
       }
     } catch (exception: ValidationException) {
       logger
-        .atInfo()
+        .atWarn()
         .setCause(exception)
         .addKeyValue("playerId", parsedPlayerId)
         .addKeyValue("commandType", command.type)
         .log("Rejected websocket command.")
-      CommandErrorMessage(
-        playerId = parsedPlayerId,
-        commandType = command.type.name,
-        message = exception.message ?: "Command rejected.",
-        serverTime = Instant.now(),
-      )
+      val message = exception.message ?: "Command rejected."
+      CommandErrorMessage(parsedPlayerId, command.type.name, message, Instant.now())
     }
   }
 

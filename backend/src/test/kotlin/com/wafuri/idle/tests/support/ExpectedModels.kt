@@ -199,7 +199,7 @@ fun expectedPlayerStateMessage(
   playerId: UUID,
   snapshot: PlayerStateSnapshot,
   type: EventType = EventType.PLAYER_STATE_SYNC,
-): PlayerStateMessage = PlayerStateMessage(type, playerId, snapshot)
+): PlayerStateMessage = PlayerStateMessage(playerId, snapshot, type)
 
 fun expectedCombatMemberState(
   characterKey: String,
