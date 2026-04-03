@@ -1,6 +1,5 @@
 package com.wafuri.idle.application.service.combat
 
-import com.wafuri.idle.application.exception.ResourceNotFoundException
 import com.wafuri.idle.application.exception.ValidationException
 import com.wafuri.idle.application.model.CharacterCombatStats
 import com.wafuri.idle.application.model.TeamCombatStats
@@ -32,10 +31,27 @@ class CombatStatService(
     playerId: UUID,
     existingMembers: List<CombatMemberState> = emptyList(),
   ): TeamCombatStats {
-    val cached =
-      cachedPlayerBaseStats.computeIfAbsent(playerId) {
-        loadPlayerCombatBaseStats(playerId)
-      }
+    val player = playerRepository.require(playerId)
+    val activeTeamId =
+      player.activeTeamId
+        ?: throw ValidationException("Player does not have an active team.")
+    val team = teamRepository.require(activeTeamId)
+    if (team.characterKeys.isEmpty()) {
+      throw ValidationException("Team must contain at least one character to enter combat.")
+    }
+    return teamStatsForPlayerOrNull(playerId, existingMembers)
+      ?: throw ValidationException("Team must contain at least one owned character to enter combat.")
+  }
+
+  fun teamStatsForPlayerOrNull(
+    playerId: UUID,
+    existingMembers: List<CombatMemberState> = emptyList(),
+  ): TeamCombatStats? {
+    val cached = cachedPlayerBaseStats[playerId] ?: loadPlayerCombatBaseStats(playerId)?.also { cachedPlayerBaseStats[playerId] = it }
+    if (cached == null) {
+      cachedPlayerBaseStats.remove(playerId)
+      return null
+    }
     val resolvedCharacterStats =
       combatPassiveService.applyLeaderPassive(
         cached.teamCharacterKeys,
@@ -49,50 +65,44 @@ class CombatStatService(
     cachedPlayerBaseStats.remove(playerId)
   }
 
-  private fun loadPlayerCombatBaseStats(playerId: UUID): PlayerCombatBaseStats {
-    val player =
-      playerRepository.findById(playerId)
-        ?: throw ResourceNotFoundException("Player $playerId was not found.")
-    val activeTeamId =
-      player.activeTeamId
-        ?: throw ValidationException("Player does not have an active team.")
-    val team =
-      teamRepository.findById(activeTeamId)
-        ?: throw ResourceNotFoundException("Team $activeTeamId was not found.")
-    if (team.characterKeys.isEmpty()) {
-      throw ValidationException("Team must contain at least one character to enter combat.")
-    }
+  private fun loadPlayerCombatBaseStats(playerId: UUID): PlayerCombatBaseStats? {
+    val player = playerRepository.require(playerId)
+    val activeTeamId = player.activeTeamId ?: return null
+    val team = teamRepository.require(activeTeamId)
+    val occupiedSlots = team.slots.filter { it.characterKey != null }
 
     val baseCharacterStats =
-      team.slots.mapNotNull { teamSlot ->
-        val characterKey = teamSlot.characterKey ?: return@mapNotNull null
-        if (!player.ownedCharacterKeys.contains(characterKey)) {
-          throw ValidationException("Team contains a character the player does not own.")
-        }
-        val template = characterTemplateCatalog.require(characterKey)
-        val equippedItems =
-          listOfNotNull(
-            teamSlot.weaponItemId?.let { inventoryRepository.findById(it) },
-            teamSlot.armorItemId?.let { inventoryRepository.findById(it) },
-            teamSlot.accessoryItemId?.let { inventoryRepository.findById(it) },
-          ).onEach { inventoryItem ->
-            if (
-              inventoryItem.playerId != player.id ||
-              inventoryItem.equippedTeamId != team.id ||
-              inventoryItem.equippedPosition != teamSlot.position
-            ) {
-              throw ValidationException("Team references an item that is not assigned to this team slot.")
-            }
-          }
-        CharacterCombatStats(
-          characterKey,
-          template.strength.atLevel(player.level) + equippedItems.sumOf { statBonus(it, StatType.STRENGTH).toDouble() }.toFloat(),
-          template.agility.atLevel(player.level) + equippedItems.sumOf { statBonus(it, StatType.AGILITY).toDouble() }.toFloat(),
-          template.vitality.atLevel(player.level) + equippedItems.sumOf { statBonus(it, StatType.VITALITY).toDouble() }.toFloat(),
-        )
-      }
+      occupiedSlots
+        .map { teamSlot ->
+          val characterKey = teamSlot.characterKey!!
+          characterKey.takeIf { it in player.ownedCharacterKeys }?.let { ownedCharacterKey ->
+            val template = characterTemplateCatalog.require(ownedCharacterKey)
+            val equippedItems =
+              listOfNotNull(
+                teamSlot.weaponItemId,
+                teamSlot.armorItemId,
+                teamSlot.accessoryItemId,
+              ).mapNotNull { inventoryRepository.findById(it) }
+                .filter { inventoryItem ->
+                  inventoryItem.playerId == player.id &&
+                    inventoryItem.equippedTeamId == team.id &&
+                    inventoryItem.equippedPosition == teamSlot.position
+                }
 
-    return PlayerCombatBaseStats(team.id, team.characterKeys, baseCharacterStats)
+            CharacterCombatStats(
+              ownedCharacterKey,
+              template.strength.atLevel(player.level) + equippedItems.sumOf { statBonus(it, StatType.STRENGTH).toDouble() }.toFloat(),
+              template.agility.atLevel(player.level) + equippedItems.sumOf { statBonus(it, StatType.AGILITY).toDouble() }.toFloat(),
+              template.vitality.atLevel(player.level) + equippedItems.sumOf { statBonus(it, StatType.VITALITY).toDouble() }.toFloat(),
+            )
+          }
+        }.filterNotNull()
+
+    if (baseCharacterStats.isEmpty()) {
+      return null
+    }
+
+    return PlayerCombatBaseStats(team.id, baseCharacterStats.map { it.characterKey }, baseCharacterStats)
   }
 
   private fun statBonus(

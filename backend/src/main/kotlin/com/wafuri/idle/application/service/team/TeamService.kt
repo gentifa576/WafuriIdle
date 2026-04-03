@@ -1,6 +1,5 @@
 package com.wafuri.idle.application.service.team
 
-import com.wafuri.idle.application.exception.ResourceNotFoundException
 import com.wafuri.idle.application.exception.ValidationException
 import com.wafuri.idle.application.port.out.CombatStateRepository
 import com.wafuri.idle.application.port.out.PlayerStateWorkQueue
@@ -28,8 +27,7 @@ class TeamService(
 ) {
   @Transactional
   fun create(playerId: UUID): Team {
-    playerRepository.findById(playerId)
-      ?: throw ResourceNotFoundException("Player $playerId was not found.")
+    playerRepository.require(playerId)
     val team = Team(id = UUID.randomUUID(), playerId = playerId)
     val saved = teamRepository.save(team)
     playerStateWorkQueue.markDirty(playerId)
@@ -45,12 +43,8 @@ class TeamService(
     position: Int,
     characterKey: String,
   ): Team {
-    val team =
-      teamRepository.findById(teamId)
-        ?: throw ResourceNotFoundException("Team $teamId was not found.")
-    val player =
-      playerRepository.findById(team.playerId)
-        ?: throw ResourceNotFoundException("Player ${team.playerId} was not found.")
+    val team = teamRepository.require(teamId)
+    val player = playerRepository.require(team.playerId)
     if (player.id != actorPlayerId) {
       throw ValidationException("Team does not belong to the authenticated player.")
     }
@@ -80,12 +74,8 @@ class TeamService(
     actorPlayerId: UUID,
     teamId: UUID,
   ): Team {
-    val team =
-      teamRepository.findById(teamId)
-        ?: throw ResourceNotFoundException("Team $teamId was not found.")
-    val player =
-      playerRepository.findById(team.playerId)
-        ?: throw ResourceNotFoundException("Player ${team.playerId} was not found.")
+    val team = teamRepository.require(teamId)
+    val player = playerRepository.require(team.playerId)
     if (player.id != actorPlayerId) {
       throw ValidationException("Team does not belong to the authenticated player.")
     }

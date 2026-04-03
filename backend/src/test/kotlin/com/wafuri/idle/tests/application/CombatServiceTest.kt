@@ -77,7 +77,7 @@ class CombatServiceTest : StringSpec() {
           listOf("Training Dummy"),
         )
 
-      every { playerRepository.findById(playerId) } returns player
+      every { playerRepository.require(playerId) } returns player
       every { combatStatService.teamStatsForPlayer(playerId) } returns teamStats
       every { zoneTemplateCatalog.default() } returns zone
       every { progressionService.requireZoneProgress(playerId, zone.id) } returns mockk { every { level } returns 1 }
@@ -135,7 +135,7 @@ class CombatServiceTest : StringSpec() {
       val player = expectedPlayer(playerId, "Alice")
       var savedState: CombatState? = null
 
-      every { playerRepository.findById(playerId) } returns player
+      every { playerRepository.require(playerId) } returns player
       every { combatStateRepository.save(any()) } answers {
         firstArg<CombatState>().also { savedState = it }
       }

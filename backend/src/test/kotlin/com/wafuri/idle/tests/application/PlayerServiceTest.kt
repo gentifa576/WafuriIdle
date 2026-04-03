@@ -53,8 +53,8 @@ class PlayerServiceTest : StringSpec() {
 
     "provision and get player" {
       every { playerRepository.save(capture(playerSlot)) } answers { playerSlot.captured }
-      every { playerRepository.findById(any()) } answers {
-        playerSlot.captured.takeIf { it.id == firstArg<UUID>() }
+      every { playerRepository.require(any()) } answers {
+        playerSlot.captured.takeIf { it.id == firstArg<UUID>() } ?: error("Player was not found.")
       }
       every { teamRepository.save(capture(teamSlot)) } answers { teamSlot.captured }
       every { playerStateWorkQueue.markDirty(any()) } returns Unit
@@ -64,14 +64,14 @@ class PlayerServiceTest : StringSpec() {
       player shouldBe expectedPlayer(player.id, "Alice")
       verify(exactly = 1) { playerRepository.save(any()) }
       verify(exactly = 3) { teamRepository.save(any()) }
-      verify(exactly = 1) { playerRepository.findById(player.id) }
+      verify(exactly = 1) { playerRepository.require(player.id) }
     }
 
     "claim starter grants configured starter when player has no owned characters" {
       val playerId = UUID.randomUUID()
       val player = Player(playerId, "Alice")
       every { playerRepository.save(capture(playerSlot)) } answers { playerSlot.captured }
-      every { playerRepository.findById(playerId) } returns player
+      every { playerRepository.require(playerId) } returns player
       every { characterTemplateCatalog.require("nimbus") } returns warriorTemplate(key = "nimbus")
       every { playerStateWorkQueue.markDirty(playerId) } returns Unit
 
@@ -85,7 +85,7 @@ class PlayerServiceTest : StringSpec() {
 
     "claim starter rejects players that already own a character" {
       val playerId = UUID.randomUUID()
-      every { playerRepository.findById(playerId) } returns Player(playerId, "Alice", ownedCharacterKeys = setOf("nimbus"))
+      every { playerRepository.require(playerId) } returns Player(playerId, "Alice", ownedCharacterKeys = setOf("nimbus"))
 
       val thrown =
         shouldThrow<com.wafuri.idle.application.exception.ValidationException> {
@@ -100,7 +100,7 @@ class PlayerServiceTest : StringSpec() {
     "pull character grants a new character and spends gold" {
       val playerId = UUID.randomUUID()
       val player = Player(playerId, "Alice", gold = 300)
-      every { playerRepository.findById(playerId) } returns player
+      every { playerRepository.require(playerId) } returns player
       every { characterTemplateCatalog.all() } returns listOf(clericTemplate(key = "cleric"), warriorTemplate(key = "warrior"))
       every { randomSource.nextInt(2) } returns 1
       every { playerRepository.save(capture(playerSlot)) } answers { playerSlot.captured }
@@ -124,7 +124,7 @@ class PlayerServiceTest : StringSpec() {
     "pull character converts duplicates into essence" {
       val playerId = UUID.randomUUID()
       val player = Player(playerId, "Alice", ownedCharacterKeys = setOf("warrior"), gold = 300, essence = 5)
-      every { playerRepository.findById(playerId) } returns player
+      every { playerRepository.require(playerId) } returns player
       every { characterTemplateCatalog.all() } returns listOf(warriorTemplate(key = "warrior"))
       every { randomSource.nextInt(1) } returns 0
       every { playerRepository.save(capture(playerSlot)) } answers { playerSlot.captured }
@@ -147,7 +147,7 @@ class PlayerServiceTest : StringSpec() {
     "pull character supports a ten pull and applies duplicates against updated batch ownership" {
       val playerId = UUID.randomUUID()
       val player = Player(playerId, "Alice", gold = 2_500)
-      every { playerRepository.findById(playerId) } returns player
+      every { playerRepository.require(playerId) } returns player
       every { characterTemplateCatalog.all() } returns listOf(clericTemplate(key = "cleric"), warriorTemplate(key = "warrior"))
       every { randomSource.nextInt(2) } returnsMany listOf(1, 1, 0, 0, 1, 0, 1, 0, 1, 0)
       every { playerRepository.save(capture(playerSlot)) } answers { playerSlot.captured }
@@ -178,7 +178,7 @@ class PlayerServiceTest : StringSpec() {
 
     "pull character rejects players without enough gold" {
       val playerId = UUID.randomUUID()
-      every { playerRepository.findById(playerId) } returns Player(playerId, "Alice", gold = 249)
+      every { playerRepository.require(playerId) } returns Player(playerId, "Alice", gold = 249)
 
       val thrown =
         shouldThrow<com.wafuri.idle.application.exception.ValidationException> {

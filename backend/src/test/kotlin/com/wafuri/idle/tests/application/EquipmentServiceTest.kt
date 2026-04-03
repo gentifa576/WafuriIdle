@@ -77,9 +77,9 @@ class EquipmentServiceTest : StringSpec() {
           item = swordItem(),
         )
 
-      every { inventoryRepository.findById(foreignItem.id) } returns foreignItem
-      every { teamRepository.findById(teamId) } returns team
-      every { playerRepository.findById(foreignItem.playerId) } returns player
+      every { inventoryRepository.require(foreignItem.id) } returns foreignItem
+      every { teamRepository.require(teamId) } returns team
+      every { playerRepository.require(foreignItem.playerId) } returns player
       every { inventoryRepository.findByTeamPositionAndSlot(teamId, 1, EquipmentSlot.WEAPON) } returns null
 
       shouldThrow<ValidationException> {
@@ -114,8 +114,8 @@ class EquipmentServiceTest : StringSpec() {
       val savedItems = mutableListOf<InventoryItem>()
 
       every { inventoryRepository.findByTeamPositionAndSlot(teamId, 1, EquipmentSlot.WEAPON) } returns inventoryItem
-      every { teamRepository.findById(teamId) } returns team
-      every { playerRepository.findById(playerId) } returns player
+      every { teamRepository.require(teamId) } returns team
+      every { playerRepository.require(playerId) } returns player
       every { inventoryRepository.save(any()) } answers {
         firstArg<InventoryItem>().also { savedItems += it }
       }
@@ -149,9 +149,9 @@ class EquipmentServiceTest : StringSpec() {
           item = swordItem(),
         )
 
-      every { inventoryRepository.findById(inventoryItemId) } returns inventoryItem
-      every { teamRepository.findById(teamId) } returns team
-      every { playerRepository.findById(playerId) } returns player
+      every { inventoryRepository.require(inventoryItemId) } returns inventoryItem
+      every { teamRepository.require(teamId) } returns team
+      every { playerRepository.require(playerId) } returns player
       every {
         combatStateRepository.findById(playerId)
       } returns
@@ -203,8 +203,8 @@ class EquipmentServiceTest : StringSpec() {
         )
 
       every { inventoryRepository.findByTeamPositionAndSlot(teamId, 1, EquipmentSlot.WEAPON) } returns inventoryItem
-      every { teamRepository.findById(teamId) } returns team
-      every { playerRepository.findById(playerId) } returns player
+      every { teamRepository.require(teamId) } returns team
+      every { playerRepository.require(playerId) } returns player
       every {
         combatStateRepository.findById(playerId)
       } returns

@@ -64,7 +64,7 @@ class TeamServiceTest : StringSpec() {
     "create team for player" {
       val player = Player(UUID.randomUUID(), "Alice")
 
-      every { playerRepository.findById(player.id) } returns player
+      every { playerRepository.require(player.id) } returns player
       every { teamRepository.save(capture(teamSlot)) } answers { teamSlot.captured }
       every { playerStateWorkQueue.markDirty(player.id) } just runs
 
@@ -79,8 +79,8 @@ class TeamServiceTest : StringSpec() {
       val player = Player(UUID.randomUUID(), "Alice")
       val team = Team(UUID.randomUUID(), player.id)
 
-      every { teamRepository.findById(team.id) } returns team
-      every { playerRepository.findById(player.id) } returns player
+      every { teamRepository.require(team.id) } returns team
+      every { playerRepository.require(player.id) } returns player
 
       shouldThrow<ValidationException> {
         service.activate(player.id, team.id)
@@ -102,8 +102,8 @@ class TeamServiceTest : StringSpec() {
         )
       val characterKey = "warrior"
 
-      every { playerRepository.findById(player.id) } returns player
-      every { teamRepository.findById(team.id) } returns team
+      every { playerRepository.require(player.id) } returns player
+      every { teamRepository.require(team.id) } returns team
       every { characterTemplateCatalog.require(characterKey) } returns warriorTemplate(characterKey)
 
       shouldThrow<ValidationException> {
@@ -117,8 +117,8 @@ class TeamServiceTest : StringSpec() {
       val characterKey = "warrior"
       val savedTeams = mutableListOf<Team>()
 
-      every { playerRepository.findById(player.id) } returns player
-      every { teamRepository.findById(team.id) } returns team
+      every { playerRepository.require(player.id) } returns player
+      every { teamRepository.require(team.id) } returns team
       every { characterTemplateCatalog.require(characterKey) } returns warriorTemplate(characterKey)
       every { teamRepository.save(any()) } answers {
         firstArg<Team>().also { savedTeams += it }
@@ -144,8 +144,8 @@ class TeamServiceTest : StringSpec() {
       val player = Player(UUID.randomUUID(), "Alice", ownedCharacterKeys = setOf("warrior"))
       val team = Team(UUID.randomUUID(), player.id)
 
-      every { teamRepository.findById(team.id) } returns team
-      every { playerRepository.findById(player.id) } returns player
+      every { teamRepository.require(team.id) } returns team
+      every { playerRepository.require(player.id) } returns player
       every {
         combatStateRepository.findById(player.id)
       } returns
@@ -181,8 +181,8 @@ class TeamServiceTest : StringSpec() {
         )
       val updatedPlayers = mutableListOf<Player>()
 
-      every { teamRepository.findById(team.id) } returns team
-      every { playerRepository.findById(player.id) } returns player
+      every { teamRepository.require(team.id) } returns team
+      every { playerRepository.require(player.id) } returns player
       every { playerRepository.save(any()) } answers { firstArg<Player>().also { updatedPlayers += it } }
       every { combatStatService.invalidatePlayer(player.id) } just runs
       every { playerStateWorkQueue.markDirty(player.id) } just runs
@@ -205,8 +205,8 @@ class TeamServiceTest : StringSpec() {
           slots = listOf(TeamMemberSlot(1, "warrior"), TeamMemberSlot(2), TeamMemberSlot(3)),
         )
 
-      every { teamRepository.findById(team.id) } returns team
-      every { playerRepository.findById(player.id) } returns player
+      every { teamRepository.require(team.id) } returns team
+      every { playerRepository.require(player.id) } returns player
       every {
         combatStateRepository.findById(player.id)
       } returns

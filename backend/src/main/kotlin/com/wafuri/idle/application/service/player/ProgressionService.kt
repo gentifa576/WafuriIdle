@@ -1,7 +1,6 @@
 package com.wafuri.idle.application.service.player
 
 import com.wafuri.idle.application.config.GameConfig
-import com.wafuri.idle.application.exception.ResourceNotFoundException
 import com.wafuri.idle.application.model.ZoneLevelUpMessage
 import com.wafuri.idle.application.port.out.PlayerMessageQueue
 import com.wafuri.idle.application.port.out.PlayerStateWorkQueue
@@ -32,18 +31,13 @@ class ProgressionService(
     zoneId: String,
     enemyLevel: Int = 1,
   ) {
-    val player =
-      playerRepository.findById(playerId)
-        ?: throw ResourceNotFoundException("Player $playerId was not found.")
+    val player = playerRepository.require(playerId)
 
-    val playerProgressionConfig = gameConfig.progression().player()
+    val config = gameConfig.progression().player()
     val rewardMultiplier = scalingRule.rewardMultiplier(enemyLevel)
-    val rewardedPlayer =
-      player.grantExperience(
-        amount = (playerProgressionConfig.killExperience() * rewardMultiplier).roundToInt(),
-        experiencePerLevel = playerProgressionConfig.experiencePerLevel(),
-      )
-    val updatedPlayer = rewardedPlayer.grantGold((playerProgressionConfig.killGold() * rewardMultiplier).roundToInt())
+    val amount = (config.killExperience() * rewardMultiplier).roundToInt()
+    val rewardedPlayer = player.grantExperience(amount, config.experiencePerLevel())
+    val updatedPlayer = rewardedPlayer.grantGold((config.killGold() * rewardMultiplier).roundToInt())
     if (updatedPlayer != player) {
       playerRepository.save(updatedPlayer)
       if (updatedPlayer.level != player.level) {
@@ -51,38 +45,27 @@ class ProgressionService(
       }
     }
 
-    val currentProgress =
-      playerZoneProgressRepository.findByPlayerIdAndZoneId(playerId, zoneId)
-        ?: PlayerZoneProgress(playerId = playerId, zoneId = zoneId)
+    val currentProgress = requireZoneProgress(playerId, zoneId)
     val updatedProgress = currentProgress.recordKill(gameConfig.progression().zone().killsPerLevel())
     playerZoneProgressRepository.save(updatedProgress)
     if (updatedProgress.level > currentProgress.level) {
-      playerEventQueue.enqueue(
-        ZoneLevelUpMessage(
-          playerId = playerId,
-          zoneId = zoneId,
-          level = updatedProgress.level,
-        ),
-      )
+      playerEventQueue.enqueue(ZoneLevelUpMessage(playerId, zoneId, updatedProgress.level))
     }
 
     playerStateWorkQueue.markDirty(playerId)
   }
 
   fun listZoneProgress(playerId: UUID): List<PlayerZoneProgress> {
-    playerRepository.findById(playerId)
-      ?: throw ResourceNotFoundException("Player $playerId was not found.")
+    playerRepository.require(playerId)
     return playerZoneProgressRepository.findByPlayerId(playerId)
   }
 
-  fun requirePlayer(playerId: UUID): Player =
-    playerRepository.findById(playerId)
-      ?: throw ResourceNotFoundException("Player $playerId was not found.")
+  fun requirePlayer(playerId: UUID): Player = playerRepository.require(playerId)
 
   fun requireZoneProgress(
     playerId: UUID,
     zoneId: String,
   ): PlayerZoneProgress =
     playerZoneProgressRepository.findByPlayerIdAndZoneId(playerId, zoneId)
-      ?: PlayerZoneProgress(playerId = playerId, zoneId = zoneId)
+      ?: PlayerZoneProgress(playerId, zoneId)
 }

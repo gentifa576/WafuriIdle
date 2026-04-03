@@ -1,6 +1,5 @@
 package com.wafuri.idle.application.service.player
 
-import com.wafuri.idle.application.exception.ResourceNotFoundException
 import com.wafuri.idle.application.model.InventoryItemSnapshot
 import com.wafuri.idle.application.model.OwnedCharacterSnapshot
 import com.wafuri.idle.application.model.PlayerStateSnapshot
@@ -27,9 +26,7 @@ class PlayerStateSnapshotService(
   private val scalingRule: ScalingRule,
 ) {
   fun snapshotFor(playerId: UUID): PlayerStateSnapshot {
-    val player =
-      playerRepository.findById(playerId)
-        ?: throw ResourceNotFoundException("Player $playerId was not found.")
+    val player = playerRepository.require(playerId)
     val inventory = inventoryRepository.findByPlayerId(playerId)
     val zoneProgress = playerZoneProgressRepository.findByPlayerId(playerId)
 

@@ -1,6 +1,5 @@
 package com.wafuri.idle.application.service.inventory
 
-import com.wafuri.idle.application.exception.ResourceNotFoundException
 import com.wafuri.idle.application.port.out.InventoryRepository
 import com.wafuri.idle.application.port.out.PlayerStateWorkQueue
 import com.wafuri.idle.application.port.out.Repository
@@ -26,8 +25,7 @@ class InventoryService(
     rarity: Rarity,
     itemLevel: Int = 1,
   ): InventoryItem {
-    playerRepository.findById(playerId)
-      ?: throw ResourceNotFoundException("Player $playerId was not found.")
+    playerRepository.require(playerId)
 
     val item = itemTemplateCatalog.require(name)
     val inventoryItem =
@@ -45,8 +43,7 @@ class InventoryService(
   }
 
   fun getInventory(playerId: UUID): List<InventoryItem> {
-    playerRepository.findById(playerId)
-      ?: throw ResourceNotFoundException("Player $playerId was not found.")
+    playerRepository.require(playerId)
     return inventoryRepository.findByPlayerId(playerId)
   }
 }

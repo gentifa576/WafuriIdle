@@ -91,8 +91,8 @@ class CombatStatServiceTest : StringSpec() {
           vitality = StatGrowth(8f, 1.2f),
         )
 
-      every { teamRepository.findById(teamId) } returns team
-      every { playerRepository.findById(player.id) } returns player
+      every { teamRepository.require(teamId) } returns team
+      every { playerRepository.require(player.id) } returns player
       characterTemplateCatalog.replace(setOf(warrior, cleric))
 
       val result = service.teamStatsForPlayer(player.id)
@@ -147,8 +147,8 @@ class CombatStatServiceTest : StringSpec() {
           slots = listOf(TeamMemberSlot(1, "cleric"), TeamMemberSlot(2, "ranger"), TeamMemberSlot(3)),
         )
 
-      every { teamRepository.findById(teamId) } returns team
-      every { playerRepository.findById(player.id) } returns player
+      every { teamRepository.require(teamId) } returns team
+      every { playerRepository.require(player.id) } returns player
       characterTemplateCatalog.replace(setOf(clericTemplate(), rangerTemplate()))
 
       val result = service.teamStatsForPlayer(player.id)
@@ -167,7 +167,7 @@ class CombatStatServiceTest : StringSpec() {
     "player combat stats require an active team" {
       val player = expectedPlayer(UUID.randomUUID(), "Alice")
 
-      every { playerRepository.findById(player.id) } returns player
+      every { playerRepository.require(player.id) } returns player
 
       shouldThrow<ValidationException> {
         service.teamStatsForPlayer(player.id)
@@ -185,21 +185,21 @@ class CombatStatServiceTest : StringSpec() {
           slots = listOf(TeamMemberSlot(1, "warrior"), TeamMemberSlot(2), TeamMemberSlot(3)),
         )
 
-      every { playerRepository.findById(player.id) } returns player
-      every { teamRepository.findById(teamId) } returns team
+      every { playerRepository.require(player.id) } returns player
+      every { teamRepository.require(teamId) } returns team
       characterTemplateCatalog.replace(setOf(warriorTemplate()))
 
-      service.teamStatsForPlayer(player.id)
-      service.teamStatsForPlayer(player.id)
+      requireNotNull(service.teamStatsForPlayerOrNull(player.id))
+      requireNotNull(service.teamStatsForPlayerOrNull(player.id))
 
-      verify(exactly = 1) { playerRepository.findById(player.id) }
-      verify(exactly = 1) { teamRepository.findById(teamId) }
+      verify(exactly = 1) { playerRepository.require(player.id) }
+      verify(exactly = 1) { teamRepository.require(teamId) }
 
       service.invalidatePlayer(player.id)
-      service.teamStatsForPlayer(player.id)
+      requireNotNull(service.teamStatsForPlayerOrNull(player.id))
 
-      verify(exactly = 2) { playerRepository.findById(player.id) }
-      verify(exactly = 2) { teamRepository.findById(teamId) }
+      verify(exactly = 2) { playerRepository.require(player.id) }
+      verify(exactly = 2) { teamRepository.require(teamId) }
     }
 
     "player combat stats reapply leader passive from cache using current member state" {
@@ -219,25 +219,27 @@ class CombatStatServiceTest : StringSpec() {
           slots = listOf(TeamMemberSlot(1, "cleric"), TeamMemberSlot(2, "ranger"), TeamMemberSlot(3)),
         )
 
-      every { playerRepository.findById(player.id) } returns player
-      every { teamRepository.findById(teamId) } returns team
+      every { playerRepository.require(player.id) } returns player
+      every { teamRepository.require(teamId) } returns team
       characterTemplateCatalog.replace(setOf(clericTemplate(), rangerTemplate()))
 
-      val buffed = service.teamStatsForPlayer(player.id)
+      val buffed = requireNotNull(service.teamStatsForPlayerOrNull(player.id))
       val unbuffed =
-        service.teamStatsForPlayer(
-          player.id,
-          existingMembers =
-            listOf(
-              expectedCombatMemberState("cleric", 5.7f, 4.6f, 9.2f, 9.2f),
-              expectedCombatMemberState("ranger", 9f, 13.8f, 0f, 10.3f),
-            ),
+        requireNotNull(
+          service.teamStatsForPlayerOrNull(
+            player.id,
+            existingMembers =
+              listOf(
+                expectedCombatMemberState("cleric", 5.7f, 4.6f, 9.2f, 9.2f),
+                expectedCombatMemberState("ranger", 9f, 13.8f, 0f, 10.3f),
+              ),
+          ),
         )
 
       buffed.characterStats.first { it.characterKey == "cleric" }.attack shouldBe 8.549999f
       unbuffed.characterStats.first { it.characterKey == "cleric" }.attack shouldBe 5.7f
-      verify(exactly = 1) { playerRepository.findById(player.id) }
-      verify(exactly = 1) { teamRepository.findById(teamId) }
+      verify(exactly = 1) { playerRepository.require(player.id) }
+      verify(exactly = 1) { teamRepository.require(teamId) }
     }
   }
 }

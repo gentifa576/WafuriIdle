@@ -7,6 +7,7 @@ import com.wafuri.idle.application.port.out.PlayerStateWorkQueue
 import com.wafuri.idle.application.service.player.ProgressionService
 import com.wafuri.idle.application.service.runInNewTransaction
 import com.wafuri.idle.application.service.scaling.ScalingRule
+import com.wafuri.idle.domain.model.CombatState
 import com.wafuri.idle.domain.model.CombatStatus
 import jakarta.enterprise.context.ApplicationScoped
 import kotlinx.coroutines.async
@@ -75,7 +76,13 @@ class CombatTickService(
       return
     }
 
-    val teamStats = combatStatService.teamStatsForPlayer(playerId, state.members)
+    val teamStats =
+      combatStatService.teamStatsForPlayerOrNull(playerId, state.members)
+        ?: run {
+          combatStateRepository.save(CombatState.idle(playerId, lastSimulatedAt = now))
+          playerStateWorkQueue.markDirty(playerId)
+          return
+        }
     val refreshedState = state.refreshTeam(teamStats.teamId, teamStats.toCombatMembers(state.members))
     val advancedState =
       refreshedState.advance(

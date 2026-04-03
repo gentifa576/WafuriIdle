@@ -1,5 +1,6 @@
 package com.wafuri.idle.application.model
 
+import com.wafuri.idle.application.service.player.OfflineProgressionResult
 import java.time.Instant
 import java.util.UUID
 
@@ -26,11 +27,11 @@ data class CombatStateMessage(
 ) : PlayerMessage
 
 data class ZoneLevelUpMessage(
-  override val type: EventType = EventType.ZONE_LEVEL_UP,
   override val playerId: UUID,
   val zoneId: String,
   val level: Int,
   val serverTime: Instant? = null,
+  override val type: EventType = EventType.ZONE_LEVEL_UP,
 ) : PlayerMessage {
   override fun publishAt(serverTime: Instant): PlayerMessage = copy(serverTime = serverTime)
 }
@@ -55,6 +56,23 @@ data class OfflineProgressionMessage(
   val rewards: List<OfflineRewardSummary>,
   val serverTime: Instant? = null,
 ) : PlayerMessage {
+  companion object {
+    fun from(result: OfflineProgressionResult): OfflineProgressionMessage =
+      OfflineProgressionMessage(
+        playerId = result.playerId,
+        offlineDurationMillis = result.offlineDuration.toMillis(),
+        kills = result.kills,
+        experienceGained = result.experienceGained,
+        goldGained = result.goldGained,
+        playerLevel = result.playerLevel,
+        playerLevelsGained = result.playerLevelsGained,
+        zoneId = result.zoneId,
+        zoneLevel = result.zoneLevel,
+        zoneLevelsGained = result.zoneLevelsGained,
+        rewards = result.rewards,
+      )
+  }
+
   override fun publishAt(serverTime: Instant): PlayerMessage = copy(serverTime = serverTime)
 }
 

@@ -15,26 +15,19 @@ import jakarta.enterprise.context.ApplicationScoped
 class ResourceItemFetcher(
   private val objectMapper: ObjectMapper,
 ) : ItemFetcher {
+  private val typeReference = object : TypeReference<List<ResourceItemRecord>>() {}
+
   override fun fetch(): List<Item> {
     val stream = javaClass.classLoader.getResourceAsStream(RESOURCE_PATH) ?: return emptyList()
-    val records =
-      stream
-        .use { input ->
-          objectMapper.readValue(input, object : TypeReference<List<ResourceItemRecord>>() {})
-        }
-    return records.map {
-      Item(
-        name = it.name,
-        displayName = it.displayName,
-        type = it.type,
-        baseStat = it.baseStat,
-        subStatPool = it.subStatPool,
-      )
-    }
+    val records = stream.use { objectMapper.readValue(it, typeReference) }
+    return records.map(::fromRecord)
   }
 
   companion object {
     private const val RESOURCE_PATH = "items/items.json"
+
+    private fun fromRecord(record: ResourceItemRecord): Item =
+      Item(record.name, record.displayName, record.type, record.baseStat, record.subStatPool)
   }
 }
 

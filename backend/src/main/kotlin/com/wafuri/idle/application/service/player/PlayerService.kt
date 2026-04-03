@@ -1,7 +1,6 @@
 package com.wafuri.idle.application.service.player
 
 import com.wafuri.idle.application.config.GameConfig
-import com.wafuri.idle.application.exception.ResourceNotFoundException
 import com.wafuri.idle.application.exception.ValidationException
 import com.wafuri.idle.application.model.CharacterPull
 import com.wafuri.idle.application.model.CharacterPullResult
@@ -28,9 +27,7 @@ class PlayerService(
   @Transactional
   fun provision(name: String): Player {
     val player =
-      Player(
-        id = UUID.randomUUID(),
-        name = name,
+      Player(UUID.randomUUID(), name,
         experience = 0,
         level = 1,
       )
@@ -122,7 +119,5 @@ class PlayerService(
     )
   }
 
-  fun get(playerId: UUID): Player =
-    playerRepository.findById(playerId)
-      ?: throw ResourceNotFoundException("Player $playerId was not found.")
+  fun get(playerId: UUID): Player = playerRepository.require(playerId)
 }

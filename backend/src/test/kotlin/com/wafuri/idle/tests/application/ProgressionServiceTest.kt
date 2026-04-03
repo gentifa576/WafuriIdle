@@ -59,7 +59,7 @@ class ProgressionServiceTest : StringSpec() {
       var savedPlayer: Player? = null
       var savedProgress: PlayerZoneProgress? = null
 
-      every { playerRepository.findById(playerId) } returns player
+      every { playerRepository.require(playerId) } returns player
       every { playerRepository.save(any()) } answers { firstArg<Player>().also { savedPlayer = it } }
       every { playerZoneProgressRepository.findByPlayerIdAndZoneId(playerId, zoneId) } returns null
       every { playerZoneProgressRepository.save(any()) } answers {
@@ -85,7 +85,7 @@ class ProgressionServiceTest : StringSpec() {
       var savedPlayer: Player? = null
       var savedProgress: PlayerZoneProgress? = null
 
-      every { playerRepository.findById(playerId) } returns player
+      every { playerRepository.require(playerId) } returns player
       every { playerRepository.save(any()) } answers { firstArg<Player>().also { savedPlayer = it } }
       every { playerZoneProgressRepository.findByPlayerIdAndZoneId(playerId, zoneId) } returns null
       every { playerZoneProgressRepository.save(any()) } answers {
@@ -110,7 +110,7 @@ class ProgressionServiceTest : StringSpec() {
       var savedPlayer: Player? = null
       var savedProgress: PlayerZoneProgress? = null
 
-      every { playerRepository.findById(playerId) } returns currentPlayer
+      every { playerRepository.require(playerId) } returns currentPlayer
       every { playerRepository.save(any()) } answers { firstArg<Player>().also { savedPlayer = it } }
       every { playerZoneProgressRepository.findByPlayerIdAndZoneId(playerId, zoneId) } returns currentProgress
       every { playerZoneProgressRepository.save(any()) } answers {

@@ -5,6 +5,9 @@ import com.wafuri.idle.domain.model.InventoryItem
 import java.util.UUID
 
 interface InventoryRepository : Repository<InventoryItem, UUID> {
+  override val resourceName: String
+    get() = "Inventory item"
+
   fun findByPlayerId(playerId: UUID): List<InventoryItem>
 
   fun findByTeamPositionAndSlot(

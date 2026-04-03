@@ -98,6 +98,35 @@ class OfflineProgressionServiceTest : StringSpec() {
       verify(exactly = 0) { playerEventQueue.enqueue(any()) }
     }
 
+    "applyIfNeeded resets combat to idle when the player no longer has a combat-ready team" {
+      val playerId = UUID.randomUUID()
+      val teamId = UUID.randomUUID()
+      val state =
+        expectedSingleMemberCombatState(
+          playerId = playerId,
+          teamId = teamId,
+          attack = 10f,
+          hit = 1f,
+          currentHp = 1000f,
+          maxHp = 1000f,
+          enemyHp = 100f,
+          enemyMaxHp = 100f,
+          lastSimulatedAt = Instant.now().minus(Duration.ofMinutes(1)),
+        )
+
+      every { combatStateRepository.findById(playerId) } returns state
+      every { combatStatService.teamStatsForPlayerOrNull(playerId, state.members) } returns null
+      every { combatStateRepository.save(any()) } answers { firstArg() }
+
+      val result = service.applyIfNeeded(playerId)
+
+      result shouldBe null
+      verify(exactly = 1) { combatStateRepository.save(match { it.status == com.wafuri.idle.domain.model.CombatStatus.IDLE }) }
+      verify(exactly = 0) { progressionService.recordKill(any(), any(), any()) }
+      verify(exactly = 0) { combatLootService.rollLoot(any(), any(), any()) }
+      verify(exactly = 0) { playerEventQueue.enqueue(any()) }
+    }
+
     "applyIfNeeded replays offline combat 1 to 1 and emits a summary after the notify threshold" {
       val playerId = UUID.randomUUID()
       val teamId = UUID.randomUUID()
@@ -127,7 +156,7 @@ class OfflineProgressionServiceTest : StringSpec() {
       var savedState: CombatState? = null
 
       every { combatStateRepository.findById(playerId) } returns state
-      every { combatStatService.teamStatsForPlayer(playerId, state.members) } returns
+      every { combatStatService.teamStatsForPlayerOrNull(playerId, state.members) } returns
         expectedSingleMemberTeamCombatStats(teamId, attack = 10f, hit = 1f, maxHp = 1000f)
       every { progressionService.requirePlayer(playerId) } returnsMany listOf(beforePlayer, afterPlayer)
       every { progressionService.requireZoneProgress(playerId, zoneId) } returnsMany listOf(beforeZone, afterZone)
@@ -185,7 +214,7 @@ class OfflineProgressionServiceTest : StringSpec() {
       val afterZone = expectedZoneProgress(playerId, zoneId, 21, 3)
 
       every { combatStateRepository.findById(playerId) } returns state
-      every { combatStatService.teamStatsForPlayer(playerId, state.members) } returns
+      every { combatStatService.teamStatsForPlayerOrNull(playerId, state.members) } returns
         expectedSingleMemberTeamCombatStats(teamId, attack = 10f, hit = 1f, maxHp = 1000f)
       every { progressionService.requirePlayer(playerId) } returnsMany listOf(beforePlayer, afterPlayer)
       every { progressionService.requireZoneProgress(playerId, zoneId) } returnsMany listOf(beforeZone, afterZone)
@@ -271,7 +300,7 @@ class OfflineProgressionServiceTest : StringSpec() {
       every { offlineCombatStateRepository.save(any()) } answers {
         firstArg<CombatState>().also { offlineSavedState = it }
       }
-      every { offlineCombatStatService.teamStatsForPlayer(playerId, any()) } returns teamStats
+      every { offlineCombatStatService.teamStatsForPlayerOrNull(playerId, any()) } returns teamStats
       every { offlineProgressionServicePort.requirePlayer(playerId) } answers {
         Player(
           playerId,
@@ -299,7 +328,7 @@ class OfflineProgressionServiceTest : StringSpec() {
       every { liveCombatStateRepository.save(any()) } answers {
         firstArg<CombatState>().also { liveCurrentState = it }
       }
-      every { liveCombatStatService.teamStatsForPlayer(playerId, any()) } returns teamStats
+      every { liveCombatStatService.teamStatsForPlayerOrNull(playerId, any()) } returns teamStats
       every { livePlayerStateWorkQueue.markDirty(playerId) } just runs
       every { liveProgressionService.requireZoneProgress(playerId, zoneId) } answers {
         PlayerZoneProgress(

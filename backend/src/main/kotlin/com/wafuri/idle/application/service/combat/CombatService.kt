@@ -1,7 +1,6 @@
 package com.wafuri.idle.application.service.combat
 
 import com.wafuri.idle.application.config.GameConfig
-import com.wafuri.idle.application.exception.ResourceNotFoundException
 import com.wafuri.idle.application.model.CombatSnapshot
 import com.wafuri.idle.application.model.toSnapshot
 import com.wafuri.idle.application.port.out.CombatStateRepository
@@ -30,8 +29,7 @@ class CombatService(
 ) {
   @Transactional
   fun start(playerId: UUID): CombatSnapshot {
-    playerRepository.findById(playerId)
-      ?: throw ResourceNotFoundException("Player $playerId was not found.")
+    playerRepository.require(playerId)
     val teamStats = combatStatService.teamStatsForPlayer(playerId)
     val zone = zoneTemplateCatalog.default()
     val zoneLevel = progressionService.requireZoneProgress(playerId, zone.id).level
@@ -57,8 +55,7 @@ class CombatService(
 
   @Transactional
   fun stop(playerId: UUID): CombatSnapshot? {
-    playerRepository.findById(playerId)
-      ?: throw ResourceNotFoundException("Player $playerId was not found.")
+    playerRepository.require(playerId)
     val savedState = combatStateRepository.save(CombatState.idle(playerId))
     playerStateWorkQueue.markDirty(playerId)
     return savedState.takeUnless { it.status == com.wafuri.idle.domain.model.CombatStatus.IDLE }?.toSnapshot()

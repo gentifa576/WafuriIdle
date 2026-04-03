@@ -33,15 +33,9 @@ class EquipmentService(
     inventoryItemId: UUID,
     slot: EquipmentSlot,
   ) {
-    val inventoryItem =
-      inventoryRepository.findById(inventoryItemId)
-        ?: throw ResourceNotFoundException("Inventory item $inventoryItemId was not found.")
-    val team =
-      teamRepository.findById(teamId)
-        ?: throw ResourceNotFoundException("Team $teamId was not found.")
-    val player =
-      playerRepository.findById(inventoryItem.playerId)
-        ?: throw ResourceNotFoundException("Player ${inventoryItem.playerId} was not found.")
+    val inventoryItem = inventoryRepository.require(inventoryItemId)
+    val team = teamRepository.require(teamId)
+    val player = playerRepository.require(inventoryItem.playerId)
     if (team.playerId != actorPlayerId || player.id != actorPlayerId) {
       throw ValidationException("Team does not belong to the authenticated player.")
     }
@@ -86,12 +80,8 @@ class EquipmentService(
     val inventoryItem =
       inventoryRepository.findByTeamPositionAndSlot(teamId, position, slot)
         ?: throw ResourceNotFoundException("No equipped item found in slot $slot for team $teamId position $position.")
-    val team =
-      teamRepository.findById(teamId)
-        ?: throw ResourceNotFoundException("Team $teamId was not found.")
-    val player =
-      playerRepository.findById(inventoryItem.playerId)
-        ?: throw ResourceNotFoundException("Player ${inventoryItem.playerId} was not found.")
+    val team = teamRepository.require(teamId)
+    val player = playerRepository.require(inventoryItem.playerId)
     if (team.playerId != actorPlayerId || player.id != actorPlayerId) {
       throw ValidationException("Team does not belong to the authenticated player.")
     }

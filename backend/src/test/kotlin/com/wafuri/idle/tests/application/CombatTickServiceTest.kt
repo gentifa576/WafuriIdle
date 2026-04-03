@@ -82,7 +82,7 @@ class CombatTickServiceTest : StringSpec() {
       every { combatStateRepository.findActiveByZoneId("starter-plains") } returns listOf(current)
       every { activePlayerRegistry.activePlayerIds() } returns setOf(playerId)
       every { combatStateRepository.findById(playerId) } returns current
-      every { combatStatService.teamStatsForPlayer(playerId, current.members) } returns
+      every { combatStatService.teamStatsForPlayerOrNull(playerId, current.members) } returns
         expectedSingleMemberTeamCombatStats(teamId = teamId, attack = 12f, hit = 7f, maxHp = 11f)
       every { combatStateRepository.save(any()) } answers {
         firstArg<CombatState>().also { savedState = it }
@@ -126,6 +126,39 @@ class CombatTickServiceTest : StringSpec() {
           members = listOf(expectedCombatMemberState("warrior", 12f, 7f, 10f, 11f)),
           lastSimulatedAt = savedState?.lastSimulatedAt,
         )
+      verify(exactly = 1) { playerStateWorkQueue.markDirty(playerId) }
+    }
+
+    "tick resets combat to idle when the player no longer has a combat-ready team" {
+      val playerId = UUID.randomUUID()
+      val teamId = UUID.randomUUID()
+      val current =
+        expectedSingleMemberCombatState(
+          playerId = playerId,
+          teamId = teamId,
+          attack = 12f,
+          hit = 7f,
+          currentHp = 11f,
+          maxHp = 11f,
+          enemyHp = 1000f,
+          enemyMaxHp = 1000f,
+        )
+      var savedState: CombatState? = null
+
+      every { combatStateRepository.findActiveByZoneId("starter-plains") } returns listOf(current)
+      every { activePlayerRegistry.activePlayerIds() } returns setOf(playerId)
+      every { combatStateRepository.findById(playerId) } returns current
+      every { combatStatService.teamStatsForPlayerOrNull(playerId, current.members) } returns null
+      every { combatStateRepository.save(any()) } answers {
+        firstArg<CombatState>().also { savedState = it }
+      }
+      every { playerStateWorkQueue.markDirty(playerId) } just runs
+
+      runBlocking {
+        service.tickZone("starter-plains", Duration.ofMillis(200))
+      }
+
+      savedState shouldBe CombatState.idle(playerId, lastSimulatedAt = savedState?.lastSimulatedAt)
       verify(exactly = 1) { playerStateWorkQueue.markDirty(playerId) }
     }
   }

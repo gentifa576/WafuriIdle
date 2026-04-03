@@ -46,16 +46,20 @@ class OfflineProgressionService(
     }
 
     val zoneId = requireNotNull(state.zoneId) { "Active combat must keep a zone id." }
+    val refreshedState =
+      refreshCombatState(playerId, state) ?: run {
+        combatStateRepository.save(CombatState.idle(playerId, lastSimulatedAt = now))
+        return null
+      }
     val beforePlayer = progressionService.requirePlayer(playerId)
     val beforeZone = progressionService.requireZoneProgress(playerId, zoneId)
-    val refreshedState = refreshCombatState(playerId, state)
     val projection = projectOfflineCombat(refreshedState, offlineDuration, beforeZone)
 
     projection.killEnemyLevels.forEach { enemyLevel ->
       progressionService.recordKill(playerId, zoneId, enemyLevel)
     }
     val rewardCounts =
-      buildMap<String, Int> {
+      buildMap {
         projection.killEnemyLevels.forEach { enemyLevel ->
           combatLootService.rollLoot(playerId, zoneId, enemyLevel)?.let { item ->
             put(item.item.name, getOrDefault(item.item.name, 0) + 1)
@@ -88,21 +92,7 @@ class OfflineProgressionService(
       )
 
     if (offlineDuration >= gameConfig.progression().offline().notifyThreshold() && result.hasGains()) {
-      playerEventQueue.enqueue(
-        OfflineProgressionMessage(
-          playerId = playerId,
-          offlineDurationMillis = offlineDuration.toMillis(),
-          kills = result.kills,
-          experienceGained = result.experienceGained,
-          goldGained = result.goldGained,
-          playerLevel = result.playerLevel,
-          playerLevelsGained = result.playerLevelsGained,
-          zoneId = result.zoneId,
-          zoneLevel = result.zoneLevel,
-          zoneLevelsGained = result.zoneLevelsGained,
-          rewards = result.rewards,
-        ),
-      )
+      playerEventQueue.enqueue(OfflineProgressionMessage.from(result))
     }
 
     return result
@@ -111,8 +101,8 @@ class OfflineProgressionService(
   private fun refreshCombatState(
     playerId: UUID,
     state: CombatState,
-  ): CombatState {
-    val teamStats = combatStatService.teamStatsForPlayer(playerId, state.members)
+  ): CombatState? {
+    val teamStats = combatStatService.teamStatsForPlayerOrNull(playerId, state.members) ?: return null
     return state.refreshTeam(teamStats.teamId, teamStats.toCombatMembers(state.members))
   }
 

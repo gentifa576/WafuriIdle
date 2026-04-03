@@ -12,6 +12,9 @@ class JpaPlayerRepository(
   private val entityManager: EntityManager,
 ) : AbstractJpaRepository<Player, PlayerEntity, UUID>(entityManager, PlayerEntity::class.java),
   Repository<Player, UUID> {
+  override val resourceName: String
+    get() = "Player"
+
   override fun entityId(domain: Player): UUID = domain.id
 
   override fun toDomain(entity: PlayerEntity): Player = entity.toDomain()
