@@ -27,7 +27,6 @@ class EquipmentService(
 ) {
   @Transactional
   fun equip(
-    actorPlayerId: UUID,
     teamId: UUID,
     position: Int,
     inventoryItemId: UUID,
@@ -36,9 +35,6 @@ class EquipmentService(
     val inventoryItem = inventoryRepository.require(inventoryItemId)
     val team = teamRepository.require(teamId)
     val player = playerRepository.require(inventoryItem.playerId)
-    if (team.playerId != actorPlayerId || player.id != actorPlayerId) {
-      throw ValidationException("Team does not belong to the authenticated player.")
-    }
     requirePlayerNotDowned(player.id)
     val teamSlot =
       team.slots.firstOrNull { it.position == position }
@@ -72,7 +68,6 @@ class EquipmentService(
 
   @Transactional
   fun unequip(
-    actorPlayerId: UUID,
     teamId: UUID,
     position: Int,
     slot: EquipmentSlot,
@@ -82,9 +77,6 @@ class EquipmentService(
         ?: throw ResourceNotFoundException("No equipped item found in slot $slot for team $teamId position $position.")
     val team = teamRepository.require(teamId)
     val player = playerRepository.require(inventoryItem.playerId)
-    if (team.playerId != actorPlayerId || player.id != actorPlayerId) {
-      throw ValidationException("Team does not belong to the authenticated player.")
-    }
     requirePlayerNotDowned(player.id)
 
     val updatedItem =

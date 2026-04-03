@@ -28,7 +28,7 @@ class TeamService(
   @Transactional
   fun create(playerId: UUID): Team {
     playerRepository.require(playerId)
-    val team = Team(id = UUID.randomUUID(), playerId = playerId)
+    val team = Team(UUID.randomUUID(), playerId)
     val saved = teamRepository.save(team)
     playerStateWorkQueue.markDirty(playerId)
     return saved
@@ -38,16 +38,12 @@ class TeamService(
 
   @Transactional
   fun assignCharacter(
-    actorPlayerId: UUID,
     teamId: UUID,
     position: Int,
     characterKey: String,
   ): Team {
     val team = teamRepository.require(teamId)
     val player = playerRepository.require(team.playerId)
-    if (player.id != actorPlayerId) {
-      throw ValidationException("Team does not belong to the authenticated player.")
-    }
     requirePlayerNotDowned(team.playerId)
     if (!player.ownedCharacterKeys.contains(characterKey)) {
       throw ValidationException("Character $characterKey is not owned by the player.")
@@ -70,15 +66,9 @@ class TeamService(
   fun templates(): List<CharacterTemplate> = characterTemplateCatalog.all()
 
   @Transactional
-  fun activate(
-    actorPlayerId: UUID,
-    teamId: UUID,
-  ): Team {
+  fun activate(teamId: UUID): Team {
     val team = teamRepository.require(teamId)
     val player = playerRepository.require(team.playerId)
-    if (player.id != actorPlayerId) {
-      throw ValidationException("Team does not belong to the authenticated player.")
-    }
     requirePlayerNotDowned(team.playerId)
     if (team.characterKeys.isEmpty()) {
       throw ValidationException("Team must have at least one character before it can be activated.")

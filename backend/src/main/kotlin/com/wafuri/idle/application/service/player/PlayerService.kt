@@ -27,7 +27,9 @@ class PlayerService(
   @Transactional
   fun provision(name: String): Player {
     val player =
-      Player(UUID.randomUUID(), name,
+      Player(
+        UUID.randomUUID(),
+        name,
         experience = 0,
         level = 1,
       )

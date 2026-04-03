@@ -83,7 +83,7 @@ class TeamServiceTest : StringSpec() {
       every { playerRepository.require(player.id) } returns player
 
       shouldThrow<ValidationException> {
-        service.activate(player.id, team.id)
+        service.activate(team.id)
       }
     }
 
@@ -107,7 +107,7 @@ class TeamServiceTest : StringSpec() {
       every { characterTemplateCatalog.require(characterKey) } returns warriorTemplate(characterKey)
 
       shouldThrow<ValidationException> {
-        service.assignCharacter(player.id, team.id, 3, characterKey)
+        service.assignCharacter(team.id, 3, characterKey)
       }
     }
 
@@ -126,7 +126,7 @@ class TeamServiceTest : StringSpec() {
       every { combatStatService.invalidatePlayer(player.id) } just runs
       every { playerStateWorkQueue.markDirty(player.id) } just runs
 
-      val updatedTeam = service.assignCharacter(player.id, team.id, 1, characterKey)
+      val updatedTeam = service.assignCharacter(team.id, 1, characterKey)
       val expectedTeam =
         expectedTeam(
           team.id,
@@ -163,7 +163,7 @@ class TeamServiceTest : StringSpec() {
 
       val thrown =
         shouldThrow<ValidationException> {
-          service.assignCharacter(player.id, team.id, 1, "warrior")
+          service.assignCharacter(team.id, 1, "warrior")
         }
 
       thrown.shouldMatchExpected(
@@ -187,7 +187,7 @@ class TeamServiceTest : StringSpec() {
       every { combatStatService.invalidatePlayer(player.id) } just runs
       every { playerStateWorkQueue.markDirty(player.id) } just runs
 
-      val activatedTeam = service.activate(player.id, team.id)
+      val activatedTeam = service.activate(team.id)
       val expectedPlayer = expectedPlayer(player.id, "Alice", ownedCharacterKeys = setOf("warrior"), activeTeamId = team.id)
 
       activatedTeam shouldBe team
@@ -224,7 +224,7 @@ class TeamServiceTest : StringSpec() {
 
       val thrown =
         shouldThrow<ValidationException> {
-          service.activate(player.id, team.id)
+          service.activate(team.id)
         }
 
       thrown.shouldMatchExpected(

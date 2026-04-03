@@ -2,6 +2,7 @@ package com.wafuri.idle.transport.rest
 
 import com.wafuri.idle.application.service.inventory.EquipmentService
 import com.wafuri.idle.application.service.team.TeamService
+import com.wafuri.idle.domain.model.Team
 import com.wafuri.idle.transport.rest.dto.EquipItemRequest
 import com.wafuri.idle.transport.rest.dto.UnequipItemRequest
 import jakarta.annotation.security.RolesAllowed
@@ -16,8 +17,8 @@ import java.util.UUID
 @Path("/teams")
 @Produces(MediaType.APPLICATION_JSON)
 @RolesAllowed("User")
+@TeamScopedAccess
 class TeamController(
-  private val authContext: AuthContext,
   private val teamService: TeamService,
   private val equipmentService: EquipmentService,
 ) {
@@ -27,16 +28,13 @@ class TeamController(
     @PathParam("id") teamId: UUID,
     @PathParam("position") position: Int,
     @PathParam("characterKey") characterKey: String,
-  ): Response =
-    Response
-      .ok(teamService.assignCharacter(authContext.requirePlayerId(), teamId, position, characterKey))
-      .build()
+  ): Team = teamService.assignCharacter(teamId, position, characterKey)
 
   @POST
   @Path("/{id}/activate")
   fun activate(
     @PathParam("id") teamId: UUID,
-  ): Response = Response.ok(teamService.activate(authContext.requirePlayerId(), teamId)).build()
+  ): Team = teamService.activate(teamId)
 
   @POST
   @Path("/{id}/slots/{position}/equip")
@@ -45,7 +43,7 @@ class TeamController(
     @PathParam("position") position: Int,
     request: EquipItemRequest,
   ): Response {
-    equipmentService.equip(authContext.requirePlayerId(), teamId, position, request.inventoryItemId, request.slot)
+    equipmentService.equip(teamId, position, request.inventoryItemId, request.slot)
     return Response.noContent().build()
   }
 
@@ -56,7 +54,7 @@ class TeamController(
     @PathParam("position") position: Int,
     request: UnequipItemRequest,
   ): Response {
-    equipmentService.unequip(authContext.requirePlayerId(), teamId, position, request.slot)
+    equipmentService.unequip(teamId, position, request.slot)
     return Response.noContent().build()
   }
 }

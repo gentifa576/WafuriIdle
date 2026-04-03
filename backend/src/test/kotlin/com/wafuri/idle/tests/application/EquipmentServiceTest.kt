@@ -83,7 +83,7 @@ class EquipmentServiceTest : StringSpec() {
       every { inventoryRepository.findByTeamPositionAndSlot(teamId, 1, EquipmentSlot.WEAPON) } returns null
 
       shouldThrow<ValidationException> {
-        service.equip(playerId, teamId, 1, foreignItem.id, EquipmentSlot.WEAPON)
+        service.equip(teamId, 1, foreignItem.id, EquipmentSlot.WEAPON)
       }
     }
 
@@ -123,7 +123,7 @@ class EquipmentServiceTest : StringSpec() {
       every { combatStatService.invalidatePlayer(playerId) } just runs
       every { playerStateWorkQueue.markDirty(playerId) } just runs
 
-      service.unequip(playerId, teamId, 1, EquipmentSlot.WEAPON)
+      service.unequip(teamId, 1, EquipmentSlot.WEAPON)
 
       savedItems.last().equippedTeamId.shouldBeNull()
       savedItems.last().equippedPosition.shouldBeNull()
@@ -169,7 +169,7 @@ class EquipmentServiceTest : StringSpec() {
 
       val thrown =
         shouldThrow<ValidationException> {
-          service.equip(playerId, teamId, 1, inventoryItemId, EquipmentSlot.WEAPON)
+          service.equip(teamId, 1, inventoryItemId, EquipmentSlot.WEAPON)
         }
 
       thrown.shouldMatchExpected(
@@ -222,7 +222,7 @@ class EquipmentServiceTest : StringSpec() {
 
       val thrown =
         shouldThrow<ValidationException> {
-          service.unequip(playerId, teamId, 1, EquipmentSlot.WEAPON)
+          service.unequip(teamId, 1, EquipmentSlot.WEAPON)
         }
 
       thrown.shouldMatchExpected(

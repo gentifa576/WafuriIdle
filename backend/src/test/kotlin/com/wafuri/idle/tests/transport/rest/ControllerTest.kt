@@ -415,7 +415,7 @@ class ControllerTest {
       .then()
       .statusCode(204)
     val teamId = firstTeamId(token)
-    teamService.assignCharacter(UUID.fromString(playerId), UUID.fromString(teamId), 1, characterKey)
+    teamService.assignCharacter(UUID.fromString(teamId), 1, characterKey)
     val inventoryItemId =
       inventoryService.addGeneratedItem(UUID.fromString(playerId), "sword_0001", Rarity.COMMON).id.toString()
 
@@ -457,7 +457,7 @@ class ControllerTest {
       .then()
       .statusCode(204)
     val teamId = firstTeamId(token)
-    teamService.assignCharacter(UUID.fromString(playerId), UUID.fromString(teamId), 1, characterKey)
+    teamService.assignCharacter(UUID.fromString(teamId), 1, characterKey)
 
     errorResponse(auth(token), "/teams/$teamId/slots/2/characters/$characterKey") shouldBe
       expectedErrorResponse("Character is already on the team.")
@@ -487,6 +487,18 @@ class ControllerTest {
 
     assignedTeam shouldBe teamService.listByPlayer(UUID.fromString(playerId)).first { it.id.toString() == teamId }
     teamsResponse(token, playerId) shouldBe teamService.listByPlayer(UUID.fromString(playerId))
+  }
+
+  @Test
+  fun `team endpoints reject access to another player's team`() {
+    val ownerSignup = signup("OwnerUser", password = null)
+    val intruderSignup = signup("IntruderUser", password = null)
+    val ownerTeamId = firstTeamId(ownerSignup.sessionToken)
+
+    auth(intruderSignup.sessionToken)
+      .post("/teams/$ownerTeamId/activate")
+      .then()
+      .statusCode(403)
   }
 
   @Test

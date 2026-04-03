@@ -1,6 +1,7 @@
 package com.wafuri.idle.transport.rest
 
 import com.wafuri.idle.application.service.auth.AuthService
+import com.wafuri.idle.transport.rest.dto.AuthResponse
 import com.wafuri.idle.transport.rest.dto.LoginRequest
 import com.wafuri.idle.transport.rest.dto.SignUpRequest
 import com.wafuri.idle.transport.rest.dto.toResponse
@@ -29,10 +30,7 @@ class AuthController(
 
   @POST
   @Path("/login")
-  fun login(request: LoginRequest): Response =
-    Response
-      .ok(authService.login(request.name, request.email, request.password).toResponse())
-      .build()
+  fun login(request: LoginRequest): AuthResponse = authService.login(request.name, request.email, request.password).toResponse()
 
   @POST
   @Path("/logout")
