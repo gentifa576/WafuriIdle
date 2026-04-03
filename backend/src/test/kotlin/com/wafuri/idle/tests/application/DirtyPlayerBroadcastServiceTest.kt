@@ -8,9 +8,11 @@ import com.wafuri.idle.application.service.cluster.DirtyPlayerBroadcastService
 import com.wafuri.idle.application.service.cluster.InstanceIdentity
 import com.wafuri.idle.application.service.cluster.InternalDirtyNotificationClient
 import io.kotest.core.spec.style.StringSpec
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
+import kotlinx.coroutines.runBlocking
 import java.time.Duration
 import java.time.Instant
 import java.util.UUID
@@ -18,58 +20,91 @@ import java.util.UUID
 class DirtyPlayerBroadcastServiceTest :
   StringSpec({
     "flushPending broadcasts to other live nodes and clears on success" {
-      val clusterConfig = mockClusterConfig(maxAttempts = 3, staleAfter = Duration.ofSeconds(30))
-      val clusterNodeRepository = mockk<ClusterNodeRepository>()
-      val clusterNodeHeartbeatService = mockk<ClusterNodeHeartbeatService>()
-      val internalDirtyNotificationClient = mockk<InternalDirtyNotificationClient>()
-      val service =
-        DirtyPlayerBroadcastService(
-          clusterConfig = clusterConfig,
-          clusterNodeRepository = clusterNodeRepository,
-          clusterNodeHeartbeatService = clusterNodeHeartbeatService,
-          internalDirtyNotificationClient = internalDirtyNotificationClient,
-        )
-      val playerId = UUID.randomUUID()
-      val now = Instant.now()
-      val peer = ClusterNode("node-b", "http://10.0.0.2:8080", now)
+      runBlocking {
+        val clusterConfig = mockClusterConfig(maxAttempts = 3, staleAfter = Duration.ofSeconds(30))
+        val clusterNodeRepository = mockk<ClusterNodeRepository>()
+        val clusterNodeHeartbeatService = mockk<ClusterNodeHeartbeatService>()
+        val internalDirtyNotificationClient = mockk<InternalDirtyNotificationClient>()
+        val service =
+          DirtyPlayerBroadcastService(
+            clusterConfig = clusterConfig,
+            clusterNodeRepository = clusterNodeRepository,
+            clusterNodeHeartbeatService = clusterNodeHeartbeatService,
+            internalDirtyNotificationClient = internalDirtyNotificationClient,
+          )
+        val playerId = UUID.randomUUID()
+        val now = Instant.now()
+        val peer = ClusterNode("node-b", "http://10.0.0.2:8080", now)
 
-      every { clusterNodeHeartbeatService.currentIdentity() } returns InstanceIdentity("node-a", "http://10.0.0.1:8080")
-      every { clusterNodeRepository.findAliveSince(any()) } returns listOf(peer)
-      every { internalDirtyNotificationClient.notifyDirty(peer.internalBaseUrl, playerId) } returns true
+        every { clusterNodeHeartbeatService.currentIdentity() } returns InstanceIdentity("node-a", "http://10.0.0.1:8080")
+        every { clusterNodeRepository.findAliveSince(any()) } returns listOf(peer)
+        coEvery { internalDirtyNotificationClient.notifyDirty(peer.internalBaseUrl, playerId) } returns Unit
 
-      service.enqueue(playerId)
-      service.flushPending()
+        service.enqueue(playerId)
+        service.flushPending()
 
-      verify(exactly = 1) { internalDirtyNotificationClient.notifyDirty(peer.internalBaseUrl, playerId) }
-      service.flushPending()
-      verify(exactly = 1) { internalDirtyNotificationClient.notifyDirty(peer.internalBaseUrl, playerId) }
+        coVerify(exactly = 1) { internalDirtyNotificationClient.notifyDirty(peer.internalBaseUrl, playerId) }
+        service.flushPending()
+        coVerify(exactly = 1) { internalDirtyNotificationClient.notifyDirty(peer.internalBaseUrl, playerId) }
+      }
     }
 
     "flushPending drops player after max retry attempts" {
-      val clusterConfig = mockClusterConfig(maxAttempts = 2, staleAfter = Duration.ofSeconds(30))
-      val clusterNodeRepository = mockk<ClusterNodeRepository>()
-      val clusterNodeHeartbeatService = mockk<ClusterNodeHeartbeatService>()
-      val internalDirtyNotificationClient = mockk<InternalDirtyNotificationClient>()
-      val service =
-        DirtyPlayerBroadcastService(
-          clusterConfig = clusterConfig,
-          clusterNodeRepository = clusterNodeRepository,
-          clusterNodeHeartbeatService = clusterNodeHeartbeatService,
-          internalDirtyNotificationClient = internalDirtyNotificationClient,
-        )
-      val playerId = UUID.randomUUID()
-      val peer = ClusterNode("node-b", "http://10.0.0.2:8080", Instant.now())
+      runBlocking {
+        val clusterConfig = mockClusterConfig(maxAttempts = 2, staleAfter = Duration.ofSeconds(30))
+        val clusterNodeRepository = mockk<ClusterNodeRepository>()
+        val clusterNodeHeartbeatService = mockk<ClusterNodeHeartbeatService>()
+        val internalDirtyNotificationClient = mockk<InternalDirtyNotificationClient>()
+        val service =
+          DirtyPlayerBroadcastService(
+            clusterConfig = clusterConfig,
+            clusterNodeRepository = clusterNodeRepository,
+            clusterNodeHeartbeatService = clusterNodeHeartbeatService,
+            internalDirtyNotificationClient = internalDirtyNotificationClient,
+          )
+        val playerId = UUID.randomUUID()
+        val peer = ClusterNode("node-b", "http://10.0.0.2:8080", Instant.now())
 
-      every { clusterNodeHeartbeatService.currentIdentity() } returns InstanceIdentity("node-a", "http://10.0.0.1:8080")
-      every { clusterNodeRepository.findAliveSince(any()) } returns listOf(peer)
-      every { internalDirtyNotificationClient.notifyDirty(peer.internalBaseUrl, playerId) } returns false
+        every { clusterNodeHeartbeatService.currentIdentity() } returns InstanceIdentity("node-a", "http://10.0.0.1:8080")
+        every { clusterNodeRepository.findAliveSince(any()) } returns listOf(peer)
+        coEvery { internalDirtyNotificationClient.notifyDirty(peer.internalBaseUrl, playerId) } throws RuntimeException("failed")
 
-      service.enqueue(playerId)
-      service.flushPending()
-      service.flushPending()
-      service.flushPending()
+        service.enqueue(playerId)
+        service.flushPending()
+        service.flushPending()
+        service.flushPending()
 
-      verify(exactly = 2) { internalDirtyNotificationClient.notifyDirty(peer.internalBaseUrl, playerId) }
+        coVerify(exactly = 2) { internalDirtyNotificationClient.notifyDirty(peer.internalBaseUrl, playerId) }
+      }
+    }
+
+    "flushPending logs warn and retries on next flush when notify throws" {
+      runBlocking {
+        val clusterConfig = mockClusterConfig(maxAttempts = 2, staleAfter = Duration.ofSeconds(30))
+        val clusterNodeRepository = mockk<ClusterNodeRepository>()
+        val clusterNodeHeartbeatService = mockk<ClusterNodeHeartbeatService>()
+        val internalDirtyNotificationClient = mockk<InternalDirtyNotificationClient>()
+        val service =
+          DirtyPlayerBroadcastService(
+            clusterConfig = clusterConfig,
+            clusterNodeRepository = clusterNodeRepository,
+            clusterNodeHeartbeatService = clusterNodeHeartbeatService,
+            internalDirtyNotificationClient = internalDirtyNotificationClient,
+          )
+        val playerId = UUID.randomUUID()
+        val peer = ClusterNode("node-b", "http://10.0.0.2:8080", Instant.now())
+
+        every { clusterNodeHeartbeatService.currentIdentity() } returns InstanceIdentity("node-a", "http://10.0.0.1:8080")
+        every { clusterNodeRepository.findAliveSince(any()) } returns listOf(peer)
+        coEvery { internalDirtyNotificationClient.notifyDirty(peer.internalBaseUrl, playerId) } throws RuntimeException("boom")
+
+        service.enqueue(playerId)
+        service.flushPending()
+        service.flushPending()
+        service.flushPending()
+
+        coVerify(exactly = 2) { internalDirtyNotificationClient.notifyDirty(peer.internalBaseUrl, playerId) }
+      }
     }
   })
 

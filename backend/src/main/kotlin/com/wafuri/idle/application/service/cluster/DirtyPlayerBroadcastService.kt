@@ -3,7 +3,10 @@ package com.wafuri.idle.application.service.cluster
 import com.wafuri.idle.application.config.ClusterConfig
 import com.wafuri.idle.application.port.out.ClusterNodeRepository
 import jakarta.enterprise.context.ApplicationScoped
-import jakarta.transaction.Transactional
+import jakarta.enterprise.context.control.ActivateRequestContext
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.util.UUID
@@ -23,8 +26,8 @@ class DirtyPlayerBroadcastService(
     pendingAttempts.putIfAbsent(playerId, 0)
   }
 
-  @Transactional
-  fun flushPending() {
+  @ActivateRequestContext
+  suspend fun flushPending() {
     val pendingPlayerIds = pendingAttempts.keys.toList()
     if (pendingPlayerIds.isEmpty()) {
       return
@@ -41,24 +44,36 @@ class DirtyPlayerBroadcastService(
       return
     }
 
-    pendingPlayerIds.forEach { playerId ->
-      val success = peers.all { peer -> internalDirtyNotificationClient.notifyDirty(peer.internalBaseUrl, playerId) }
-      if (success) {
-        pendingAttempts.remove(playerId)
-        return@forEach
-      }
+    coroutineScope {
+      pendingPlayerIds
+        .map { playerId ->
+          async {
+            try {
+              peers.forEach { peer ->
+                internalDirtyNotificationClient.notifyDirty(peer.internalBaseUrl, playerId)
+              }
+              pendingAttempts.remove(playerId)
+            } catch (exception: Exception) {
+              logger
+                .atWarn()
+                .setCause(exception)
+                .addKeyValue("playerId", playerId)
+                .log("Dirty player broadcast failed.")
 
-      val attempts = (pendingAttempts[playerId] ?: 0) + 1
-      if (attempts >= clusterConfig.notify().maxAttempts()) {
-        pendingAttempts.remove(playerId)
-        logger
-          .atWarn()
-          .addKeyValue("playerId", playerId)
-          .addKeyValue("attempts", attempts)
-          .log("Dropping dirty player broadcast after max retry attempts.")
-      } else {
-        pendingAttempts[playerId] = attempts
-      }
+              val attempts = (pendingAttempts[playerId] ?: 0) + 1
+              if (attempts >= clusterConfig.notify().maxAttempts()) {
+                pendingAttempts.remove(playerId)
+                logger
+                  .atWarn()
+                  .addKeyValue("playerId", playerId)
+                  .addKeyValue("attempts", attempts)
+                  .log("Dropping dirty player broadcast after max retry attempts.")
+              } else {
+                pendingAttempts[playerId] = attempts
+              }
+            }
+          }
+        }.awaitAll()
     }
   }
 }

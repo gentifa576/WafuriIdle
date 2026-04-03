@@ -2,11 +2,14 @@ package com.wafuri.idle.application.service.cluster
 
 import com.wafuri.idle.application.config.ClusterConfig
 import com.wafuri.idle.application.service.auth.JwtTokenService
+import io.smallrye.mutiny.coroutines.awaitSuspending
+import io.vertx.core.http.HttpMethod
+import io.vertx.mutiny.core.Vertx
+import io.vertx.mutiny.core.buffer.Buffer
+import io.vertx.mutiny.ext.web.client.HttpResponse
+import io.vertx.mutiny.ext.web.client.WebClient
 import jakarta.enterprise.context.ApplicationScoped
 import java.net.URI
-import java.net.http.HttpClient
-import java.net.http.HttpRequest
-import java.net.http.HttpResponse
 import java.util.UUID
 
 @ApplicationScoped
@@ -14,26 +17,25 @@ class InternalDirtyNotificationClient(
   private val clusterConfig: ClusterConfig,
   private val jwtTokenService: JwtTokenService,
   private val clusterNodeHeartbeatService: ClusterNodeHeartbeatService,
+  vertx: Vertx,
 ) {
-  private val httpClient: HttpClient =
-    HttpClient
-      .newBuilder()
-      .connectTimeout(clusterConfig.notify().requestTimeout())
-      .build()
+  private val webClient: WebClient = WebClient.create(vertx)
 
-  fun notifyDirty(
+  suspend fun notifyDirty(
     targetBaseUrl: String,
     playerId: UUID,
-  ): Boolean {
+  ) {
     val token = jwtTokenService.mintInternalNode(clusterNodeHeartbeatService.currentIdentity().instanceId)
-    val request =
-      HttpRequest
-        .newBuilder(URI.create(targetBaseUrl.trimEnd('/') + "/internal/players/$playerId/dirty"))
-        .timeout(clusterConfig.notify().requestTimeout())
-        .header("Authorization", "Bearer $token")
-        .POST(HttpRequest.BodyPublishers.noBody())
-        .build()
-    val response = httpClient.send(request, HttpResponse.BodyHandlers.discarding())
-    return response.statusCode() in 200..299
+    val requestUri = URI.create(targetBaseUrl.trimEnd('/') + "/internal/players/$playerId/dirty")
+    val response: HttpResponse<Buffer> =
+      webClient
+        .requestAbs(HttpMethod.POST, requestUri.toString())
+        .timeout(clusterConfig.notify().requestTimeout().toMillis())
+        .putHeader("Authorization", "Bearer $token")
+        .send()
+        .awaitSuspending()
+    require(response.statusCode() in 200..299) {
+      "Dirty player notification failed with status ${response.statusCode()}."
+    }
   }
 }

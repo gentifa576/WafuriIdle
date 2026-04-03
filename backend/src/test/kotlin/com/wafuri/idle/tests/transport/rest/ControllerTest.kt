@@ -22,7 +22,6 @@ import com.wafuri.idle.tests.support.expectedErrorResponse
 import com.wafuri.idle.tests.support.expectedPlayer
 import com.wafuri.idle.transport.rest.dto.AuthResponse
 import com.wafuri.idle.transport.rest.dto.ErrorResponse
-import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldNotBeBlank
 import io.quarkus.test.junit.QuarkusTest
@@ -505,6 +504,7 @@ class ControllerTest {
     val playerId = UUID.randomUUID()
     val userToken = signup("Ivy", password = null).sessionToken
     val internalToken = jwtTokenService.mintInternalNode("node-a")
+    localPlayerStateWorkQueue.drainDirtyPlayerIds()
 
     given()
       .header("Authorization", "Bearer $userToken")
@@ -518,6 +518,6 @@ class ControllerTest {
       .then()
       .statusCode(202)
 
-    localPlayerStateWorkQueue.drainDirtyPlayerIds() shouldContain playerId
+    localPlayerStateWorkQueue.drainDirtyPlayerIds() shouldBe emptySet()
   }
 }

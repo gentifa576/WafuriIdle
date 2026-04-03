@@ -65,7 +65,7 @@ class CombatLoop(
     }
     zoneJobs.keys
       .filter { it !in activeZoneIds }
-      .forEach(::cancelZoneJob)
+      .forEach { zoneJobs.remove(it)?.cancel() }
   }
 
   @PreDestroy
@@ -102,9 +102,5 @@ class CombatLoop(
       zoneJobs.remove(zoneId, job)
     }
     return job
-  }
-
-  private fun cancelZoneJob(zoneId: String) {
-    zoneJobs.remove(zoneId)?.cancel()
   }
 }
