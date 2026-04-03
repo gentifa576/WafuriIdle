@@ -127,7 +127,7 @@ class DomainModelTest :
 
     "combat state advances enemy hp only after enough accumulated elapsed time" {
       val state =
-        CombatState(
+        CombatState.active(
           playerId = UUID.randomUUID(),
           status = CombatStatus.FIGHTING,
           zoneId = "starter-plains",
@@ -182,7 +182,7 @@ class DomainModelTest :
 
     "combat state respawns after the configured delay and consumes overflow time" {
       val state =
-        CombatState(
+        CombatState.active(
           playerId = UUID.randomUUID(),
           status = CombatStatus.WON,
           zoneId = "starter-plains",
@@ -250,7 +250,7 @@ class DomainModelTest :
 
     "combat state enters down status on a full wipe and revives at half hp after the revive delay" {
       val state =
-        CombatState(
+        CombatState.active(
           playerId = UUID.randomUUID(),
           status = CombatStatus.FIGHTING,
           zoneId = "starter-plains",

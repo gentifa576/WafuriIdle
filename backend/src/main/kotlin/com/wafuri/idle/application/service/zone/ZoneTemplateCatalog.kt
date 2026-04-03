@@ -9,10 +9,7 @@ import java.util.concurrent.atomic.AtomicReference
 class ZoneTemplateCatalog {
   private val zones = AtomicReference<Map<String, ZoneTemplate>>(emptyMap())
 
-  fun replace(newZones: List<ZoneTemplate>) {
-    require(newZones.map { it.id }.distinct().size == newZones.size) {
-      "Zone ids must be unique."
-    }
+  fun replace(newZones: Set<ZoneTemplate>) {
     zones.set(newZones.associateBy { it.id })
   }
 

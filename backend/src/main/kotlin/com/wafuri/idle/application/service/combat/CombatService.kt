@@ -37,7 +37,7 @@ class CombatService(
     val zoneLevel = progressionService.requireZoneProgress(playerId, zone.id).level
     val enemyBaseHp = gameConfig.combat().enemyMaxHp()
     val enemyAttack = gameConfig.combat().enemyAttack()
-    val currentState = combatStateRepository.findById(playerId) ?: CombatState(playerId = playerId)
+    val currentState = combatStateRepository.findById(playerId) ?: CombatState.idle(playerId)
     val startedState =
       currentState.start(
         zoneId = zone.id,
@@ -59,7 +59,7 @@ class CombatService(
   fun stop(playerId: UUID): CombatSnapshot? {
     playerRepository.findById(playerId)
       ?: throw ResourceNotFoundException("Player $playerId was not found.")
-    val savedState = combatStateRepository.save(CombatState(playerId = playerId))
+    val savedState = combatStateRepository.save(CombatState.idle(playerId))
     playerStateWorkQueue.markDirty(playerId)
     return savedState.takeUnless { it.status == com.wafuri.idle.domain.model.CombatStatus.IDLE }?.toSnapshot()
   }

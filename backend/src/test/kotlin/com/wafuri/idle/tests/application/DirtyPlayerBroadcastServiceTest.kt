@@ -10,7 +10,6 @@ import com.wafuri.idle.application.service.cluster.InternalDirtyNotificationClie
 import io.kotest.core.spec.style.StringSpec
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import java.time.Duration
@@ -36,8 +35,8 @@ class DirtyPlayerBroadcastServiceTest :
         val now = Instant.now()
         val peer = ClusterNode("node-b", "http://10.0.0.2:8080", now)
 
-        every { clusterNodeHeartbeatService.currentIdentity() } returns InstanceIdentity("node-a", "http://10.0.0.1:8080")
-        every { clusterNodeRepository.findAliveSince(any()) } returns listOf(peer)
+        coEvery { clusterNodeHeartbeatService.currentIdentity() } returns InstanceIdentity("node-a", "http://10.0.0.1:8080")
+        coEvery { clusterNodeRepository.findAliveSince(any()) } returns listOf(peer)
         coEvery { internalDirtyNotificationClient.notifyDirty(peer.internalBaseUrl, playerId) } returns Unit
 
         service.enqueue(playerId)
@@ -65,8 +64,8 @@ class DirtyPlayerBroadcastServiceTest :
         val playerId = UUID.randomUUID()
         val peer = ClusterNode("node-b", "http://10.0.0.2:8080", Instant.now())
 
-        every { clusterNodeHeartbeatService.currentIdentity() } returns InstanceIdentity("node-a", "http://10.0.0.1:8080")
-        every { clusterNodeRepository.findAliveSince(any()) } returns listOf(peer)
+        coEvery { clusterNodeHeartbeatService.currentIdentity() } returns InstanceIdentity("node-a", "http://10.0.0.1:8080")
+        coEvery { clusterNodeRepository.findAliveSince(any()) } returns listOf(peer)
         coEvery { internalDirtyNotificationClient.notifyDirty(peer.internalBaseUrl, playerId) } throws RuntimeException("failed")
 
         service.enqueue(playerId)
@@ -94,8 +93,8 @@ class DirtyPlayerBroadcastServiceTest :
         val playerId = UUID.randomUUID()
         val peer = ClusterNode("node-b", "http://10.0.0.2:8080", Instant.now())
 
-        every { clusterNodeHeartbeatService.currentIdentity() } returns InstanceIdentity("node-a", "http://10.0.0.1:8080")
-        every { clusterNodeRepository.findAliveSince(any()) } returns listOf(peer)
+        coEvery { clusterNodeHeartbeatService.currentIdentity() } returns InstanceIdentity("node-a", "http://10.0.0.1:8080")
+        coEvery { clusterNodeRepository.findAliveSince(any()) } returns listOf(peer)
         coEvery { internalDirtyNotificationClient.notifyDirty(peer.internalBaseUrl, playerId) } throws RuntimeException("boom")
 
         service.enqueue(playerId)

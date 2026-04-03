@@ -32,7 +32,7 @@ class ItemTemplateBootstrap(
         .firstOrNull { it.isNotEmpty() }
         .orEmpty()
 
-    itemTemplateCatalog.replace(items)
+    itemTemplateCatalog.replace(items.toSet())
 
     if (items.isEmpty()) {
       logger.warn("No item templates were loaded during startup.")

@@ -5,7 +5,6 @@ import com.wafuri.idle.application.service.combat.CombatLootService
 import com.wafuri.idle.application.service.combat.RandomSource
 import com.wafuri.idle.application.service.inventory.InventoryService
 import com.wafuri.idle.application.service.item.ItemTemplateCatalog
-import com.wafuri.idle.application.service.player.ProgressionService
 import com.wafuri.idle.application.service.zone.ZoneTemplateCatalog
 import com.wafuri.idle.domain.model.LevelRange
 import com.wafuri.idle.domain.model.Rarity
@@ -23,7 +22,6 @@ class CombatLootServiceTest : StringSpec() {
   private lateinit var zoneTemplateCatalog: ZoneTemplateCatalog
   private lateinit var itemTemplateCatalog: ItemTemplateCatalog
   private lateinit var inventoryService: InventoryService
-  private lateinit var progressionService: ProgressionService
   private lateinit var randomSource: RandomSource
   private lateinit var config: GameConfig
   private lateinit var service: CombatLootService
@@ -47,7 +45,6 @@ class CombatLootServiceTest : StringSpec() {
       zoneTemplateCatalog = mockk()
       itemTemplateCatalog = mockk()
       inventoryService = mockk()
-      progressionService = mockk()
       randomSource = mockk()
       config = gameConfig()
       service =
@@ -55,7 +52,6 @@ class CombatLootServiceTest : StringSpec() {
           zoneTemplateCatalog,
           itemTemplateCatalog,
           inventoryService,
-          progressionService,
           config,
           randomSource,
         )
@@ -69,10 +65,9 @@ class CombatLootServiceTest : StringSpec() {
       every { randomSource.nextInt(100) } returns 20
       every { zoneTemplateCatalog.require("starter-plains") } returns zone
       every { itemTemplateCatalog.require("sword_0001") } returns swordItem()
-      every { progressionService.requireZoneProgress(playerId, "starter-plains") } returns mockk { every { level } returns 1 }
       every { inventoryService.addGeneratedItem(playerId, "sword_0001", Rarity.COMMON, 1) } answers { mockk() }
 
-      service.rollLoot(playerId, "starter-plains")
+      service.rollLoot(playerId, "starter-plains", 1)
 
       verify(exactly = 1) { inventoryService.addGeneratedItem(playerId, "sword_0001", Rarity.COMMON, 1) }
     }
@@ -82,7 +77,7 @@ class CombatLootServiceTest : StringSpec() {
 
       every { randomSource.nextFloat() } returns 0.5f
 
-      service.rollLoot(playerId, "starter-plains")
+      service.rollLoot(playerId, "starter-plains", 1)
 
       verify(exactly = 0) { zoneTemplateCatalog.require(any()) }
       verify(exactly = 0) { inventoryService.addGeneratedItem(any(), any(), any()) }

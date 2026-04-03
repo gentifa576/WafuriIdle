@@ -3,7 +3,6 @@ package com.wafuri.idle.application.service.combat
 import com.wafuri.idle.application.config.GameConfig
 import com.wafuri.idle.application.service.inventory.InventoryService
 import com.wafuri.idle.application.service.item.ItemTemplateCatalog
-import com.wafuri.idle.application.service.player.ProgressionService
 import com.wafuri.idle.application.service.zone.ZoneTemplateCatalog
 import com.wafuri.idle.domain.model.InventoryItem
 import com.wafuri.idle.domain.model.Rarity
@@ -16,25 +15,22 @@ class CombatLootService(
   private val zoneTemplateCatalog: ZoneTemplateCatalog,
   private val itemTemplateCatalog: ItemTemplateCatalog,
   private val inventoryService: InventoryService,
-  private val progressionService: ProgressionService,
   private val gameConfig: GameConfig,
   private val randomSource: RandomSource,
 ) {
   fun rollLoot(
     playerId: UUID,
     zoneId: String,
-    itemLevel: Int? = null,
+    itemLevel: Int,
   ): InventoryItem? {
     val lootConfig = gameConfig.combat().loot()
     if (randomSource.nextFloat() >= lootConfig.baseItemDropRate()) {
       return null
     }
 
-    val zone = zoneTemplateCatalog.require(zoneId)
-    val rolledEntry = rollZoneLoot(zone.lootTable) ?: return null
+    val rolledEntry = rollZoneLoot(zoneTemplateCatalog.require(zoneId).lootTable) ?: return null
     val item = itemTemplateCatalog.require(rolledEntry.itemName)
-    val resolvedItemLevel = itemLevel ?: progressionService.requireZoneProgress(playerId, zoneId).level
-    return inventoryService.addGeneratedItem(playerId, item.name, rollRarity(), resolvedItemLevel)
+    return inventoryService.addGeneratedItem(playerId, item.name, rollRarity(), itemLevel)
   }
 
   private fun rollZoneLoot(lootTable: List<ZoneLootEntry>): ZoneLootEntry? {
@@ -59,20 +55,20 @@ class CombatLootService(
 
   private fun rollRarity(): Rarity {
     val rarityConfig = gameConfig.combat().loot().rarity()
-    val entries =
-      listOf(
+    val rarityMap =
+      linkedMapOf(
         Rarity.COMMON to rarityConfig.common(),
         Rarity.RARE to rarityConfig.rare(),
         Rarity.EPIC to rarityConfig.epic(),
         Rarity.LEGENDARY to rarityConfig.legendary(),
       )
-    val totalWeight = entries.sumOf { it.second.toDouble() }.toFloat()
+    val totalWeight = rarityMap.values.sumOf { it.toDouble() }.toFloat()
     if (totalWeight <= 0f) {
       return Rarity.COMMON
     }
 
     var remaining = randomSource.nextFloat() * totalWeight
-    entries.forEach { (rarity, weight) ->
+    rarityMap.forEach { (rarity, weight) ->
       remaining -= weight
       if (remaining < 0f) {
         return rarity

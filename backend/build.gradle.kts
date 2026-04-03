@@ -17,6 +17,7 @@ repositories {
 }
 
 dependencies {
+  val awsSdkVersion = "2.20.87"
   val kotestVersion = "6.0.0"
   val mockkVersion = "1.13.17"
 
@@ -25,6 +26,7 @@ dependencies {
       "${property("quarkusPlatformGroupId")}:${property("quarkusPlatformArtifactId")}:${property("quarkusPlatformVersion")}",
     ),
   )
+  implementation(platform("software.amazon.awssdk:bom:$awsSdkVersion"))
   implementation("io.quarkus:quarkus-arc")
   implementation("io.quarkus:quarkus-config-yaml")
   implementation("io.quarkus:quarkus-kotlin")
@@ -40,6 +42,8 @@ dependencies {
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
   implementation("io.smallrye.reactive:mutiny-kotlin")
   implementation("io.smallrye.reactive:smallrye-mutiny-vertx-web-client")
+  implementation("software.amazon.awssdk:imds")
+  implementation("software.amazon.awssdk:netty-nio-client")
 
   testImplementation("io.quarkus:quarkus-junit5")
   testImplementation("io.kotest:kotest-runner-junit5:$kotestVersion")

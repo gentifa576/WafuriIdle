@@ -16,6 +16,7 @@ import io.kotest.matchers.shouldBe
 import io.quarkus.test.TestTransaction
 import io.quarkus.test.junit.QuarkusTest
 import jakarta.inject.Inject
+import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.util.UUID
@@ -65,15 +66,17 @@ class PersistenceRepositoryIntegrationTest {
   @Test
   @TestTransaction
   fun `cluster node repository persists and queries live nodes`() {
-    val now = Instant.now()
-    val node =
-      ClusterNode(
-        instanceId = "node-a",
-        internalBaseUrl = "http://10.0.0.1:8080",
-        lastHeartbeatAt = now,
-      )
-    clusterNodeRepository.save(node)
+    runBlocking {
+      val now = Instant.now()
+      val node =
+        ClusterNode(
+          instanceId = "node-a",
+          internalBaseUrl = "http://10.0.0.1:8080",
+          lastHeartbeatAt = now,
+        )
+      clusterNodeRepository.save(node)
 
-    clusterNodeRepository.findAliveSince(now.minusSeconds(1)).first { it.instanceId == node.instanceId } shouldBe node
+      clusterNodeRepository.findAliveSince(now.minusSeconds(1)).first { it.instanceId == node.instanceId } shouldBe node
+    }
   }
 }

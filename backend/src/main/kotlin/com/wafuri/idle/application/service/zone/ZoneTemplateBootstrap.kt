@@ -32,7 +32,7 @@ class ZoneTemplateBootstrap(
         .firstOrNull { it.isNotEmpty() }
         .orEmpty()
 
-    zoneTemplateCatalog.replace(zones)
+    zoneTemplateCatalog.replace(zones.toSet())
 
     if (zones.isEmpty()) {
       logger.warn("No zone templates were loaded during startup.")

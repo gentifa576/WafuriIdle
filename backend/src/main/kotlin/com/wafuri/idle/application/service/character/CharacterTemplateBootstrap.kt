@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory
 @ApplicationScoped
 class CharacterTemplateBootstrap(
   private val databaseCharacterFetcher: DatabaseCharacterFetcher,
-  private val resourceCharacterFetcherInstance: Instance<ResourceCharacterFetcher>,
+  private val localCharacterFetcherInstance: Instance<LocalCharacterFetcher>,
   private val characterTemplateCatalog: CharacterTemplateCatalog,
 ) {
   private val logger = LoggerFactory.getLogger(CharacterTemplateBootstrap::class.java)
@@ -20,8 +20,8 @@ class CharacterTemplateBootstrap(
   fun load() {
     val fetchers: List<CharacterFetcher> =
       buildList {
-        if (resourceCharacterFetcherInstance.isResolvable) {
-          add(resourceCharacterFetcherInstance.get())
+        if (localCharacterFetcherInstance.isResolvable) {
+          add(localCharacterFetcherInstance.get())
         }
         add(databaseCharacterFetcher)
       }
@@ -32,7 +32,7 @@ class CharacterTemplateBootstrap(
         .firstOrNull { it.isNotEmpty() }
         .orEmpty()
 
-    characterTemplateCatalog.replace(templates)
+    characterTemplateCatalog.replace(templates.toSet())
 
     if (templates.isEmpty()) {
       logger.warn("No character templates were loaded during startup.")

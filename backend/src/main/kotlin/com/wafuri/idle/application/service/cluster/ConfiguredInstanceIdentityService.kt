@@ -9,9 +9,9 @@ import jakarta.enterprise.context.ApplicationScoped
 class ConfiguredInstanceIdentityService(
   private val clusterConfig: ClusterConfig,
 ) : InstanceIdentityService {
-  override fun current(): InstanceIdentity =
+  override suspend fun current(): InstanceIdentity =
     InstanceIdentity(
-      instanceId = clusterConfig.local().instanceId(),
-      internalBaseUrl = clusterConfig.local().internalBaseUrl(),
+      clusterConfig.local().instanceId(),
+      clusterConfig.local().internalBaseUrl(),
     )
 }

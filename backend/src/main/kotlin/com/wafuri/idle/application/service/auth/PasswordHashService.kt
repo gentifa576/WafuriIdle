@@ -13,8 +13,8 @@ class PasswordHashService {
     val salt = ByteArray(SALT_BYTES).also(secureRandom::nextBytes)
     val hash = hash(password, salt)
     return HashedPassword(
-      hash = Base64.getEncoder().encodeToString(hash),
-      salt = Base64.getEncoder().encodeToString(salt),
+      Base64.getEncoder().encodeToString(hash),
+      Base64.getEncoder().encodeToString(salt),
     )
   }
 

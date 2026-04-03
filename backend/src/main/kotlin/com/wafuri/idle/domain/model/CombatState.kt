@@ -20,6 +20,54 @@ data class CombatState(
   val pendingReviveMillis: Long = 0,
   val lastSimulatedAt: Instant? = null,
 ) {
+  companion object {
+    fun idle(
+      playerId: UUID,
+      lastSimulatedAt: Instant? = null,
+    ): CombatState =
+      CombatState(
+        playerId = playerId,
+        lastSimulatedAt = lastSimulatedAt,
+      )
+
+    fun active(
+      playerId: UUID,
+      status: CombatStatus,
+      zoneId: String,
+      activeTeamId: UUID,
+      enemyName: String,
+      enemyLevel: Int,
+      enemyBaseHp: Float,
+      enemyAttack: Float,
+      enemyHp: Float,
+      enemyMaxHp: Float,
+      members: List<CombatMemberState>,
+      pendingDamageMillis: Long = 0L,
+      pendingRespawnMillis: Long = 0L,
+      pendingReviveMillis: Long = 0L,
+      lastSimulatedAt: Instant? = null,
+    ): CombatState {
+      require(status != CombatStatus.IDLE) { "Active combat state must not use idle status." }
+      return CombatState(
+        playerId = playerId,
+        status = status,
+        zoneId = zoneId,
+        activeTeamId = activeTeamId,
+        enemyName = enemyName,
+        enemyLevel = enemyLevel,
+        enemyBaseHp = enemyBaseHp,
+        enemyAttack = enemyAttack,
+        enemyHp = enemyHp,
+        enemyMaxHp = enemyMaxHp,
+        members = members,
+        pendingDamageMillis = pendingDamageMillis,
+        pendingRespawnMillis = pendingRespawnMillis,
+        pendingReviveMillis = pendingReviveMillis,
+        lastSimulatedAt = lastSimulatedAt,
+      )
+    }
+  }
+
   init {
     require(enemyHp >= 0f) { "Enemy HP must not be negative." }
     require(enemyBaseHp >= 0f) { "Enemy base HP must not be negative." }
@@ -81,7 +129,8 @@ data class CombatState(
     require(members.isNotEmpty()) { "Combat must start with at least one member." }
     require(members.any { it.isAlive }) { "Combat must start with at least one living member." }
 
-    return copy(
+    return active(
+      playerId = playerId,
       status = CombatStatus.FIGHTING,
       zoneId = zoneId,
       activeTeamId = teamId,
@@ -92,14 +141,7 @@ data class CombatState(
       enemyHp = enemyMaxHp,
       enemyMaxHp = enemyMaxHp,
       members = members,
-      pendingDamageMillis = 0L,
-      pendingRespawnMillis = 0L,
-      pendingReviveMillis = 0L,
     )
-  }
-
-  fun refreshMembers(members: List<CombatMemberState>): CombatState {
-    return refreshTeam(activeTeamId ?: return this, members)
   }
 
   fun refreshEnemy(

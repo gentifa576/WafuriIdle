@@ -9,10 +9,7 @@ import java.util.concurrent.atomic.AtomicReference
 class CharacterTemplateCatalog {
   private val templates = AtomicReference<Map<String, CharacterTemplate>>(emptyMap())
 
-  fun replace(newTemplates: List<CharacterTemplate>) {
-    require(newTemplates.map { it.key }.distinct().size == newTemplates.size) {
-      "Character template keys must be unique."
-    }
+  fun replace(newTemplates: Set<CharacterTemplate>) {
     templates.set(newTemplates.associateBy { it.key })
   }
 

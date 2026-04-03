@@ -226,30 +226,30 @@ fun expectedCombatState(
   pendingReviveMillis: Long = 0,
   lastSimulatedAt: Instant? = null,
 ): CombatState =
-  CombatState(
-    playerId = playerId,
-    status = status,
-    zoneId = zoneId,
-    activeTeamId = activeTeamId,
-    enemyName = enemyName,
-    enemyLevel = if (status == CombatStatus.IDLE) 0 else enemyLevel.coerceAtLeast(1),
-    enemyBaseHp =
-      if (status == CombatStatus.IDLE) {
-        0f
-      } else if (enemyBaseHp > 0f) {
-        enemyBaseHp
-      } else {
-        enemyMaxHp
-      },
-    enemyAttack = if (status == CombatStatus.IDLE) 0f else enemyAttack.coerceAtLeast(1f),
-    enemyHp = enemyHp,
-    enemyMaxHp = enemyMaxHp,
-    members = members,
-    pendingDamageMillis = pendingDamageMillis,
-    pendingRespawnMillis = pendingRespawnMillis,
-    pendingReviveMillis = pendingReviveMillis,
-    lastSimulatedAt = lastSimulatedAt,
-  )
+  if (status == CombatStatus.IDLE) {
+    CombatState.idle(
+      playerId = playerId,
+      lastSimulatedAt = lastSimulatedAt,
+    )
+  } else {
+    CombatState.active(
+      playerId = playerId,
+      status = status,
+      zoneId = requireNotNull(zoneId),
+      activeTeamId = requireNotNull(activeTeamId),
+      enemyName = requireNotNull(enemyName),
+      enemyLevel = enemyLevel.coerceAtLeast(1),
+      enemyBaseHp = if (enemyBaseHp > 0f) enemyBaseHp else enemyMaxHp,
+      enemyAttack = enemyAttack.coerceAtLeast(1f),
+      enemyHp = enemyHp,
+      enemyMaxHp = enemyMaxHp,
+      members = members,
+      pendingDamageMillis = pendingDamageMillis,
+      pendingRespawnMillis = pendingRespawnMillis,
+      pendingReviveMillis = pendingReviveMillis,
+      lastSimulatedAt = lastSimulatedAt,
+    )
+  }
 
 fun expectedSingleMemberCombatState(
   playerId: UUID,

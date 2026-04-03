@@ -50,7 +50,7 @@ class ItemTemplateRefreshLoop(
     try {
       val items = databaseItemFetcher.fetch()
       if (items.isNotEmpty()) {
-        itemTemplateCatalog.replace(items)
+        itemTemplateCatalog.replace(items.toSet())
       }
     } catch (exception: Exception) {
       logger

@@ -93,7 +93,7 @@ class CombatStatServiceTest : StringSpec() {
 
       every { teamRepository.findById(teamId) } returns team
       every { playerRepository.findById(player.id) } returns player
-      characterTemplateCatalog.replace(listOf(warrior, cleric))
+      characterTemplateCatalog.replace(setOf(warrior, cleric))
 
       val result = service.teamStatsForPlayer(player.id)
       val expected =
@@ -149,7 +149,7 @@ class CombatStatServiceTest : StringSpec() {
 
       every { teamRepository.findById(teamId) } returns team
       every { playerRepository.findById(player.id) } returns player
-      characterTemplateCatalog.replace(listOf(clericTemplate(), rangerTemplate()))
+      characterTemplateCatalog.replace(setOf(clericTemplate(), rangerTemplate()))
 
       val result = service.teamStatsForPlayer(player.id)
 
@@ -187,7 +187,7 @@ class CombatStatServiceTest : StringSpec() {
 
       every { playerRepository.findById(player.id) } returns player
       every { teamRepository.findById(teamId) } returns team
-      characterTemplateCatalog.replace(listOf(warriorTemplate()))
+      characterTemplateCatalog.replace(setOf(warriorTemplate()))
 
       service.teamStatsForPlayer(player.id)
       service.teamStatsForPlayer(player.id)
@@ -221,7 +221,7 @@ class CombatStatServiceTest : StringSpec() {
 
       every { playerRepository.findById(player.id) } returns player
       every { teamRepository.findById(teamId) } returns team
-      characterTemplateCatalog.replace(listOf(clericTemplate(), rangerTemplate()))
+      characterTemplateCatalog.replace(setOf(clericTemplate(), rangerTemplate()))
 
       val buffed = service.teamStatsForPlayer(player.id)
       val unbuffed =

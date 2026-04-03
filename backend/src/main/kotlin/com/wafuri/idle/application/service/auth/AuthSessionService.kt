@@ -15,10 +15,7 @@ class AuthSessionService(
   fun revoke(jwt: JsonWebToken) {
     val sessionId = jwt.sessionId() ?: return
     revokedSessionRepository.save(
-      RevokedSession(
-        sessionId = sessionId,
-        expiresAt = jwt.expiresAtInstant(),
-      ),
+      RevokedSession(sessionId, jwt.expiresAtInstant()),
     )
   }
 

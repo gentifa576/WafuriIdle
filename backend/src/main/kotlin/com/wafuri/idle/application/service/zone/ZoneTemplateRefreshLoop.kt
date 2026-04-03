@@ -50,7 +50,7 @@ class ZoneTemplateRefreshLoop(
     try {
       val zones = databaseZoneFetcher.fetch()
       if (zones.isNotEmpty()) {
-        zoneTemplateCatalog.replace(zones)
+        zoneTemplateCatalog.replace(zones.toSet())
       }
     } catch (exception: Exception) {
       logger

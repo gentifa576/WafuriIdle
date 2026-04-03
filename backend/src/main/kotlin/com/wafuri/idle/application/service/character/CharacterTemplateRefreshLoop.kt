@@ -50,7 +50,7 @@ class CharacterTemplateRefreshLoop(
     try {
       val templates = databaseCharacterFetcher.fetch()
       if (templates.isNotEmpty()) {
-        characterTemplateCatalog.replace(templates)
+        characterTemplateCatalog.replace(templates.toSet())
       }
     } catch (exception: Exception) {
       logger

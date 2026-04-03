@@ -12,7 +12,7 @@ import jakarta.enterprise.context.ApplicationScoped
 
 @ApplicationScoped
 @UnlessBuildProfile("prod")
-class ResourceCharacterFetcher(
+class LocalCharacterFetcher(
   private val objectMapper: ObjectMapper,
 ) : CharacterFetcher {
   override fun fetch(): List<CharacterTemplate> {
@@ -64,5 +64,5 @@ private fun List<Float>.toStatGrowth(
   require(size == 2) {
     "Character template $characterId must define $statName as [base, increment]."
   }
-  return StatGrowth(base = first(), increment = last())
+  return StatGrowth(first(), last())
 }

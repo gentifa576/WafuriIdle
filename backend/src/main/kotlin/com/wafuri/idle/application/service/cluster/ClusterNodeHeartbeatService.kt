@@ -11,22 +11,18 @@ class ClusterNodeHeartbeatService(
   private val clusterNodeRepository: ClusterNodeRepository,
   private val instanceIdentityService: InstanceIdentityService,
 ) {
-  fun currentIdentity(): InstanceIdentity = instanceIdentityService.current()
+  suspend fun currentIdentity(): InstanceIdentity = instanceIdentityService.current()
 
   @Transactional
-  fun heartbeat(at: Instant = Instant.now()) {
+  suspend fun heartbeat(at: Instant = Instant.now()) {
     val identity = instanceIdentityService.current()
     clusterNodeRepository.save(
-      ClusterNode(
-        instanceId = identity.instanceId,
-        internalBaseUrl = identity.internalBaseUrl,
-        lastHeartbeatAt = at,
-      ),
+      ClusterNode(identity.instanceId, identity.internalBaseUrl, at),
     )
   }
 
   @Transactional
-  fun removeCurrentNode() {
+  suspend fun removeCurrentNode() {
     clusterNodeRepository.delete(instanceIdentityService.current().instanceId)
   }
 }

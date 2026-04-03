@@ -9,10 +9,7 @@ import java.util.concurrent.atomic.AtomicReference
 class ItemTemplateCatalog {
   private val items = AtomicReference<Map<String, Item>>(emptyMap())
 
-  fun replace(newItems: List<Item>) {
-    require(newItems.map { it.name }.distinct().size == newItems.size) {
-      "Item names must be unique."
-    }
+  fun replace(newItems: Set<Item>) {
     items.set(newItems.associateBy { it.name })
   }
 

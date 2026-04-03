@@ -13,6 +13,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 
 @Startup
@@ -27,7 +28,6 @@ class ClusterNodeHeartbeatLoop(
 
   @PostConstruct
   fun start() {
-    tryHeartbeat()
     val intervalMillis =
       clusterConfig
         .discovery()
@@ -36,6 +36,7 @@ class ClusterNodeHeartbeatLoop(
         .coerceAtLeast(1)
     heartbeatJob =
       scope.launch {
+        tryHeartbeat()
         while (isActive) {
           delay(intervalMillis)
           tryHeartbeat()
@@ -47,19 +48,22 @@ class ClusterNodeHeartbeatLoop(
   fun stop() {
     heartbeatJob?.cancel()
     scope.cancel()
-    runCatching { clusterNodeHeartbeatService.removeCurrentNode() }
-      .onFailure { exception ->
-        if (exception is IllegalStateException && exception.message?.contains("EntityManagerFactory is closed") == true) {
-          return
-        }
-        logger
-          .atWarn()
-          .setCause(exception)
-          .log("Cluster node deregistration failed during shutdown.")
+    runCatching {
+      runBlocking {
+        clusterNodeHeartbeatService.removeCurrentNode()
       }
+    }.onFailure { exception ->
+      if (exception is IllegalStateException && exception.message?.contains("EntityManagerFactory is closed") == true) {
+        return
+      }
+      logger
+        .atWarn()
+        .setCause(exception)
+        .log("Cluster node deregistration failed during shutdown.")
+    }
   }
 
-  private fun tryHeartbeat() {
+  private suspend fun tryHeartbeat() {
     runCatching { clusterNodeHeartbeatService.heartbeat() }
       .onFailure { exception ->
         logger

@@ -3,7 +3,7 @@ package com.wafuri.idle.tests.application
 import com.wafuri.idle.application.service.character.CharacterTemplateBootstrap
 import com.wafuri.idle.application.service.character.CharacterTemplateCatalog
 import com.wafuri.idle.application.service.character.DatabaseCharacterFetcher
-import com.wafuri.idle.application.service.character.ResourceCharacterFetcher
+import com.wafuri.idle.application.service.character.LocalCharacterFetcher
 import com.wafuri.idle.domain.model.CharacterTemplate
 import com.wafuri.idle.domain.model.StatGrowth
 import com.wafuri.idle.tests.support.clericTemplate
@@ -17,9 +17,9 @@ import jakarta.enterprise.inject.Instance
 class CharacterTemplateBootstrapTest :
   StringSpec({
     "bootstrap uses the first non-empty fetcher result" {
-      val resourceFetcher = mockk<ResourceCharacterFetcher>()
+      val resourceFetcher = mockk<LocalCharacterFetcher>()
       val databaseFetcher = mockk<DatabaseCharacterFetcher>()
-      val resourceFetcherInstance = mockk<Instance<ResourceCharacterFetcher>>()
+      val resourceFetcherInstance = mockk<Instance<LocalCharacterFetcher>>()
       val catalog = CharacterTemplateCatalog()
       val expectedTemplates =
         listOf(

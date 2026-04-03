@@ -144,7 +144,7 @@ class CombatServiceTest : StringSpec() {
       val result = service.stop(playerId)
 
       result shouldBe null
-      savedState shouldBe CombatState(playerId)
+      savedState shouldBe CombatState.idle(playerId)
       verify(exactly = 1) { playerStateWorkQueue.markDirty(playerId) }
     }
   }

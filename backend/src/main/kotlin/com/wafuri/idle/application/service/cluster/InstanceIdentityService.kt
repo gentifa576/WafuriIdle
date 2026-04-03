@@ -6,5 +6,5 @@ data class InstanceIdentity(
 )
 
 interface InstanceIdentityService {
-  fun current(): InstanceIdentity
+  suspend fun current(): InstanceIdentity
 }
