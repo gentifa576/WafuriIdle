@@ -37,6 +37,18 @@ body {
   background: transparent;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 button,
 input,
 select {
@@ -467,9 +479,6 @@ select:focus-visible {
 }
 
 .item-hover-card {
-  position: absolute;
-  left: 0;
-  top: calc(100% + 0.55rem);
   min-width: 220px;
   max-width: 280px;
   padding: 0.85rem 0.95rem;
@@ -480,12 +489,17 @@ select:focus-visible {
     var(--panel-strong);
   box-shadow: var(--shadow);
   z-index: 24;
-  pointer-events: none;
 }
 
 .item-hover-card p {
   margin: 0.3rem 0 0;
   color: var(--muted);
+}
+
+.item-detail-panel {
+  position: static;
+  margin-top: 0.75rem;
+  max-width: none;
 }
 
 .slot-heading {

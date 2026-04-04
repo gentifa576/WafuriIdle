@@ -213,6 +213,7 @@ describe('CombatScreen', () => {
 
     expect(await screen.findByRole('dialog', { name: 'Choose Your First Character' })).toBeInTheDocument()
     expect(screen.getByText('Pick one starter to begin. This prompt will remain until your roster is no longer empty.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Herohero/i })).toHaveFocus()
     const activeCombatNav = screen
       .getAllByRole('button')
       .find((element) => element.getAttribute('aria-pressed') === 'true' && element.textContent?.includes('Combat'))
@@ -577,5 +578,43 @@ describe('CombatScreen', () => {
     expect(screen.getByRole('region', { name: 'Recent alerts' })).toBeInTheDocument()
     expect(screen.getByRole('alert')).toHaveTextContent('Combat already running.')
     expect(screen.getByRole('button', { name: 'Clear' })).toBeInTheDocument()
+  })
+
+  it('exposes explicit navigation names and keyboard-accessible inventory details', async () => {
+    const readyPlayer = guestAuthResponse({ ownedCharacterKeys: ['hero'] })
+
+    mocks.createGuestPlayer.mockResolvedValue(readyPlayer)
+    mocks.getPlayer.mockResolvedValue(readyPlayer.player)
+    mocks.getPlayerTeams.mockResolvedValue([emptyTeam()])
+    mocks.getPlayerInventory.mockResolvedValue([
+      {
+        id: 'item-1',
+        itemName: 'iron-sword',
+        itemDisplayName: 'Iron Sword',
+        itemType: 'WEAPON',
+        itemBaseStat: { type: 'ATK', value: 12 },
+        itemSubStatPool: [],
+        subStats: [{ type: 'CRIT', value: 2 }],
+        rarity: 'common',
+        upgrade: 0,
+        equippedTeamId: null,
+        equippedPosition: null,
+      },
+    ])
+
+    const user = userEvent.setup()
+    render(<CombatScreen />)
+
+    await user.type(screen.getByLabelText('Player name'), 'Scout')
+    await user.click(screen.getByRole('button', { name: 'Create Guest' }))
+    expect(await screen.findByRole('heading', { name: 'Scout' })).toBeInTheDocument()
+
+    expect(screen.getByRole('button', { name: 'Open combat workspace. Current combat status: Idle.' })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Open inventory workspace. 1 items available.' }))
+    await user.click(screen.getByRole('button', { name: 'Inspect details' }))
+
+    expect(screen.getByRole('region', { name: 'Iron Sword details' })).toBeInTheDocument()
+    expect(screen.getByText('ATK 12')).toBeInTheDocument()
   })
 })

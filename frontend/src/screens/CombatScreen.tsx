@@ -78,6 +78,17 @@ export function CombatScreen() {
           subtitle: `DOWN · Revive in ${reviveSeconds}s`,
         }
       : toCombatHud(combat)
+  const screenReaderStatus = useMemo(() => {
+    const updates = [
+      `Socket ${socketStatus}.`,
+      `Combat ${combat?.status ?? 'idle'}.`,
+      notifications.length > 0 ? `${notifications.length} alerts available.` : 'No pending alerts.',
+    ]
+    if (combat?.status === 'DOWN') {
+      updates.push(`Revive in ${reviveSeconds} seconds.`)
+    }
+    return updates.join(' ')
+  }, [combat?.status, notifications.length, reviveSeconds, socketStatus])
 
   useEffect(() => {
     if (selectedTeamId && teams.some((team) => team.id === selectedTeamId)) {
@@ -138,6 +149,9 @@ export function CombatScreen() {
 
   return (
     <main className="hud-shell app-workspace">
+      <div aria-atomic="true" aria-live="polite" className="sr-only">
+        {screenReaderStatus}
+      </div>
       <PlayerStatusHeader
         player={player}
         topZone={topZone}
