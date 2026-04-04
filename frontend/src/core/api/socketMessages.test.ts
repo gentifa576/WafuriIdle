@@ -23,26 +23,66 @@ describe('parsePlayerSocketMessage', () => {
     )
 
     expect(parsed).toEqual({
-      type: 'PLAYER_STATE_SYNC',
-      playerId: 'player-1',
-      snapshot: {
+      ok: true,
+      message: {
+        type: 'PLAYER_STATE_SYNC',
         playerId: 'player-1',
-        playerName: 'Scout',
-        playerExperience: 120,
-        playerLevel: 2,
-        playerGold: 90,
-        playerEssence: 4,
-        ownedCharacters: [{ key: 'hero', name: 'Hero', level: 2 }],
-        zoneProgress: [{ zoneId: 'starter-plains', killCount: 6, level: 2 }],
-        inventory: [],
-        serverTime: '2099-01-01T00:00:00Z',
+        snapshot: {
+          playerId: 'player-1',
+          playerName: 'Scout',
+          playerExperience: 120,
+          playerLevel: 2,
+          playerGold: 90,
+          playerEssence: 4,
+          ownedCharacters: [{ key: 'hero', name: 'Hero', level: 2 }],
+          zoneProgress: [{ zoneId: 'starter-plains', killCount: 6, level: 2 }],
+          inventory: [],
+          serverTime: '2099-01-01T00:00:00Z',
+        },
       },
     })
   })
 
   it('rejects malformed or unsupported payloads', () => {
-    expect(parsePlayerSocketMessage('not json')).toBeNull()
-    expect(parsePlayerSocketMessage(JSON.stringify({ type: 'PLAYER_STATE_SYNC', playerId: 'player-1' }))).toBeNull()
-    expect(parsePlayerSocketMessage(JSON.stringify({ type: 'UNKNOWN_EVENT' }))).toBeNull()
+    expect(parsePlayerSocketMessage('not json')).toEqual({
+      ok: false,
+      error: {
+        code: 'INVALID_JSON',
+        message: 'Received invalid JSON from the player socket.',
+      },
+    })
+    expect(
+      parsePlayerSocketMessage(
+        JSON.stringify({
+          type: 'PLAYER_STATE_SYNC',
+          playerId: 'player-1',
+          snapshot: {
+            playerId: 'player-1',
+            playerName: 'Scout',
+            playerExperience: 120,
+            playerLevel: '2',
+            playerGold: 90,
+            playerEssence: 4,
+            ownedCharacters: [],
+            zoneProgress: [],
+            inventory: [],
+            serverTime: '2099-01-01T00:00:00Z',
+          },
+        }),
+      ),
+    ).toEqual({
+      ok: false,
+      error: {
+        code: 'INVALID_MESSAGE_SHAPE',
+        message: 'PLAYER_STATE_SYNC payload is missing required player snapshot fields.',
+      },
+    })
+    expect(parsePlayerSocketMessage(JSON.stringify({ type: 'UNKNOWN_EVENT' }))).toEqual({
+      ok: false,
+      error: {
+        code: 'UNSUPPORTED_MESSAGE',
+        message: 'Unsupported socket message type "UNKNOWN_EVENT".',
+      },
+    })
   })
 })

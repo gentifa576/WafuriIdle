@@ -15,6 +15,7 @@ import {
 } from '../../../core/api/playerApi'
 import { createPlayerSocket, sendStartCombat, sendStopCombat } from '../../../core/api/wsClient'
 import { activateTeam, assignCharacterToTeam, equipTeamItem, unequipTeamItem } from '../../../core/api/teamApi'
+import type { SocketMessageParseError } from '../../../core/api/socketMessages'
 import type {
   CharacterPull,
   CharacterTemplate,
@@ -24,13 +25,12 @@ import type {
   OfflineProgressionMessage,
   OwnedCharacterSnapshot,
   Player,
-  PlayerStateSnapshot,
   PlayerSocketMessage,
-  Stat,
   Team,
   ZoneLevelUpMessage,
   ZoneProgressSnapshot,
 } from '../../../core/types/api'
+import { applyCombatStateSnapshot, applyPlayerStateSnapshot } from './socketSync'
 
 export type SocketStatus = 'disconnected' | 'connecting' | 'connected' | 'error'
 
@@ -73,8 +73,21 @@ export function useGameClient() {
   const [sessionExpiresAt, setSessionExpiresAt] = useState<string | null>(null)
   const [latestPullResult, setLatestPullResult] = useState<PullResult | null>(null)
   const socketRef = useRef<WebSocket | null>(null)
+  const syncStateRef = useRef({
+    player: null as Player | null,
+    inventory: [] as InventoryItemSnapshot[],
+    ownedCharacters: [] as OwnedCharacterSnapshot[],
+    zoneProgress: [] as ZoneProgressSnapshot[],
+  })
   const activitySequenceRef = useRef(0)
   const restoreAttemptedRef = useRef(false)
+
+  syncStateRef.current = {
+    player,
+    inventory,
+    ownedCharacters,
+    zoneProgress,
+  }
 
   useEffect(() => {
     void Promise.all([getCharacterTemplates(), getStarterCharacterTemplates()])
@@ -138,6 +151,11 @@ export function useGameClient() {
           applySocketMessage(message)
         })
       },
+      onInvalidMessage: (error) => {
+        startTransition(() => {
+          handleInvalidSocketMessage(error)
+        })
+      },
     })
     socketRef.current = socket
 
@@ -155,20 +173,21 @@ export function useGameClient() {
       appendActivity(activityEntry)
     }
     if (message.type === 'PLAYER_STATE_SYNC') {
-      setInventory((current) => (inventoryEquals(current, message.snapshot.inventory) ? current : message.snapshot.inventory))
-      setOwnedCharacters((current) =>
-        ownedCharactersEquals(current, message.snapshot.ownedCharacters) ? current : message.snapshot.ownedCharacters,
+      const nextState = applyPlayerStateSnapshot(
+        syncStateRef.current.player,
+        syncStateRef.current.inventory,
+        syncStateRef.current.ownedCharacters,
+        syncStateRef.current.zoneProgress,
+        message.snapshot,
       )
-      setZoneProgress((current) => (zoneProgressEquals(current, message.snapshot.zoneProgress) ? current : message.snapshot.zoneProgress))
-      setPlayer((current) =>
-        current == null
-          ? null
-          : updatePlayerFromSnapshot(current, message.snapshot),
-      )
+      setInventory(nextState.inventory)
+      setOwnedCharacters(nextState.ownedCharacters)
+      setZoneProgress(nextState.zoneProgress)
+      setPlayer(nextState.player)
       return
     }
     if (message.type === 'COMBAT_STATE_SYNC') {
-      setCombat((current) => (combatEquals(current, message.snapshot) ? current : message.snapshot))
+      setCombat((current) => applyCombatStateSnapshot(current, message.snapshot))
       return
     }
     if (message.type === 'ZONE_LEVEL_UP') {
@@ -180,6 +199,11 @@ export function useGameClient() {
       return
     }
     pushNotification(offlineProgressionNotification(message))
+  }
+
+  function handleInvalidSocketMessage(error: SocketMessageParseError) {
+    appendActivity(`Ignored invalid socket payload: ${error.message}`)
+    setError('Received an unsupported realtime update from the server. Refresh if the UI looks stale.')
   }
 
   function pushNotification(notification: HudNotification) {
@@ -505,128 +529,6 @@ function describeSocketEvent(message: PlayerSocketMessage): string | null {
     case 'COMMAND_ERROR':
       return `${message.commandType} failed: ${message.message}`
   }
-}
-
-function updatePlayerFromSnapshot(player: Player, snapshot: PlayerStateSnapshot) {
-  const nextOwnedCharacterKeys = snapshot.ownedCharacters.map((character) => character.key)
-  if (
-    player.id === snapshot.playerId &&
-    player.name === snapshot.playerName &&
-    player.experience === snapshot.playerExperience &&
-    player.level === snapshot.playerLevel &&
-    player.gold === snapshot.playerGold &&
-    player.essence === snapshot.playerEssence &&
-    stringArrayEquals(player.ownedCharacterKeys, nextOwnedCharacterKeys)
-  ) {
-    return player
-  }
-
-  return {
-    ...player,
-    id: snapshot.playerId,
-    name: snapshot.playerName,
-    ownedCharacterKeys: nextOwnedCharacterKeys,
-    experience: snapshot.playerExperience,
-    level: snapshot.playerLevel,
-    gold: snapshot.playerGold,
-    essence: snapshot.playerEssence,
-  }
-}
-
-function stringArrayEquals(left: string[], right: string[]) {
-  return left.length === right.length && left.every((value, index) => value === right[index])
-}
-
-function ownedCharactersEquals(left: OwnedCharacterSnapshot[], right: OwnedCharacterSnapshot[]) {
-  return (
-    left.length === right.length &&
-    left.every(
-      (character, index) =>
-        character.key === right[index]?.key &&
-        character.name === right[index]?.name &&
-        character.level === right[index]?.level,
-    )
-  )
-}
-
-function zoneProgressEquals(left: ZoneProgressSnapshot[], right: ZoneProgressSnapshot[]) {
-  return (
-    left.length === right.length &&
-    left.every(
-      (zone, index) =>
-        zone.zoneId === right[index]?.zoneId &&
-        zone.killCount === right[index]?.killCount &&
-        zone.level === right[index]?.level,
-    )
-  )
-}
-
-function inventoryEquals(left: InventoryItemSnapshot[], right: InventoryItemSnapshot[]) {
-  return (
-    left.length === right.length &&
-    left.every((item, index) => {
-      const other = right[index]
-      return (
-        item.id === other?.id &&
-        item.itemName === other?.itemName &&
-        item.itemDisplayName === other?.itemDisplayName &&
-        item.itemType === other?.itemType &&
-        statEquals(item.itemBaseStat, other?.itemBaseStat) &&
-        stringArrayEquals(item.itemSubStatPool, other?.itemSubStatPool ?? []) &&
-        statsEquals(item.subStats, other?.subStats ?? []) &&
-        item.rarity === other?.rarity &&
-        item.upgrade === other?.upgrade &&
-        item.equippedTeamId === other?.equippedTeamId &&
-        item.equippedPosition === other?.equippedPosition
-      )
-    })
-  )
-}
-
-function combatEquals(left: CombatSnapshot | null, right: CombatSnapshot | null) {
-  if (left === right) {
-    return true
-  }
-  if (left == null || right == null) {
-    return false
-  }
-
-  return (
-    left.playerId === right.playerId &&
-    left.status === right.status &&
-    left.zoneId === right.zoneId &&
-    left.activeTeamId === right.activeTeamId &&
-    left.enemyName === right.enemyName &&
-    left.enemyAttack === right.enemyAttack &&
-    left.enemyHp === right.enemyHp &&
-    left.enemyMaxHp === right.enemyMaxHp &&
-    left.teamDps === right.teamDps &&
-    left.pendingReviveMillis === right.pendingReviveMillis &&
-    combatMembersEquals(left.members, right.members)
-  )
-}
-
-function combatMembersEquals(left: CombatSnapshot['members'], right: CombatSnapshot['members']) {
-  return (
-    left.length === right.length &&
-    left.every(
-      (member, index) =>
-        member.characterKey === right[index]?.characterKey &&
-        member.attack === right[index]?.attack &&
-        member.hit === right[index]?.hit &&
-        member.currentHp === right[index]?.currentHp &&
-        member.maxHp === right[index]?.maxHp &&
-        member.alive === right[index]?.alive,
-    )
-  )
-}
-
-function statsEquals(left: Stat[], right: Stat[]) {
-  return left.length === right.length && left.every((stat, index) => statEquals(stat, right[index]))
-}
-
-function statEquals(left: Stat, right: Stat | undefined) {
-  return left.type === right?.type && left.value === right?.value
 }
 
 function zoneLevelUpNotification(message: ZoneLevelUpMessage): HudNotification {

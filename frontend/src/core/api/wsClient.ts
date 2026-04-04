@@ -1,10 +1,11 @@
 import { env } from '../config/env'
 import { currentSessionToken } from './httpClient'
-import { parsePlayerSocketMessage } from './socketMessages'
+import { parsePlayerSocketMessage, type SocketMessageParseError } from './socketMessages'
 import type { PlayerSocketMessage } from '../types/api'
 
 export interface PlayerSocketOptions {
   onMessage: (message: PlayerSocketMessage) => void
+  onInvalidMessage?: (error: SocketMessageParseError) => void
   onOpen?: () => void
   onClose?: () => void
   onError?: () => void
@@ -21,10 +22,12 @@ export function createPlayerSocket(playerId: string, options: PlayerSocketOption
   socket.addEventListener('close', () => options.onClose?.())
   socket.addEventListener('error', () => options.onError?.())
   socket.addEventListener('message', (event) => {
-    const message = parsePlayerSocketMessage(event.data)
-    if (message) {
-      options.onMessage(message)
+    const result = parsePlayerSocketMessage(event.data)
+    if (result.ok) {
+      options.onMessage(result.message)
+      return
     }
+    options.onInvalidMessage?.(result.error)
   })
   return socket
 }

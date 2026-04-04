@@ -1,6 +1,7 @@
 import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import type { SocketMessageParseError } from '../core/api/socketMessages'
 import type { PlayerSocketMessage } from '../core/types/api'
 import { CombatScreen } from './CombatScreen'
 
@@ -17,6 +18,7 @@ const mocks = vi.hoisted(() => {
     socket,
     lastSocketOptions: null as {
       onMessage: (message: PlayerSocketMessage) => void
+      onInvalidMessage?: (error: SocketMessageParseError) => void
       onOpen?: () => void
       onClose?: () => void
       onError?: () => void
@@ -255,6 +257,31 @@ describe('CombatScreen', () => {
     })
 
     expect(await screen.findByText('Combat already running.')).toBeInTheDocument()
+  })
+
+  it('surfaces invalid socket payloads instead of dropping them silently', async () => {
+    const readyPlayer = guestAuthResponse({ ownedCharacterKeys: ['hero'] })
+
+    mocks.createGuestPlayer.mockResolvedValue(readyPlayer)
+    mocks.getPlayer.mockResolvedValue(readyPlayer.player)
+    mocks.getPlayerTeams.mockResolvedValue([emptyTeam()])
+    mocks.getPlayerInventory.mockResolvedValue([])
+
+    const user = userEvent.setup()
+    render(<CombatScreen />)
+
+    await user.type(screen.getByLabelText('Player name'), 'Scout')
+    await user.click(screen.getByRole('button', { name: 'Create Guest' }))
+    expect(await screen.findByRole('heading', { name: 'Scout' })).toBeInTheDocument()
+
+    act(() => {
+      mocks.lastSocketOptions?.onInvalidMessage?.({
+        code: 'INVALID_MESSAGE_SHAPE',
+        message: 'COMBAT_STATE_SYNC payload is missing required combat snapshot fields.',
+      })
+    })
+
+    expect(await screen.findByText('Received an unsupported realtime update from the server. Refresh if the UI looks stale.')).toBeInTheDocument()
   })
 
   it('renders team hp and enemy retaliation from combat sync', async () => {

@@ -51,7 +51,7 @@
 | Change confirmation | Before making code or file changes, confirm the requested change with the user first. |
 | Clarification | If any requirement or expected behavior is ambiguous, ask follow-up questions until the scope is fully clear before editing files. |
 | Decision tracking | Before recording a finalized architecture or implementation decision in `AGENTS.md`, draft a brief summary and ask the user to confirm the decision. Once confirmed, record it in `AGENTS.md` in the same change if future work depends on it; do not rely on session memory for repo rules. |
-| Validation compliance | After any code change, do not stop at targeted or localized tests when `AGENTS.md` defines a required build gate. Run the required gate before closing the task unless the user explicitly waives it or the gate is blocked, and if blocked state the blocker clearly. |
+| Validation compliance | After any code change, do not stop at targeted or localized tests when `AGENTS.md` defines a required build gate. Run `./gradlew check` before closing the task when the change modifies files under `backend/`, unless the user explicitly waives it or the gate is blocked; if blocked, state the blocker clearly. |
 | Protocol adherence | Follow all repo protocol in `AGENTS.md` as written. Do not bypass, weaken, or invent ad hoc exceptions to established repo rules unless the user explicitly approves a deviation for the current task. If a rule is blocked, state the blocker clearly instead of silently improvising. |
 
 ## Architecture
@@ -198,7 +198,7 @@
 | Frontend unit tests | Use Vitest with Testing Library for frontend unit and component coverage. |
 | Frontend browser tests | Use Playwright for frontend smoke coverage; mock backend transport in-browser when the goal is frontend regression detection rather than backend verification. |
 | Kotlin lint fixes | When Kotlin lint/style issues need autofix, run `cd backend && ./gradlew ktlintFormat` instead of manually formatting by hand unless a specific exception is necessary. |
-| Build gate | `./gradlew check` must include lint and tests. |
+| Build gate | When a change modifies files under `backend/`, run `./gradlew check`; that gate must include lint and tests. |
 
 ## Out of Scope
 | Excluded capability |
