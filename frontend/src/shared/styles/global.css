@@ -217,6 +217,8 @@ select:focus-visible {
   top: 1.3rem;
   right: 1.3rem;
   z-index: 12;
+  display: grid;
+  gap: 0.75rem;
 }
 
 .status-tools-row {
@@ -259,6 +261,36 @@ select:focus-visible {
     var(--panel-strong);
   box-shadow: var(--shadow);
   z-index: 30;
+}
+
+.connection-badge,
+.feedback-state {
+  padding: 1rem;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.connection-badge p,
+.feedback-state p {
+  margin: 0.35rem 0 0;
+  color: var(--muted);
+}
+
+.feedback-state {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.feedback-copy {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.feedback-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
 }
 
 .workspace-shell,
@@ -679,6 +711,24 @@ select:focus-visible {
 
 .tone-neutral {
   border-color: var(--line);
+}
+
+.feedback-state.tone-warning,
+.connection-badge.tone-warning {
+  border-color: rgba(240, 197, 110, 0.36);
+  background: rgba(240, 197, 110, 0.09);
+}
+
+.feedback-state.tone-danger,
+.connection-badge.tone-danger {
+  border-color: rgba(255, 115, 96, 0.38);
+  background: rgba(255, 115, 96, 0.1);
+}
+
+.feedback-state.tone-success,
+.connection-badge.tone-success {
+  border-color: rgba(182, 221, 127, 0.32);
+  background: rgba(182, 221, 127, 0.08);
 }
 
 .progress-card,

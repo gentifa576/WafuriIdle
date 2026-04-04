@@ -192,6 +192,7 @@ export function CombatScreen() {
             reviveSeconds={reviveSeconds}
             loading={loading}
             activeTeamId={activeTeamId}
+            socketStatus={socketStatus}
             onStartCombat={() => void actions.startCombat()}
             onStopCombat={() => void actions.stopCombat()}
             onRefreshState={() => void actions.refreshPlayer()}
