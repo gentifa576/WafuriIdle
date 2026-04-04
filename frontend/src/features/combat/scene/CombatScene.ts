@@ -1,16 +1,21 @@
-import { Application, Container, Graphics, Text, TextStyle } from 'pixi.js'
+import { Application, Assets, Container, Graphics, Sprite, Text, TextStyle, Texture } from 'pixi.js'
 import type { ClientCombat, ClientCombatMember } from '../../session/model/clientModels'
 import combatPresets from './combatPresets.json'
 
 interface CombatSceneRenderState {
   snapshot: ClientCombat | null
   memberLabels: Record<string, string>
+  memberImages: Record<string, string | null | undefined>
 }
 
 interface MemberNode {
   container: Container
-  ball: Graphics
+  fallback: Graphics
+  portrait: Sprite
   label: Text
+  characterKey: string | null
+  imageUrl: string | null
+  loadVersion: number
 }
 
 interface FloatingDamageText {
@@ -82,7 +87,7 @@ export class CombatScene {
   private app: Application | null = null
   private mounted = false
   private destroyed = false
-  private pendingState: CombatSceneRenderState = { snapshot: null, memberLabels: {} }
+  private pendingState: CombatSceneRenderState = { snapshot: null, memberLabels: {}, memberImages: {} }
   private stageRoot = new Container()
   private board = new Graphics()
   private rails = new Graphics()
@@ -104,6 +109,7 @@ export class CombatScene {
   private previousStatus: ClientCombat['status'] | null = null
   private activePathPreset: ActivePathPreset | null = null
   private pathSizeKey = ''
+  private failedMemberImages = new Set<string>()
   private enemyFlashMs = 0
   private ballPosition: Vec2 = { x: BASE_WIDTH * 0.42, y: BASE_HEIGHT * 0.66 }
   private leaderTrail: Vec2[] = []
@@ -156,10 +162,15 @@ export class CombatScene {
     this.applyState()
   }
 
-  render(snapshot: ClientCombat | null, memberLabels: Record<string, string> = {}) {
+  render(
+    snapshot: ClientCombat | null,
+    memberLabels: Record<string, string> = {},
+    memberImages: Record<string, string | null | undefined> = {},
+  ) {
     this.pendingState = {
       snapshot,
       memberLabels,
+      memberImages,
     }
 
     if (this.mounted) {
@@ -215,7 +226,9 @@ export class CombatScene {
     while (this.memberNodes.length < visibleMembers.length) {
       const index = this.memberNodes.length
       const container = new Container()
-      const ball = new Graphics()
+      const fallback = new Graphics()
+      const portrait = new Sprite(Texture.EMPTY)
+      portrait.anchor.set(0.5)
       const label = new Text({
         text: '',
         style: new TextStyle({
@@ -226,27 +239,29 @@ export class CombatScene {
         }),
       })
       label.anchor.set(0.5)
-      container.addChild(ball)
+      container.addChild(fallback)
+      container.addChild(portrait)
       container.addChild(label)
       this.stageRoot.addChild(container)
-      this.memberNodes.push({ container, ball, label })
-      this.drawMemberBall(index)
+      this.memberNodes.push({ container, fallback, portrait, label, characterKey: null, imageUrl: null, loadVersion: 0 })
+      this.drawMemberToken(index)
     }
 
     visibleMembers.forEach((member, index) => {
       const node = this.memberNodes[index]
       node.label.text = this.toMemberLabel(member.characterKey)
-      node.label.position.set(0, 0)
+      this.syncMemberImage(node, member.characterKey)
     })
   }
 
-  private drawMemberBall(index: number) {
+  private drawMemberToken(index: number) {
     const node = this.memberNodes[index]
     const radius = this.boardRadius()
-    node.ball.clear()
-    node.ball.circle(0, 0, radius).fill(BALL_COLORS[index] ?? 0xf4e9d8)
-    node.ball.circle(0, 0, radius - this.s(5)).fill(0xf8f0e3)
-    node.ball.circle(0, -radius + this.s(4), this.s(5)).fill(BALL_COLORS[index] ?? 0xf4e9d8)
+    node.fallback.clear()
+    node.fallback.circle(0, 0, radius).fill(BALL_COLORS[index] ?? 0xf4e9d8)
+    node.fallback.circle(0, 0, radius - this.s(5)).fill(0xf8f0e3)
+    node.fallback.circle(0, -radius + this.s(4), this.s(5)).fill(BALL_COLORS[index] ?? 0xf4e9d8)
+    node.label.position.set(0, 0)
   }
 
   private onTick = () => {
@@ -405,10 +420,57 @@ export class CombatScene {
 
       const trailIndex = index === 0 ? 0 : Math.min(index * TRAIL_SPACING, this.leaderTrail.length - 1)
       const position = index === 0 ? this.ballPosition : this.leaderTrail[trailIndex] ?? this.ballPosition
+      this.drawMemberToken(index)
       node.container.position.set(position.x, position.y)
       node.container.alpha = member.currentHp > 0 ? 1 : 0.4
       node.container.scale.set(index === 0 ? 1 : 0.94 - index * 0.06)
     })
+  }
+
+  private syncMemberImage(node: MemberNode, characterKey: string) {
+    const imageUrl = this.pendingState.memberImages[characterKey] ?? null
+    if (node.characterKey === characterKey && node.imageUrl === imageUrl) {
+      return
+    }
+
+    node.characterKey = characterKey
+    node.imageUrl = imageUrl
+    node.loadVersion += 1
+    node.portrait.texture = Texture.EMPTY
+
+    if (!imageUrl || this.failedMemberImages.has(imageUrl)) {
+      node.portrait.visible = false
+      node.fallback.visible = true
+      node.label.visible = true
+      return
+    }
+
+    const loadVersion = node.loadVersion
+    void Assets.load<Texture>(imageUrl)
+      .then((texture) => {
+        if (this.destroyed || node.loadVersion !== loadVersion || node.imageUrl !== imageUrl) {
+          return
+        }
+        node.portrait.texture = texture
+        this.sizePortrait(node, texture)
+        node.portrait.visible = true
+        node.fallback.visible = false
+        node.label.visible = false
+      })
+      .catch(() => {
+        if (node.loadVersion !== loadVersion || node.imageUrl !== imageUrl) {
+          return
+        }
+        this.failedMemberImages.add(imageUrl)
+        node.portrait.visible = false
+        node.fallback.visible = true
+        node.label.visible = true
+      })
+  }
+
+  private sizePortrait(node: MemberNode, texture: Texture) {
+    node.portrait.width = texture.width * 2
+    node.portrait.height = texture.height * 2
   }
 
   private spawnDamageTexts(members: ClientCombatMember[]) {

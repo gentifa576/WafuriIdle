@@ -191,24 +191,34 @@ export function mapInventorySnapshots(items: InventoryItemSnapshot[]): ClientInv
   }))
 }
 
-export function mapRestInventory(items: InventoryItem[]): ClientInventoryItem[] {
-  return items.map((item) => ({
-    id: item.id,
-    itemName: item.item.name,
-    itemDisplayName: item.item.displayName,
-    itemType: item.item.type,
-    itemBaseStat: mapStat(item.item.baseStat),
-    itemSubStatPool: [...item.item.subStatPool],
-    subStats: item.subStats.map(mapStat),
-    rarity: item.rarity,
-    upgrade: item.upgrade,
-    equippedTeamId: item.equippedTeamId,
-    equippedPosition: item.equippedPosition,
-    assignmentLabel:
-      item.equippedTeamId && item.equippedPosition != null
-        ? `Equipped on ${item.equippedTeamId.slice(0, 8)} · Slot ${item.equippedPosition}`
-        : 'In backpack',
-  }))
+export function mapRestInventory(items: Array<InventoryItem | InventoryItemSnapshot>): ClientInventoryItem[] {
+  return items.map((item) => {
+    const itemDefinition = 'item' in item ? item.item : {
+      name: item.itemName,
+      displayName: item.itemDisplayName,
+      type: item.itemType,
+      baseStat: item.itemBaseStat,
+      subStatPool: item.itemSubStatPool,
+    }
+
+    return {
+      id: item.id,
+      itemName: itemDefinition.name,
+      itemDisplayName: itemDefinition.displayName,
+      itemType: itemDefinition.type,
+      itemBaseStat: mapStat(itemDefinition.baseStat),
+      itemSubStatPool: [...itemDefinition.subStatPool],
+      subStats: item.subStats.map(mapStat),
+      rarity: item.rarity,
+      upgrade: item.upgrade,
+      equippedTeamId: item.equippedTeamId,
+      equippedPosition: item.equippedPosition,
+      assignmentLabel:
+        item.equippedTeamId && item.equippedPosition != null
+          ? `Equipped on ${item.equippedTeamId.slice(0, 8)} · Slot ${item.equippedPosition}`
+          : 'In backpack',
+    }
+  })
 }
 
 export function mapCombat(snapshot: CombatSnapshot | null): ClientCombat | null {

@@ -16,6 +16,7 @@ interface CombatWorkspaceProps {
   }
   combat: ClientCombat | null
   memberLabels: Record<string, string>
+  memberImages: Record<string, string | null | undefined>
   topZone: ClientZoneProgress | null
   activeTeam: ClientTeam | null
   combatMembersByKey: Map<string, ClientCombatMember>
@@ -33,6 +34,7 @@ export function CombatWorkspace({
   hud,
   combat,
   memberLabels,
+  memberImages,
   topZone,
   activeTeam,
   combatMembersByKey,
@@ -89,7 +91,7 @@ export function CombatWorkspace({
                 tone="neutral"
               />
             ) : (
-              <CombatViewport snapshot={combat} memberLabels={memberLabels} />
+              <CombatViewport snapshot={combat} memberLabels={memberLabels} memberImages={memberImages} />
             )}
           </div>
         </section>

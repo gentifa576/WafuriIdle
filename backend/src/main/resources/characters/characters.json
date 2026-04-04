@@ -62,7 +62,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/vagner/front.png"
   },
   {
     "id": "marina",
@@ -127,7 +128,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/marina/front.png"
   },
   {
     "id": "clarisse",
@@ -208,7 +210,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/clarisse/front.png"
   },
   {
     "id": "marianne-holiday",
@@ -290,7 +293,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/marianne-holiday/front.png"
   },
   {
     "id": "kikuno",
@@ -367,7 +371,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/kikuno/front.png"
   },
   {
     "id": "noenne-new-year",
@@ -437,7 +442,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/noenne-new-year/front.png"
   },
   {
     "id": "rolf",
@@ -514,7 +520,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/rolf/front.png"
   },
   {
     "id": "mia-summer",
@@ -582,7 +589,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/mia-summer/front.png"
   },
   {
     "id": "bianca-holiday",
@@ -662,7 +670,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/bianca-holiday/front.png"
   },
   {
     "id": "hanabi-flipperversary",
@@ -740,7 +749,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/hanabi-flipperversary/front.png"
   },
   {
     "id": "toria",
@@ -816,7 +826,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/toria/front.png"
   },
   {
     "id": "liao",
@@ -884,7 +895,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/liao/front.png"
   },
   {
     "id": "suizen-white-day",
@@ -954,7 +966,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/suizen-white-day/front.png"
   },
   {
     "id": "quade",
@@ -1030,7 +1043,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/quade/front.png"
   },
   {
     "id": "zeta",
@@ -1106,7 +1120,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/zeta/front.png"
   },
   {
     "id": "reticia",
@@ -1182,7 +1197,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/reticia/front.png"
   },
   {
     "id": "eclair-summer",
@@ -1260,7 +1276,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/eclair-summer/front.png"
   },
   {
     "id": "ryunon",
@@ -1340,7 +1357,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/ryunon/front.png"
   },
   {
     "id": "star-vanguard-marina-flipperversary",
@@ -1418,7 +1436,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/star-vanguard-marina-flipperversary/front.png"
   },
   {
     "id": "misogi",
@@ -1498,7 +1517,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/misogi/front.png"
   },
   {
     "id": "reticia-valentine-s",
@@ -1576,7 +1596,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/reticia-valentine-s/front.png"
   },
   {
     "id": "weihu",
@@ -1652,7 +1673,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/weihu/front.png"
   },
   {
     "id": "toria-flipperversary",
@@ -1734,7 +1756,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/toria-flipperversary/front.png"
   },
   {
     "id": "parfait-summer",
@@ -1770,7 +1793,7 @@
     ],
     "skill": {
       "key": "poisson-ecaille",
-      "name": "Poisson Écaille",
+      "name": "Poisson \u00c9caille",
       "cooldownMillis": 5000,
       "effects": [
         {
@@ -1803,7 +1826,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/parfait-summer/front.png"
   },
   {
     "id": "magnos",
@@ -1881,7 +1905,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/magnos/front.png"
   },
   {
     "id": "gold-ship",
@@ -1959,7 +1984,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/gold-ship/front.png"
   },
   {
     "id": "dedalia",
@@ -2037,7 +2063,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/dedalia/front.png"
   },
   {
     "id": "mia-holiday",
@@ -2116,7 +2143,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/mia-holiday/front.png"
   },
   {
     "id": "stinelle-star-fest",
@@ -2196,7 +2224,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/stinelle-star-fest/front.png"
   },
   {
     "id": "lilith-half-flipperversary",
@@ -2275,7 +2304,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/lilith-half-flipperversary/front.png"
   },
   {
     "id": "sonia",
@@ -2355,7 +2385,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/sonia/front.png"
   },
   {
     "id": "suizen",
@@ -2433,7 +2464,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/suizen/front.png"
   },
   {
     "id": "ellya-new-year-s",
@@ -2501,7 +2533,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/ellya-new-year-s/front.png"
   },
   {
     "id": "cipher",
@@ -2582,7 +2615,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/cipher/front.png"
   },
   {
     "id": "selene",
@@ -2658,7 +2692,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/selene/front.png"
   },
   {
     "id": "remnith",
@@ -2734,7 +2769,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/remnith/front.png"
   },
   {
     "id": "rakisha",
@@ -2802,7 +2838,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/rakisha/front.png"
   },
   {
     "id": "razelt-summer",
@@ -2871,7 +2908,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/razelt-summer/front.png"
   },
   {
     "id": "sakura-minamoto-zombie-land-saga-collab",
@@ -2954,7 +2992,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/sakura-minamoto-zombie-land-saga-collab/front.png"
   },
   {
     "id": "reylas",
@@ -3030,7 +3069,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/reylas/front.png"
   },
   {
     "id": "shuilong",
@@ -3095,7 +3135,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/shuilong/front.png"
   },
   {
     "id": "haridal",
@@ -3171,7 +3212,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/haridal/front.png"
   },
   {
     "id": "emilia-re-zero-collab",
@@ -3254,7 +3296,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/emilia-re-zero-collab/front.png"
   },
   {
     "id": "rem-re-zero-collab",
@@ -3333,7 +3376,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/rem-re-zero-collab/front.png"
   },
   {
     "id": "amelia-half-flipperversary",
@@ -3412,7 +3456,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/amelia-half-flipperversary/front.png"
   },
   {
     "id": "mamnalia",
@@ -3479,7 +3524,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/mamnalia/front.png"
   },
   {
     "id": "dogged-fighter-shuilong-proud",
@@ -3557,7 +3603,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/dogged-fighter-shuilong-proud/front.png"
   },
   {
     "id": "barrier-defender-yuki-mishima",
@@ -3637,7 +3684,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/barrier-defender-yuki-mishima/front.png"
   },
   {
     "id": "fraxis",
@@ -3717,7 +3765,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/fraxis/front.png"
   },
   {
     "id": "cipher-flipperversary",
@@ -3797,7 +3846,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/cipher-flipperversary/front.png"
   },
   {
     "id": "reylas-holiday",
@@ -3875,7 +3925,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/reylas-holiday/front.png"
   },
   {
     "id": "torietta-new-year",
@@ -3958,7 +4009,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/torietta-new-year/front.png"
   },
   {
     "id": "kyouka",
@@ -4035,7 +4087,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/kyouka/front.png"
   },
   {
     "id": "anbach",
@@ -4115,7 +4168,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/anbach/front.png"
   },
   {
     "id": "themis",
@@ -4193,7 +4247,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/themis/front.png"
   },
   {
     "id": "dia-flipperversary",
@@ -4273,7 +4328,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/dia-flipperversary/front.png"
   },
   {
     "id": "luca",
@@ -4355,7 +4411,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/luca/front.png"
   },
   {
     "id": "zelimir",
@@ -4431,7 +4488,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/zelimir/front.png"
   },
   {
     "id": "ciel",
@@ -4508,7 +4566,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/ciel/front.png"
   },
   {
     "id": "yuki-mishima-new-year",
@@ -4590,7 +4649,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/yuki-mishima-new-year/front.png"
   },
   {
     "id": "sotieth-star-fest",
@@ -4669,11 +4729,13 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/sotieth-star-fest/front.png"
   },
   {
     "id": "inaho",
     "name": "Inaho",
+    "image": "/assets/characters/inaho/front.png",
     "strength": [
       9.4,
       1.6
@@ -4813,7 +4875,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/cagliostro/front.png"
   },
   {
     "id": "soushiro-holiday",
@@ -4891,7 +4954,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/soushiro-holiday/front.png"
   },
   {
     "id": "metis",
@@ -4967,7 +5031,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/metis/front.png"
   },
   {
     "id": "barrek",
@@ -5043,7 +5108,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/barrek/front.png"
   },
   {
     "id": "sera",
@@ -5109,7 +5175,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/sera/front.png"
   },
   {
     "id": "botan",
@@ -5174,7 +5241,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/botan/front.png"
   },
   {
     "id": "illumine-summer",
@@ -5257,7 +5325,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/illumine-summer/front.png"
   },
   {
     "id": "belsidia-summer",
@@ -5336,7 +5405,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/belsidia-summer/front.png"
   },
   {
     "id": "regis-flipperversary",
@@ -5415,7 +5485,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/regis-flipperversary/front.png"
   },
   {
     "id": "beaucy",
@@ -5484,7 +5555,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/beaucy/front.png"
   },
   {
     "id": "rhode",
@@ -5565,7 +5637,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/rhode/front.png"
   },
   {
     "id": "tink",
@@ -5642,7 +5715,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/tink/front.png"
   },
   {
     "id": "zantetsu",
@@ -5719,7 +5793,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/zantetsu/front.png"
   },
   {
     "id": "marcus",
@@ -5784,7 +5859,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/marcus/front.png"
   },
   {
     "id": "sera-summer",
@@ -5852,7 +5928,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/sera-summer/front.png"
   },
   {
     "id": "memram",
@@ -5933,7 +6010,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/memram/front.png"
   },
   {
     "id": "strina",
@@ -6014,7 +6092,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/strina/front.png"
   },
   {
     "id": "moonlit-guardian-helga-proud",
@@ -6097,7 +6176,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/moonlit-guardian-helga-proud/front.png"
   },
   {
     "id": "tohru-sengaku",
@@ -6173,7 +6253,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/tohru-sengaku/front.png"
   },
   {
     "id": "nimbus-flipperversary",
@@ -6252,7 +6333,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/nimbus-flipperversary/front.png"
   },
   {
     "id": "techtus",
@@ -6329,7 +6411,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/techtus/front.png"
   },
   {
     "id": "mayuzuki",
@@ -6409,7 +6492,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/mayuzuki/front.png"
   },
   {
     "id": "bulleta-summer",
@@ -6488,7 +6572,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/bulleta-summer/front.png"
   },
   {
     "id": "laputina",
@@ -6556,7 +6641,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/laputina/front.png"
   },
   {
     "id": "lumira",
@@ -6624,7 +6710,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/lumira/front.png"
   },
   {
     "id": "keira-halloween",
@@ -6702,7 +6789,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/keira-halloween/front.png"
   },
   {
     "id": "tink-new-year",
@@ -6781,7 +6869,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/tink-new-year/front.png"
   },
   {
     "id": "king-johnson",
@@ -6859,7 +6948,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/king-johnson/front.png"
   },
   {
     "id": "celtie",
@@ -6924,7 +7014,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/celtie/front.png"
   },
   {
     "id": "phiria",
@@ -6992,7 +7083,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/phiria/front.png"
   },
   {
     "id": "murakumo",
@@ -7073,7 +7165,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/murakumo/front.png"
   },
   {
     "id": "leon",
@@ -7149,7 +7242,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/leon/front.png"
   },
   {
     "id": "shywe",
@@ -7227,7 +7321,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/shywe/front.png"
   },
   {
     "id": "miguel",
@@ -7304,7 +7399,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/miguel/front.png"
   },
   {
     "id": "kokkoro",
@@ -7372,7 +7468,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/kokkoro/front.png"
   },
   {
     "id": "schult",
@@ -7448,7 +7545,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/schult/front.png"
   },
   {
     "id": "saki-nikaido-zombie-land-saga-collab",
@@ -7527,7 +7625,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/saki-nikaido-zombie-land-saga-collab/front.png"
   },
   {
     "id": "estariel",
@@ -7604,7 +7703,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/estariel/front.png"
   },
   {
     "id": "celtie-flipperversary",
@@ -7682,7 +7782,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/celtie-flipperversary/front.png"
   },
   {
     "id": "suzuka-new-year",
@@ -7760,7 +7861,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/suzuka-new-year/front.png"
   },
   {
     "id": "fluffy",
@@ -7837,7 +7939,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/fluffy/front.png"
   },
   {
     "id": "sonia-desert",
@@ -7915,7 +8018,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/sonia-desert/front.png"
   },
   {
     "id": "nevia",
@@ -7993,7 +8097,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/nevia/front.png"
   },
   {
     "id": "estariel-half-flipperversary",
@@ -8073,7 +8178,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/estariel-half-flipperversary/front.png"
   },
   {
     "id": "shywe-summer",
@@ -8156,7 +8262,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/shywe-summer/front.png"
   },
   {
     "id": "gouran",
@@ -8236,7 +8343,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/gouran/front.png"
   },
   {
     "id": "leon-summer-yukata",
@@ -8314,7 +8422,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/leon-summer-yukata/front.png"
   },
   {
     "id": "fluffy-holiday",
@@ -8393,7 +8502,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/fluffy-holiday/front.png"
   },
   {
     "id": "mimi",
@@ -8470,7 +8580,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/mimi/front.png"
   },
   {
     "id": "marchella",
@@ -8548,7 +8659,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/marchella/front.png"
   },
   {
     "id": "schult-white-day",
@@ -8626,7 +8738,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/schult-white-day/front.png"
   },
   {
     "id": "elmara",
@@ -8706,7 +8819,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/elmara/front.png"
   },
   {
     "id": "inori-shota-summer",
@@ -8784,7 +8898,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/inori-shota-summer/front.png"
   },
   {
     "id": "silence-suzuka",
@@ -8852,7 +8967,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/silence-suzuka/front.png"
   },
   {
     "id": "manoka",
@@ -8930,7 +9046,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/manoka/front.png"
   },
   {
     "id": "zephyr",
@@ -9008,7 +9125,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/zephyr/front.png"
   },
   {
     "id": "silkhare-new-year",
@@ -9078,7 +9196,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/silkhare-new-year/front.png"
   },
   {
     "id": "phiria-star-fest",
@@ -9157,7 +9276,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/phiria-star-fest/front.png"
   },
   {
     "id": "nephtim",
@@ -9222,7 +9342,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/nephtim/front.png"
   },
   {
     "id": "razelt",
@@ -9302,7 +9423,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/razelt/front.png"
   },
   {
     "id": "eclair",
@@ -9378,7 +9500,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/eclair/front.png"
   },
   {
     "id": "inaho-holiday",
@@ -9447,7 +9570,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/inaho-holiday/front.png"
   },
   {
     "id": "teurgis",
@@ -9524,7 +9648,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/teurgis/front.png"
   },
   {
     "id": "bulleta",
@@ -9605,7 +9730,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/bulleta/front.png"
   },
   {
     "id": "libram",
@@ -9681,7 +9807,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/libram/front.png"
   },
   {
     "id": "nephtim-half-flipperversary",
@@ -9759,7 +9886,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/nephtim-half-flipperversary/front.png"
   },
   {
     "id": "pecorine",
@@ -9835,7 +9963,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/pecorine/front.png"
   },
   {
     "id": "lyra",
@@ -9915,7 +10044,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/lyra/front.png"
   },
   {
     "id": "orvelle",
@@ -9991,7 +10121,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/orvelle/front.png"
   },
   {
     "id": "firamelia",
@@ -10058,7 +10189,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/firamelia/front.png"
   },
   {
     "id": "lily-hoshikawa-zombie-land-saga-collab",
@@ -10141,7 +10273,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/lily-hoshikawa-zombie-land-saga-collab/front.png"
   },
   {
     "id": "phiria-flipperversary",
@@ -10221,7 +10354,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/phiria-flipperversary/front.png"
   },
   {
     "id": "ellya-valentine-s",
@@ -10297,7 +10431,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/ellya-valentine-s/front.png"
   },
   {
     "id": "theriol",
@@ -10373,7 +10508,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/theriol/front.png"
   },
   {
     "id": "rengetsu",
@@ -10449,7 +10585,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/rengetsu/front.png"
   },
   {
     "id": "lilith-summer",
@@ -10528,7 +10665,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/lilith-summer/front.png"
   },
   {
     "id": "inaho-summer",
@@ -10610,7 +10748,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/inaho-summer/front.png"
   },
   {
     "id": "nephtim-summer-yukata",
@@ -10679,7 +10818,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/nephtim-summer-yukata/front.png"
   },
   {
     "id": "zekhel",
@@ -10755,7 +10895,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/zekhel/front.png"
   },
   {
     "id": "magical-music-lover-lyra-halloween",
@@ -10837,7 +10978,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/magical-music-lover-lyra-halloween/front.png"
   },
   {
     "id": "orvelle-new-year",
@@ -10915,7 +11057,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/orvelle-new-year/front.png"
   },
   {
     "id": "wayward-heart-nate-valentine-s",
@@ -10994,7 +11137,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/wayward-heart-nate-valentine-s/front.png"
   },
   {
     "id": "stinelle",
@@ -11060,7 +11204,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/stinelle/front.png"
   },
   {
     "id": "quinvere",
@@ -11137,7 +11282,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/quinvere/front.png"
   },
   {
     "id": "zantetsu-summer",
@@ -11205,7 +11351,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/zantetsu-summer/front.png"
   },
   {
     "id": "rinoa",
@@ -11281,7 +11428,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/rinoa/front.png"
   },
   {
     "id": "special-week",
@@ -11349,7 +11497,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/special-week/front.png"
   },
   {
     "id": "yuwel-flipperversary",
@@ -11427,7 +11576,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/yuwel-flipperversary/front.png"
   },
   {
     "id": "kikuno-holiday",
@@ -11497,7 +11647,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/kikuno-holiday/front.png"
   },
   {
     "id": "light-star-fest",
@@ -11576,7 +11727,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/light-star-fest/front.png"
   },
   {
     "id": "stella-star-fest",
@@ -11646,7 +11798,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/stella-star-fest/front.png"
   },
   {
     "id": "alk-half-flipperversary",
@@ -11714,7 +11867,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/alk-half-flipperversary/front.png"
   },
   {
     "id": "nao-nagihara-starlight-ceremony",
@@ -11793,7 +11947,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/nao-nagihara-starlight-ceremony/front.png"
   },
   {
     "id": "belsidia",
@@ -11859,7 +12014,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/belsidia/front.png"
   },
   {
     "id": "vyron",
@@ -11935,7 +12091,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/vyron/front.png"
   },
   {
     "id": "mormia",
@@ -12012,7 +12169,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/mormia/front.png"
   },
   {
     "id": "carla",
@@ -12089,7 +12247,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/carla/front.png"
   },
   {
     "id": "olivia",
@@ -12166,7 +12325,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/olivia/front.png"
   },
   {
     "id": "karyl",
@@ -12232,7 +12392,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/karyl/front.png"
   },
   {
     "id": "alice-summer",
@@ -12311,7 +12472,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/alice-summer/front.png"
   },
   {
     "id": "junko-konno-zombie-land-saga-collab",
@@ -12394,7 +12556,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/junko-konno-zombie-land-saga-collab/front.png"
   },
   {
     "id": "dia-halloween",
@@ -12474,7 +12637,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/dia-halloween/front.png"
   },
   {
     "id": "denah",
@@ -12555,7 +12719,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/denah/front.png"
   },
   {
     "id": "adjudicus",
@@ -12631,7 +12796,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/adjudicus/front.png"
   },
   {
     "id": "arum-holiday",
@@ -12709,7 +12875,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/arum-holiday/front.png"
   },
   {
     "id": "yakumo",
@@ -12785,7 +12952,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/yakumo/front.png"
   },
   {
     "id": "couette",
@@ -12859,7 +13027,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/couette/front.png"
   },
   {
     "id": "malviola",
@@ -12927,7 +13096,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/malviola/front.png"
   },
   {
     "id": "denah-desert",
@@ -13003,7 +13173,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/denah-desert/front.png"
   },
   {
     "id": "beatrix",
@@ -13079,7 +13250,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/beatrix/front.png"
   },
   {
     "id": "selgir-half-flipperversary",
@@ -13146,7 +13318,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/selgir-half-flipperversary/front.png"
   },
   {
     "id": "primula",
@@ -13227,11 +13400,12 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/primula/front.png"
   },
   {
     "id": "hw-night-girl-love-halloween",
-    "name": "[HW ★ Night Girl] Love (Halloween)",
+    "name": "[HW \u2605 Night Girl] Love (Halloween)",
     "strength": [
       17.3,
       2.9
@@ -13306,7 +13480,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/hw-night-girl-love-halloween/front.png"
   },
   {
     "id": "gravity-manipulator-inori-shota",
@@ -13382,7 +13557,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/gravity-manipulator-inori-shota/front.png"
   },
   {
     "id": "the-littlest-diviner-couette-flipperversary",
@@ -13458,7 +13634,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/the-littlest-diviner-couette-flipperversary/front.png"
   },
   {
     "id": "belsidia-new-year",
@@ -13537,7 +13714,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/belsidia-new-year/front.png"
   },
   {
     "id": "murakumo-white-day",
@@ -13620,7 +13798,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/murakumo-white-day/front.png"
   },
   {
     "id": "hildegarde",
@@ -13700,7 +13879,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/hildegarde/front.png"
   },
   {
     "id": "witch-of-the-mirror-ruelle",
@@ -13768,7 +13948,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/witch-of-the-mirror-ruelle/front.png"
   },
   {
     "id": "liam",
@@ -13835,7 +14016,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/liam/front.png"
   },
   {
     "id": "primula-summer",
@@ -13914,7 +14096,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/primula-summer/front.png"
   },
   {
     "id": "yukariko-kuguri",
@@ -13991,7 +14174,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/yukariko-kuguri/front.png"
   },
   {
     "id": "celtie-halloween",
@@ -14069,7 +14253,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/celtie-halloween/front.png"
   },
   {
     "id": "elmor",
@@ -14137,7 +14322,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/elmor/front.png"
   },
   {
     "id": "vyron-flipperversary",
@@ -14215,7 +14401,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/vyron-flipperversary/front.png"
   },
   {
     "id": "nihilyana",
@@ -14282,7 +14469,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/nihilyana/front.png"
   },
   {
     "id": "nephtim-half-flipperversary-2",
@@ -14357,7 +14545,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/nephtim-half-flipperversary-2/front.png"
   },
   {
     "id": "alk",
@@ -14433,7 +14622,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/alk/front.png"
   },
   {
     "id": "azel",
@@ -14509,7 +14699,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/azel/front.png"
   },
   {
     "id": "bianca",
@@ -14586,7 +14777,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/bianca/front.png"
   },
   {
     "id": "hanabi",
@@ -14651,7 +14843,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/hanabi/front.png"
   },
   {
     "id": "asukirimaru",
@@ -14717,7 +14910,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/asukirimaru/front.png"
   },
   {
     "id": "clyde",
@@ -14793,7 +14987,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/clyde/front.png"
   },
   {
     "id": "kannon",
@@ -14858,7 +15053,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/kannon/front.png"
   },
   {
     "id": "luluca-new-year",
@@ -14940,7 +15136,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/luluca-new-year/front.png"
   },
   {
     "id": "levy",
@@ -15016,7 +15213,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/levy/front.png"
   },
   {
     "id": "kyrie",
@@ -15081,7 +15279,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/kyrie/front.png"
   },
   {
     "id": "hayz",
@@ -15157,7 +15356,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/hayz/front.png"
   },
   {
     "id": "melmyna",
@@ -15233,7 +15433,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/melmyna/front.png"
   },
   {
     "id": "nasir",
@@ -15298,7 +15499,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/nasir/front.png"
   },
   {
     "id": "kuramaru",
@@ -15374,7 +15576,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/kuramaru/front.png"
   },
   {
     "id": "yugiri-zombie-land-saga-collab",
@@ -15457,7 +15660,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/yugiri-zombie-land-saga-collab/front.png"
   },
   {
     "id": "nicola",
@@ -15537,7 +15741,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/nicola/front.png"
   },
   {
     "id": "trine-holiday",
@@ -15615,7 +15820,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/trine-holiday/front.png"
   },
   {
     "id": "alk-flipperversary",
@@ -15683,7 +15889,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/alk-flipperversary/front.png"
   },
   {
     "id": "maihime",
@@ -15763,7 +15970,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/maihime/front.png"
   },
   {
     "id": "azel-summer",
@@ -15830,7 +16038,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/azel-summer/front.png"
   },
   {
     "id": "rinne-hikawa",
@@ -15910,7 +16119,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/rinne-hikawa/front.png"
   },
   {
     "id": "nao-nagihara",
@@ -15977,7 +16187,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/nao-nagihara/front.png"
   },
   {
     "id": "pythica",
@@ -16045,7 +16256,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/pythica/front.png"
   },
   {
     "id": "levy-new-year",
@@ -16123,7 +16335,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/levy-new-year/front.png"
   },
   {
     "id": "yuwel",
@@ -16199,7 +16412,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/yuwel/front.png"
   },
   {
     "id": "liesel",
@@ -16266,7 +16480,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/liesel/front.png"
   },
   {
     "id": "amelia",
@@ -16336,7 +16551,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/amelia/front.png"
   },
   {
     "id": "alice",
@@ -16413,7 +16629,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/alice/front.png"
   },
   {
     "id": "sharon",
@@ -16489,7 +16706,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/sharon/front.png"
   },
   {
     "id": "rain",
@@ -16569,7 +16787,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/rain/front.png"
   },
   {
     "id": "saar",
@@ -16650,7 +16869,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/saar/front.png"
   },
   {
     "id": "mordiaga",
@@ -16716,7 +16936,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/mordiaga/front.png"
   },
   {
     "id": "mizuchi",
@@ -16797,7 +17018,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/mizuchi/front.png"
   },
   {
     "id": "sohvi",
@@ -16873,7 +17095,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/sohvi/front.png"
   },
   {
     "id": "gerard-summer",
@@ -16940,7 +17163,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/gerard-summer/front.png"
   },
   {
     "id": "marina-summer",
@@ -17017,7 +17241,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/marina-summer/front.png"
   },
   {
     "id": "vivi",
@@ -17093,7 +17318,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/vivi/front.png"
   },
   {
     "id": "trista-new-year",
@@ -17171,7 +17397,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/trista-new-year/front.png"
   },
   {
     "id": "sotieth",
@@ -17252,7 +17479,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/sotieth/front.png"
   },
   {
     "id": "nate-a-hero-s-beginning",
@@ -17331,11 +17559,12 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/nate-a-hero-s-beginning/front.png"
   },
   {
     "id": "facon",
-    "name": "Façon",
+    "name": "Fa\u00e7on",
     "strength": [
       8.2,
       1.3
@@ -17412,7 +17641,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/facon/front.png"
   },
   {
     "id": "evelyn",
@@ -17492,7 +17722,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/evelyn/front.png"
   },
   {
     "id": "shirano-summer",
@@ -17574,7 +17805,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/shirano-summer/front.png"
   },
   {
     "id": "rain-halloween",
@@ -17656,7 +17888,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/rain-halloween/front.png"
   },
   {
     "id": "seiji-takamori",
@@ -17723,7 +17956,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/seiji-takamori/front.png"
   },
   {
     "id": "marine-bunny-princess-faroa",
@@ -17800,7 +18034,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/marine-bunny-princess-faroa/front.png"
   },
   {
     "id": "student-council-pres-luciada",
@@ -17877,7 +18112,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/student-council-pres-luciada/front.png"
   },
   {
     "id": "pythica-summer",
@@ -17947,7 +18183,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/pythica-summer/front.png"
   },
   {
     "id": "pharah",
@@ -18027,7 +18264,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/pharah/front.png"
   },
   {
     "id": "rams",
@@ -18103,7 +18341,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/rams/front.png"
   },
   {
     "id": "renoir",
@@ -18184,7 +18423,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/renoir/front.png"
   },
   {
     "id": "regis",
@@ -18250,7 +18490,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/regis/front.png"
   },
   {
     "id": "eleanor",
@@ -18327,7 +18568,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/eleanor/front.png"
   },
   {
     "id": "jay",
@@ -18395,7 +18637,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/jay/front.png"
   },
   {
     "id": "mino",
@@ -18472,7 +18715,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/mino/front.png"
   },
   {
     "id": "aureo-holiday",
@@ -18544,7 +18788,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/aureo-holiday/front.png"
   },
   {
     "id": "adonis",
@@ -18620,7 +18865,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/adonis/front.png"
   },
   {
     "id": "rudy",
@@ -18697,7 +18943,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/rudy/front.png"
   },
   {
     "id": "prika-the-poppet-princess",
@@ -18775,7 +19022,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/prika-the-poppet-princess/front.png"
   },
   {
     "id": "naska-summer",
@@ -18853,7 +19101,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/naska-summer/front.png"
   },
   {
     "id": "roselia",
@@ -18929,7 +19178,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/roselia/front.png"
   },
   {
     "id": "ai-mizuno-zombie-land-saga-collab",
@@ -19012,7 +19262,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/ai-mizuno-zombie-land-saga-collab/front.png"
   },
   {
     "id": "renoir-halloween",
@@ -19095,7 +19346,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/renoir-halloween/front.png"
   },
   {
     "id": "adonis-holiday",
@@ -19173,7 +19425,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/adonis-holiday/front.png"
   },
   {
     "id": "tor-leleni",
@@ -19240,7 +19493,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/tor-leleni/front.png"
   },
   {
     "id": "edita",
@@ -19316,7 +19570,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/edita/front.png"
   },
   {
     "id": "telluna",
@@ -19392,7 +19647,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/telluna/front.png"
   },
   {
     "id": "giselle",
@@ -19426,7 +19682,7 @@
     ],
     "skill": {
       "key": "etincelle-mysterieuse",
-      "name": "Étincelle Mystérieuse",
+      "name": "\u00c9tincelle Myst\u00e9rieuse",
       "cooldownMillis": 5300,
       "effects": [
         {
@@ -19472,7 +19728,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/giselle/front.png"
   },
   {
     "id": "fuku",
@@ -19549,7 +19806,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/fuku/front.png"
   },
   {
     "id": "teo-crown-of-the-beast-king",
@@ -19620,7 +19878,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/teo-crown-of-the-beast-king/front.png"
   },
   {
     "id": "claw-new-year",
@@ -19703,7 +19962,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/claw-new-year/front.png"
   },
   {
     "id": "elegia",
@@ -19770,7 +20030,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/elegia/front.png"
   },
   {
     "id": "karina",
@@ -19851,7 +20112,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/karina/front.png"
   },
   {
     "id": "ornesto",
@@ -19920,7 +20182,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/ornesto/front.png"
   },
   {
     "id": "echo",
@@ -19998,7 +20261,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/echo/front.png"
   },
   {
     "id": "eloise",
@@ -20079,7 +20343,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/eloise/front.png"
   },
   {
     "id": "nimbus",
@@ -20156,7 +20421,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/nimbus/front.png"
   },
   {
     "id": "mia",
@@ -20222,7 +20488,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/mia/front.png"
   },
   {
     "id": "aurore",
@@ -20303,7 +20570,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/aurore/front.png"
   },
   {
     "id": "soushiro",
@@ -20368,7 +20636,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/soushiro/front.png"
   },
   {
     "id": "melsele",
@@ -20445,7 +20714,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/melsele/front.png"
   },
   {
     "id": "helga",
@@ -20526,7 +20796,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/helga/front.png"
   },
   {
     "id": "arisa",
@@ -20594,7 +20865,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/arisa/front.png"
   },
   {
     "id": "rebecca-new-year",
@@ -20674,7 +20946,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/rebecca-new-year/front.png"
   },
   {
     "id": "lou",
@@ -20755,7 +21028,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/lou/front.png"
   },
   {
     "id": "suzuka",
@@ -20824,7 +21098,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/suzuka/front.png"
   },
   {
     "id": "kohane",
@@ -20889,7 +21164,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/kohane/front.png"
   },
   {
     "id": "kugui-the-yokai-encyclopedia-the-art-of-change",
@@ -20957,7 +21233,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/kugui-the-yokai-encyclopedia-the-art-of-change/front.png"
   },
   {
     "id": "hao",
@@ -21031,7 +21308,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/hao/front.png"
   },
   {
     "id": "nimbus-holiday",
@@ -21109,7 +21387,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/nimbus-holiday/front.png"
   },
   {
     "id": "ricardo",
@@ -21185,7 +21464,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/ricardo/front.png"
   },
   {
     "id": "middy",
@@ -21262,7 +21542,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/middy/front.png"
   },
   {
     "id": "ram-re-zero-collab",
@@ -21345,7 +21626,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/ram-re-zero-collab/front.png"
   },
   {
     "id": "piamo",
@@ -21426,7 +21708,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/piamo/front.png"
   },
   {
     "id": "lemarque",
@@ -21507,7 +21790,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/lemarque/front.png"
   },
   {
     "id": "training-fanatic-makani",
@@ -21580,7 +21864,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/training-fanatic-makani/front.png"
   },
   {
     "id": "melmyna-halloween",
@@ -21658,7 +21943,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/melmyna-halloween/front.png"
   },
   {
     "id": "mary-confessions-of-a-coward",
@@ -21728,7 +22014,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/mary-confessions-of-a-coward/front.png"
   },
   {
     "id": "ryouki",
@@ -21804,7 +22091,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/ryouki/front.png"
   },
   {
     "id": "fuulan",
@@ -21880,7 +22168,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/fuulan/front.png"
   },
   {
     "id": "dia",
@@ -21915,7 +22204,7 @@
     ],
     "skill": {
       "key": "flipper-heroes",
-      "name": "♪ \"Flipper Heroes\"",
+      "name": "\u266a \"Flipper Heroes\"",
       "cooldownMillis": 4900,
       "effects": [
         {
@@ -21930,7 +22219,7 @@
     },
     "passive": {
       "key": "lullaby-for-salvation",
-      "name": "♪ \"Lullaby for Salvation\"",
+      "name": "\u266a \"Lullaby for Salvation\"",
       "leaderOnly": true,
       "trigger": "AURA",
       "condition": {
@@ -21948,7 +22237,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/dia/front.png"
   },
   {
     "id": "gerard",
@@ -22028,7 +22318,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/gerard/front.png"
   },
   {
     "id": "ellya",
@@ -22102,7 +22393,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/ellya/front.png"
   },
   {
     "id": "finn",
@@ -22182,7 +22474,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/finn/front.png"
   },
   {
     "id": "keira",
@@ -22258,7 +22551,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/keira/front.png"
   },
   {
     "id": "parfait-valentine-s-festival-event",
@@ -22327,7 +22621,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/parfait-valentine-s-festival-event/front.png"
   },
   {
     "id": "illumine",
@@ -22395,7 +22690,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/illumine/front.png"
   },
   {
     "id": "hopper",
@@ -22476,7 +22772,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/hopper/front.png"
   },
   {
     "id": "lyla",
@@ -22556,7 +22853,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/lyla/front.png"
   },
   {
     "id": "floretta",
@@ -22637,7 +22935,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/floretta/front.png"
   },
   {
     "id": "liesel-summer",
@@ -22706,7 +23005,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/liesel-summer/front.png"
   },
   {
     "id": "keyana",
@@ -22787,7 +23087,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/keyana/front.png"
   },
   {
     "id": "lilith",
@@ -22868,7 +23169,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/lilith/front.png"
   },
   {
     "id": "mech",
@@ -22936,7 +23238,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/mech/front.png"
   },
   {
     "id": "cecilia-flipperversary",
@@ -22972,7 +23275,7 @@
     ],
     "skill": {
       "key": "adamas-blade",
-      "name": "Adámas Blade",
+      "name": "Ad\u00e1mas Blade",
       "cooldownMillis": 5300,
       "effects": [
         {
@@ -23018,7 +23321,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/cecilia-flipperversary/front.png"
   },
   {
     "id": "diletta",
@@ -23094,7 +23398,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/diletta/front.png"
   },
   {
     "id": "floretta-valentine-s",
@@ -23177,7 +23482,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/floretta-valentine-s/front.png"
   },
   {
     "id": "feanie",
@@ -23212,7 +23518,7 @@
     ],
     "skill": {
       "key": "schlaflied-fur-alle",
-      "name": "Schlaflied für Alle",
+      "name": "Schlaflied f\u00fcr Alle",
       "cooldownMillis": 4700,
       "effects": [
         {
@@ -23245,7 +23551,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/feanie/front.png"
   },
   {
     "id": "sarliha",
@@ -23312,11 +23619,12 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/sarliha/front.png"
   },
   {
     "id": "sohvi-love-adrift",
-    "name": "Sohvi (Love ⭐ Adrift)",
+    "name": "Sohvi (Love \u2b50 Adrift)",
     "strength": [
       14.7,
       2.4
@@ -23394,7 +23702,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/sohvi-love-adrift/front.png"
   },
   {
     "id": "stella-driven-by-deams-guided-through-darkness",
@@ -23464,7 +23773,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/stella-driven-by-deams-guided-through-darkness/front.png"
   },
   {
     "id": "folus-christmas",
@@ -23546,7 +23856,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/folus-christmas/front.png"
   },
   {
     "id": "carbina",
@@ -23627,7 +23938,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/carbina/front.png"
   },
   {
     "id": "clarita",
@@ -23695,7 +24007,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/clarita/front.png"
   },
   {
     "id": "yuna-summer",
@@ -23777,7 +24090,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/yuna-summer/front.png"
   },
   {
     "id": "varen",
@@ -23856,7 +24170,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/varen/front.png"
   },
   {
     "id": "arum",
@@ -23929,7 +24244,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/arum/front.png"
   },
   {
     "id": "marianne",
@@ -24009,7 +24325,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/marianne/front.png"
   },
   {
     "id": "andy",
@@ -24090,7 +24407,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/andy/front.png"
   },
   {
     "id": "liam-2",
@@ -24167,7 +24485,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/liam-2/front.png"
   },
   {
     "id": "yuwel-new-year",
@@ -24245,7 +24564,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/yuwel-new-year/front.png"
   },
   {
     "id": "quazer-co-op-challenge",
@@ -24311,7 +24631,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/quazer-co-op-challenge/front.png"
   },
   {
     "id": "love-neon-skyline",
@@ -24393,7 +24714,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/love-neon-skyline/front.png"
   },
   {
     "id": "selgir",
@@ -24469,7 +24791,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/selgir/front.png"
   },
   {
     "id": "luna",
@@ -24535,7 +24858,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/luna/front.png"
   },
   {
     "id": "marguerite-summer",
@@ -24602,7 +24926,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/marguerite-summer/front.png"
   },
   {
     "id": "grieg",
@@ -24678,7 +25003,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/grieg/front.png"
   },
   {
     "id": "bryce",
@@ -24758,7 +25084,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/bryce/front.png"
   },
   {
     "id": "tae-yamada-zombie-land-saga-collab",
@@ -24830,7 +25157,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/tae-yamada-zombie-land-saga-collab/front.png"
   },
   {
     "id": "falsche-halloween",
@@ -24905,7 +25233,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/falsche-halloween/front.png"
   },
   {
     "id": "zelma",
@@ -24972,7 +25301,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/zelma/front.png"
   },
   {
     "id": "arly-flipperversary",
@@ -25047,7 +25377,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/arly-flipperversary/front.png"
   },
   {
     "id": "eduardo",
@@ -25127,7 +25458,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/eduardo/front.png"
   },
   {
     "id": "subaru-natsuki-re-zero-collab",
@@ -25209,7 +25541,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/subaru-natsuki-re-zero-collab/front.png"
   },
   {
     "id": "londahl",
@@ -25289,7 +25622,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/londahl/front.png"
   },
   {
     "id": "tahweel",
@@ -25365,7 +25699,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/tahweel/front.png"
   },
   {
     "id": "volgia",
@@ -25445,7 +25780,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/volgia/front.png"
   },
   {
     "id": "ryuichi-kageoka",
@@ -25522,7 +25858,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/ryuichi-kageoka/front.png"
   },
   {
     "id": "cursed-informant-shion-flipperversary",
@@ -25604,7 +25941,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/cursed-informant-shion-flipperversary/front.png"
   },
   {
     "id": "rinne-hikawa-halloween",
@@ -25673,7 +26011,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/rinne-hikawa-halloween/front.png"
   },
   {
     "id": "hartlief",
@@ -25754,7 +26093,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/hartlief/front.png"
   },
   {
     "id": "lilial",
@@ -25830,7 +26170,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/lilial/front.png"
   },
   {
     "id": "marnie",
@@ -25898,7 +26239,8 @@
           "value": 0
         }
       ]
-    }
+    },
+    "image": "/assets/characters/marnie/front.png"
   },
   {
     "id": "elise",
@@ -25978,7 +26320,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/elise/front.png"
   },
   {
     "id": "haaj",
@@ -26043,7 +26386,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/haaj/front.png"
   },
   {
     "id": "jin",
@@ -26110,7 +26454,8 @@
           "value": 0
         }
       ]
-    }
+    },
+    "image": "/assets/characters/jin/front.png"
   },
   {
     "id": "trine",
@@ -26190,7 +26535,8 @@
           "value": 0
         }
       ]
-    }
+    },
+    "image": "/assets/characters/trine/front.png"
   },
   {
     "id": "gilasrad",
@@ -26270,7 +26616,8 @@
           "value": 0
         }
       ]
-    }
+    },
+    "image": "/assets/characters/gilasrad/front.png"
   },
   {
     "id": "enni",
@@ -26351,7 +26698,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/enni/front.png"
   },
   {
     "id": "jake",
@@ -26427,7 +26775,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/jake/front.png"
   },
   {
     "id": "cran",
@@ -26508,7 +26857,8 @@
           "value": 0
         }
       ]
-    }
+    },
+    "image": "/assets/characters/cran/front.png"
   },
   {
     "id": "harlisha",
@@ -26575,7 +26925,8 @@
           "value": 0
         }
       ]
-    }
+    },
+    "image": "/assets/characters/harlisha/front.png"
   },
   {
     "id": "sven",
@@ -26641,7 +26992,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/sven/front.png"
   },
   {
     "id": "lilian",
@@ -26708,7 +27060,8 @@
           "value": 0
         }
       ]
-    }
+    },
+    "image": "/assets/characters/lilian/front.png"
   },
   {
     "id": "klaus-white-day",
@@ -26787,7 +27140,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/klaus-white-day/front.png"
   },
   {
     "id": "keylos",
@@ -26867,7 +27221,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/keylos/front.png"
   },
   {
     "id": "trista",
@@ -26943,7 +27298,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/trista/front.png"
   },
   {
     "id": "walter",
@@ -27023,7 +27379,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/walter/front.png"
   },
   {
     "id": "elza",
@@ -27090,7 +27447,8 @@
           "value": 0
         }
       ]
-    }
+    },
+    "image": "/assets/characters/elza/front.png"
   },
   {
     "id": "klaus",
@@ -27167,7 +27525,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/klaus/front.png"
   },
   {
     "id": "shirano",
@@ -27234,7 +27593,8 @@
           "value": 0
         }
       ]
-    }
+    },
+    "image": "/assets/characters/shirano/front.png"
   },
   {
     "id": "kaiyu",
@@ -27301,7 +27661,8 @@
           "value": 0
         }
       ]
-    }
+    },
+    "image": "/assets/characters/kaiyu/front.png"
   },
   {
     "id": "lassie",
@@ -27377,7 +27738,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/lassie/front.png"
   },
   {
     "id": "faf",
@@ -27444,7 +27806,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/faf/front.png"
   },
   {
     "id": "rico",
@@ -27511,7 +27874,8 @@
           "value": 0
         }
       ]
-    }
+    },
+    "image": "/assets/characters/rico/front.png"
   },
   {
     "id": "challua-christmas",
@@ -27580,7 +27944,8 @@
           "value": 0
         }
       ]
-    }
+    },
+    "image": "/assets/characters/challua-christmas/front.png"
   },
   {
     "id": "clara",
@@ -27658,7 +28023,8 @@
           "value": 0
         }
       ]
-    }
+    },
+    "image": "/assets/characters/clara/front.png"
   },
   {
     "id": "samantha",
@@ -27736,7 +28102,8 @@
           "value": 0
         }
       ]
-    }
+    },
+    "image": "/assets/characters/samantha/front.png"
   },
   {
     "id": "ritta",
@@ -27816,7 +28183,8 @@
           "value": 0
         }
       ]
-    }
+    },
+    "image": "/assets/characters/ritta/front.png"
   },
   {
     "id": "yuna",
@@ -27892,7 +28260,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/yuna/front.png"
   },
   {
     "id": "bonnie",
@@ -27972,7 +28341,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/bonnie/front.png"
   },
   {
     "id": "taiga",
@@ -28038,7 +28408,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/taiga/front.png"
   },
   {
     "id": "claw",
@@ -28104,7 +28475,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/claw/front.png"
   },
   {
     "id": "albert",
@@ -28181,7 +28553,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/albert/front.png"
   },
   {
     "id": "kazuchi",
@@ -28247,7 +28620,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/kazuchi/front.png"
   },
   {
     "id": "tatiana",
@@ -28327,7 +28701,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/tatiana/front.png"
   },
   {
     "id": "colt",
@@ -28395,7 +28770,8 @@
           "value": 0
         }
       ]
-    }
+    },
+    "image": "/assets/characters/colt/front.png"
   },
   {
     "id": "sha-suzu",
@@ -28472,7 +28848,8 @@
           "value": 0
         }
       ]
-    }
+    },
+    "image": "/assets/characters/sha-suzu/front.png"
   },
   {
     "id": "fiora",
@@ -28539,7 +28916,8 @@
           "value": 0
         }
       ]
-    }
+    },
+    "image": "/assets/characters/fiora/front.png"
   },
   {
     "id": "mew-new-year",
@@ -28606,7 +28984,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/mew-new-year/front.png"
   },
   {
     "id": "vargen",
@@ -28683,7 +29062,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/vargen/front.png"
   },
   {
     "id": "flana",
@@ -28750,7 +29130,8 @@
           "value": 0
         }
       ]
-    }
+    },
+    "image": "/assets/characters/flana/front.png"
   },
   {
     "id": "rainy-skip-phi-nonoa",
@@ -28830,7 +29211,8 @@
           "value": 0
         }
       ]
-    }
+    },
+    "image": "/assets/characters/rainy-skip-phi-nonoa/front.png"
   },
   {
     "id": "evan",
@@ -28895,7 +29277,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/evan/front.png"
   },
   {
     "id": "challua",
@@ -28963,7 +29346,8 @@
           "value": 0
         }
       ]
-    }
+    },
+    "image": "/assets/characters/challua/front.png"
   },
   {
     "id": "regitare",
@@ -29030,7 +29414,8 @@
           "value": 0
         }
       ]
-    }
+    },
+    "image": "/assets/characters/regitare/front.png"
   },
   {
     "id": "naska",
@@ -29106,7 +29491,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/naska/front.png"
   },
   {
     "id": "mew",
@@ -29172,7 +29558,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/mew/front.png"
   },
   {
     "id": "folus",
@@ -29252,7 +29639,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/folus/front.png"
   },
   {
     "id": "hartlief-2",
@@ -29319,7 +29707,8 @@
           "value": 0
         }
       ]
-    }
+    },
+    "image": "/assets/characters/hartlief-2/front.png"
   },
   {
     "id": "conner",
@@ -29395,7 +29784,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/conner/front.png"
   },
   {
     "id": "jester",
@@ -29475,7 +29865,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/jester/front.png"
   },
   {
     "id": "kate",
@@ -29540,7 +29931,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/kate/front.png"
   },
   {
     "id": "nellie",
@@ -29617,7 +30009,8 @@
           "value": 0
         }
       ]
-    }
+    },
+    "image": "/assets/characters/nellie/front.png"
   },
   {
     "id": "millet",
@@ -29693,7 +30086,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/millet/front.png"
   },
   {
     "id": "corinna",
@@ -29760,7 +30154,8 @@
           "value": 0
         }
       ]
-    }
+    },
+    "image": "/assets/characters/corinna/front.png"
   },
   {
     "id": "marguerite",
@@ -29825,7 +30220,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/marguerite/front.png"
   },
   {
     "id": "cecilia",
@@ -29905,7 +30301,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/cecilia/front.png"
   },
   {
     "id": "aureo",
@@ -29971,7 +30368,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/aureo/front.png"
   },
   {
     "id": "raul",
@@ -30047,7 +30445,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/raul/front.png"
   },
   {
     "id": "miles",
@@ -30127,7 +30526,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/miles/front.png"
   },
   {
     "id": "luluca",
@@ -30207,7 +30607,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/luluca/front.png"
   },
   {
     "id": "kharo",
@@ -30273,7 +30674,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/kharo/front.png"
   },
   {
     "id": "mora",
@@ -30350,7 +30752,8 @@
           "value": 0
         }
       ]
-    }
+    },
+    "image": "/assets/characters/mora/front.png"
   },
   {
     "id": "corinna-halloween",
@@ -30419,7 +30822,8 @@
           "value": 0
         }
       ]
-    }
+    },
+    "image": "/assets/characters/corinna-halloween/front.png"
   },
   {
     "id": "katyusha",
@@ -30500,7 +30904,8 @@
           "value": 0
         }
       ]
-    }
+    },
+    "image": "/assets/characters/katyusha/front.png"
   },
   {
     "id": "axem",
@@ -30577,7 +30982,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/axem/front.png"
   },
   {
     "id": "rue-ruto",
@@ -30642,7 +31048,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/rue-ruto/front.png"
   },
   {
     "id": "falsche",
@@ -30707,7 +31114,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/falsche/front.png"
   },
   {
     "id": "jalil",
@@ -30787,7 +31195,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/jalil/front.png"
   },
   {
     "id": "arly",
@@ -30860,7 +31269,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/arly/front.png"
   },
   {
     "id": "shion",
@@ -30940,7 +31350,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/shion/front.png"
   },
   {
     "id": "adil",
@@ -31020,7 +31431,8 @@
           "value": 0
         }
       ]
-    }
+    },
+    "image": "/assets/characters/adil/front.png"
   },
   {
     "id": "dorothea",
@@ -31087,7 +31499,8 @@
           "value": 0
         }
       ]
-    }
+    },
+    "image": "/assets/characters/dorothea/front.png"
   },
   {
     "id": "rebecca",
@@ -31155,7 +31568,8 @@
           "value": 0
         }
       ]
-    }
+    },
+    "image": "/assets/characters/rebecca/front.png"
   },
   {
     "id": "nochel",
@@ -31231,7 +31645,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/nochel/front.png"
   },
   {
     "id": "meryll",
@@ -31308,7 +31723,8 @@
           "value": 0
         }
       ]
-    }
+    },
+    "image": "/assets/characters/meryll/front.png"
   },
   {
     "id": "meryll-holiday",
@@ -31387,7 +31803,8 @@
           "value": 0
         }
       ]
-    }
+    },
+    "image": "/assets/characters/meryll-holiday/front.png"
   },
   {
     "id": "tarha",
@@ -31468,7 +31885,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/tarha/front.png"
   },
   {
     "id": "cody",
@@ -31545,7 +31963,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/cody/front.png"
   },
   {
     "id": "lucille",
@@ -31625,7 +32044,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/lucille/front.png"
   },
   {
     "id": "golem",
@@ -31705,7 +32125,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/golem/front.png"
   },
   {
     "id": "owlbert",
@@ -31782,7 +32203,8 @@
           "value": 0
         }
       ]
-    }
+    },
+    "image": "/assets/characters/owlbert/front.png"
   },
   {
     "id": "kamaitachi",
@@ -31847,7 +32269,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/kamaitachi/front.png"
   },
   {
     "id": "cf-kiseki-miraculous-golden-head-collab",
@@ -31914,7 +32337,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/cf-kiseki-miraculous-golden-head-collab/front.png"
   },
   {
     "id": "towa-kiseki-miraculous-golden-head-collab",
@@ -31996,7 +32420,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/towa-kiseki-miraculous-golden-head-collab/front.png"
   },
   {
     "id": "shroombo",
@@ -32061,7 +32486,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/shroombo/front.png"
   },
   {
     "id": "red-blobble",
@@ -32125,7 +32551,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/red-blobble/front.png"
   },
   {
     "id": "fire-imp",
@@ -32191,7 +32618,8 @@
           "value": 0
         }
       ]
-    }
+    },
+    "image": "/assets/characters/fire-imp/front.png"
   },
   {
     "id": "blue-blobble",
@@ -32255,7 +32683,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/blue-blobble/front.png"
   },
   {
     "id": "yellow-blobble",
@@ -32319,7 +32748,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/yellow-blobble/front.png"
   },
   {
     "id": "zapquill",
@@ -32394,7 +32824,8 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/zapquill/front.png"
   },
   {
     "id": "green-blobble",
@@ -32458,6 +32889,7 @@
           "value": 0.1
         }
       ]
-    }
+    },
+    "image": "/assets/characters/green-blobble/front.png"
   }
 ]

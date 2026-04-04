@@ -94,14 +94,14 @@ class PlayerWebSocketEndpoint {
     return try {
       when (command.type) {
         PlayerSocketCommandType.START_COMBAT -> {
-          logger.atInfo().addKeyValue("playerId", playerId).log("Received websocket combat start command.")
+          logger.atDebug().addKeyValue("playerId", playerId).log("Received websocket combat start command.")
           val snapshot = combatService.start(parsedPlayerId)
           playerStateChangeTracker.invalidate(parsedPlayerId)
           playerStateWorkQueue.markDirty(parsedPlayerId)
           CombatStateMessage(parsedPlayerId, snapshot, Instant.now())
         }
         PlayerSocketCommandType.STOP_COMBAT -> {
-          logger.atInfo().addKeyValue("playerId", playerId).log("Received websocket combat stop command.")
+          logger.atDebug().addKeyValue("playerId", playerId).log("Received websocket combat stop command.")
           val snapshot = combatService.stop(parsedPlayerId)
           playerStateChangeTracker.invalidate(parsedPlayerId)
           playerStateWorkQueue.markDirty(parsedPlayerId)

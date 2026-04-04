@@ -31,7 +31,8 @@ export function CombatScreen() {
     inventory,
     ownedCharacters,
     zoneProgress,
-    starterTemplates,
+    templates = [],
+    starterTemplates = [],
     combat,
     socketStatus,
     notifications,
@@ -60,6 +61,10 @@ export function CombatScreen() {
     [combat?.members],
   )
   const memberLabels = useMemo(() => Object.fromEntries(ownedCharacters.map((character) => [character.key, character.name])), [ownedCharacters])
+  const memberImages = useMemo(
+    () => Object.fromEntries(templates.filter((template) => template.image).map((template) => [template.key, template.image])),
+    [templates],
+  )
   const topZone = zoneProgress[0] ?? null
   const needsStarterChoice = player?.hasStarterChoice === true
   const displayedPendingReviveMillis =
@@ -182,6 +187,7 @@ export function CombatScreen() {
             hud={hud}
             combat={combat}
             memberLabels={memberLabels}
+            memberImages={memberImages}
             topZone={topZone}
             activeTeam={activeTeam}
             combatMembersByKey={combatMembersByKey}

@@ -18,10 +18,10 @@
 
 .top-status {
   display: grid;
-  grid-template-columns: minmax(320px, 1.2fr) minmax(420px, 1fr);
+  grid-template-columns: minmax(280px, 1.1fr) minmax(360px, 1fr) auto;
+  grid-template-areas: 'identity stats tools';
   gap: 1rem;
-  align-items: end;
-  position: relative;
+  align-items: start;
   z-index: 8;
   background:
     radial-gradient(circle at right top, rgba(250, 179, 135, 0.24), transparent 42%),
@@ -30,9 +30,14 @@
 }
 
 .status-grid {
+  grid-area: stats;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.85rem;
+}
+
+.status-identity {
+  grid-area: identity;
 }
 
 .status-card {
@@ -56,17 +61,18 @@
 }
 
 .status-tools {
-  position: absolute;
-  top: 1.3rem;
-  right: 1.3rem;
-  z-index: 12;
+  grid-area: tools;
   display: grid;
   gap: 0.75rem;
+  align-content: start;
+  justify-items: end;
+  min-width: 168px;
 }
 
 .status-tools-row {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 0.75rem;
 }
 
@@ -322,10 +328,14 @@ button.nav-item:hover:not(:disabled) {
 @media (max-width: 1100px) {
   .top-status {
     grid-template-columns: 1fr;
+    grid-template-areas:
+      'identity'
+      'stats'
+      'tools';
   }
 
   .status-tools {
-    position: static;
+    justify-items: start;
   }
 
   .status-tools-row {

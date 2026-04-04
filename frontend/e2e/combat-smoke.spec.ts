@@ -204,7 +204,7 @@ test('guest onboarding can reach combat with mocked backend transport', async ({
   await page.getByRole('button', { name: 'Create Guest' }).click()
 
   await expect(page.getByRole('heading', { name: 'Choose Your First Character' })).toBeVisible()
-  await expect(page.getByText('connected')).toBeVisible()
+  await expect(page.locator('.status-card strong', { hasText: 'connected' }).first()).toBeVisible()
 
   await page.getByRole('button', { name: 'Confirm Starter' }).click()
   await expect(page.getByRole('heading', { name: 'Choose Your First Character' })).toBeHidden()
