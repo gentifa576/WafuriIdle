@@ -62,8 +62,10 @@ const mocks = vi.hoisted(() => {
       this.socket.readyState = 1
       this.socket.close.mockReset()
       this.socket.send.mockReset()
-      this.currentSessionPlayerId.mockClear()
-      this.currentSessionExpiresAt.mockClear()
+      this.currentSessionPlayerId.mockReset()
+      this.currentSessionPlayerId.mockImplementation(() => sessionPlayerId)
+      this.currentSessionExpiresAt.mockReset()
+      this.currentSessionExpiresAt.mockImplementation(() => sessionExpiresAt)
       this.setSession.mockClear()
       this.createGuestPlayer.mockReset()
       this.signUpPlayer.mockReset()
@@ -179,6 +181,20 @@ beforeEach(() => {
 })
 
 describe('CombatScreen', () => {
+  it('clears a stale persisted session when restore fails', async () => {
+    mocks.currentSessionPlayerId.mockReturnValue('player-1')
+    mocks.currentSessionExpiresAt.mockReturnValue('2099-01-01T00:00:00Z')
+    mocks.getPlayer.mockRejectedValue(new Error('HTTP 401'))
+    mocks.getPlayerTeams.mockResolvedValue([emptyTeam()])
+    mocks.getPlayerInventory.mockResolvedValue([])
+
+    render(<CombatScreen />)
+
+    expect(await screen.findByText('Saved session could not be restored. Please sign in again.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Create Guest' })).toBeInTheDocument()
+    expect(mocks.setSession).toHaveBeenCalledWith(null)
+  })
+
   it('shows the starter picker after guest creation and clears it after claiming a starter', async () => {
     const emptyPlayer = guestAuthResponse()
     const startedPlayer = guestAuthResponse({ ownedCharacterKeys: ['hero'] }).player
@@ -471,5 +487,54 @@ describe('CombatScreen', () => {
       expect(mocks.pullCharacter).toHaveBeenCalledWith('player-1', 10)
       expect(screen.getByText('Count: 10')).toBeInTheDocument()
     })
+  })
+
+  it('logs out cleanly when the backend session is already invalidated', async () => {
+    const readyPlayer = guestAuthResponse({ ownedCharacterKeys: ['hero'] })
+
+    mocks.createGuestPlayer.mockResolvedValue(readyPlayer)
+    mocks.getPlayer.mockResolvedValue(readyPlayer.player)
+    mocks.getPlayerTeams.mockResolvedValue([emptyTeam()])
+    mocks.getPlayerInventory.mockResolvedValue([])
+    mocks.logoutPlayer.mockRejectedValue(new Error('Session is no longer active.'))
+
+    const user = userEvent.setup()
+    render(<CombatScreen />)
+
+    await user.type(screen.getByLabelText('Player name'), 'Scout')
+    await user.click(screen.getByRole('button', { name: 'Create Guest' }))
+    expect(await screen.findByRole('heading', { name: 'Scout' })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Log Out' }))
+
+    expect(await screen.findByRole('button', { name: 'Create Guest' })).toBeInTheDocument()
+    expect(screen.queryByText('Session is no longer active.')).not.toBeInTheDocument()
+    expect(mocks.setSession).toHaveBeenLastCalledWith(null)
+  })
+
+  it('updates socket status when the connection drops and reconnects', async () => {
+    const readyPlayer = guestAuthResponse({ ownedCharacterKeys: ['hero'] })
+
+    mocks.createGuestPlayer.mockResolvedValue(readyPlayer)
+    mocks.getPlayer.mockResolvedValue(readyPlayer.player)
+    mocks.getPlayerTeams.mockResolvedValue([emptyTeam()])
+    mocks.getPlayerInventory.mockResolvedValue([])
+
+    const user = userEvent.setup()
+    render(<CombatScreen />)
+
+    await user.type(screen.getByLabelText('Player name'), 'Scout')
+    await user.click(screen.getByRole('button', { name: 'Create Guest' }))
+    expect(await screen.findByText('connected')).toBeInTheDocument()
+
+    act(() => {
+      mocks.lastSocketOptions?.onClose?.()
+    })
+    expect(await screen.findByText('disconnected')).toBeInTheDocument()
+
+    act(() => {
+      mocks.lastSocketOptions?.onOpen?.()
+    })
+    expect(await screen.findByText('connected')).toBeInTheDocument()
   })
 })
