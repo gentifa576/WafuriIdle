@@ -213,7 +213,9 @@ describe('CombatScreen', () => {
 
     expect(await screen.findByRole('dialog', { name: 'Choose Your First Character' })).toBeInTheDocument()
     expect(screen.getByText('Pick one starter to begin. This prompt will remain until your roster is no longer empty.')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Herohero/i })).toHaveFocus()
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /Herohero/i })).toHaveFocus()
+    })
     const activeCombatNav = screen
       .getAllByRole('button')
       .find((element) => element.getAttribute('aria-pressed') === 'true' && element.textContent?.includes('Combat'))
