@@ -55,7 +55,7 @@ class PlayerWebSocketEndpointTest :
       every { authSessionService.requireActive(jwt) } just runs
       every { offlineProgressionService.applyIfNeeded(playerId) } returns null
       every { playerStateChangeTracker.invalidate(playerId) } just runs
-      every { registry.register(playerId, connection) } just runs
+      every { registry.register(playerId, connection) } returns true
       every { playerStateWorkQueue.markDirty(playerId) } just runs
       every { backgroundExecutor.execute(any()) } answers {
         firstArg<Runnable>().run()

@@ -25,13 +25,20 @@ class WebSocketPlayerMessagePublisher(
   }
 
   private suspend fun nextJitterMillis(): Long {
-    val maxMillis = gameConfig.tick().publishJitterMax().toMillis().coerceAtLeast(0)
+    val maxMillis =
+      gameConfig
+        .tick()
+        .publishJitterMax()
+        .toMillis()
+        .coerceAtLeast(0)
     if (maxMillis == 0L) {
       return 0L
     }
     return ThreadLocalRandom.current().nextLong(maxMillis + 1)
   }
 
-  private suspend fun send(playerId: UUID, payload: String) =
-    registry.sessions(playerId).forEach { it.sendText(payload).subscribe().with({}, {}) }
+  private suspend fun send(
+    playerId: UUID,
+    payload: String,
+  ) = registry.sessions(playerId).forEach { it.sendText(payload).subscribe().with({}, {}) }
 }
