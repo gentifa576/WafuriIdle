@@ -2,6 +2,7 @@
 .gradle
 .gradle-user-home/
 build/
+scripts/not_found
 !backend/gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
