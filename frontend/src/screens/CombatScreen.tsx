@@ -167,7 +167,7 @@ export function CombatScreen() {
         onDismissNotification={(id) => actions.dismissNotification(id)}
       />
 
-      <section className="workspace-shell">
+      <section className={`workspace-shell workspace-shell--${activeView}`}>
         <WorkspaceNav
           activeView={activeView}
           combat={combat}

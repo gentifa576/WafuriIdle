@@ -315,6 +315,7 @@ select:focus-visible {
   grid-template-columns: 17% 58% 25%;
   gap: 1rem;
   min-height: 0;
+  align-items: start;
 }
 
 .workspace-nav,
@@ -325,6 +326,10 @@ select:focus-visible {
   min-height: 0;
   position: relative;
   z-index: 1;
+}
+
+.workspace-nav {
+  gap: 1rem;
 }
 
 .workspace-main {
@@ -793,6 +798,10 @@ select:focus-visible {
     position: static;
   }
 
+  .status-tools-row {
+    justify-content: flex-start;
+  }
+
   .notification-popover {
     top: 0;
     right: auto;
@@ -804,6 +813,7 @@ select:focus-visible {
 
   .workspace-shell {
     grid-template-columns: minmax(240px, 280px) minmax(0, 1fr);
+    align-items: start;
   }
 
   .workspace-context {
@@ -822,6 +832,10 @@ select:focus-visible {
     padding: 0.8rem;
   }
 
+  .hud-shell {
+    min-height: auto;
+  }
+
   .onboarding-hero,
   .auth-panel,
   .panel {
@@ -829,7 +843,6 @@ select:focus-visible {
     padding: 1rem;
   }
 
-  .workspace-shell,
   .status-grid,
   .auth-mode-row,
   .slot-grid,
@@ -839,6 +852,18 @@ select:focus-visible {
     grid-template-columns: 1fr;
   }
 
+  .top-status {
+    gap: 0.9rem;
+  }
+
+  .status-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .status-card {
+    padding: 0.85rem 0.95rem;
+  }
+
   .combat-viewport {
     min-height: 100%;
   }
@@ -846,11 +871,99 @@ select:focus-visible {
   .combat-viewport-shell {
     width: 100%;
     max-width: none;
+    aspect-ratio: 4 / 5;
   }
 
   .status-tools {
     display: grid;
     justify-content: stretch;
+  }
+
+  .status-tools-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .connection-badge {
+    order: 0;
+  }
+
+  .workspace-shell {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+
+  .workspace-nav,
+  .workspace-main,
+  .workspace-context {
+    min-width: 0;
+  }
+
+  .workspace-shell--combat .workspace-main,
+  .workspace-shell--characters .workspace-main,
+  .workspace-shell--team .workspace-main,
+  .workspace-shell--inventory .workspace-main,
+  .workspace-shell--gacha .workspace-main {
+    order: 1;
+  }
+
+  .workspace-shell--combat .workspace-context,
+  .workspace-shell--characters .workspace-context,
+  .workspace-shell--team .workspace-context,
+  .workspace-shell--inventory .workspace-context,
+  .workspace-shell--gacha .workspace-context {
+    order: 2;
+  }
+
+  .workspace-shell--combat .workspace-nav,
+  .workspace-shell--characters .workspace-nav,
+  .workspace-shell--team .workspace-nav,
+  .workspace-shell--inventory .workspace-nav,
+  .workspace-shell--gacha .workspace-nav {
+    order: 3;
+    position: sticky;
+    bottom: 0.8rem;
+    z-index: 20;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03)),
+      var(--panel-strong);
+    backdrop-filter: blur(18px);
+  }
+
+  .workspace-nav .section-heading,
+  .workspace-nav .nav-footnote {
+    display: none;
+  }
+
+  .nav-list {
+    display: flex;
+    gap: 0.75rem;
+    overflow-x: auto;
+    padding-bottom: 0.2rem;
+    scrollbar-width: none;
+  }
+
+  .nav-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-item {
+    min-width: 148px;
+    flex: 0 0 auto;
+    padding: 0.85rem 0.95rem;
+  }
+
+  .section-heading {
+    flex-direction: column;
+  }
+
+  .section-count,
+  .header-chip {
+    align-self: flex-start;
+  }
+
+  .button-row {
+    flex-direction: column;
   }
 
   .notification-card,
@@ -863,6 +976,22 @@ select:focus-visible {
   .primary-cta,
   .secondary-button,
   .ghost-button {
+    width: 100%;
+  }
+
+  .feedback-actions {
+    flex-direction: column;
+  }
+
+  .feedback-actions > * {
+    width: 100%;
+  }
+
+  .starter-choice-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .notification-popover {
     width: 100%;
   }
 }

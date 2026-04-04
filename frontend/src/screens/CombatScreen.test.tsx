@@ -680,4 +680,26 @@ describe('CombatScreen', () => {
     expect(screen.getByRole('button', { name: 'Pull x1' })).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Pull x10' })).toBeDisabled()
   })
+
+  it('tracks the active workspace on the shell for responsive composition', async () => {
+    const readyPlayer = guestAuthResponse({ ownedCharacterKeys: ['hero'] })
+
+    mocks.createGuestPlayer.mockResolvedValue(readyPlayer)
+    mocks.getPlayer.mockResolvedValue(readyPlayer.player)
+    mocks.getPlayerTeams.mockResolvedValue([emptyTeam()])
+    mocks.getPlayerInventory.mockResolvedValue([])
+
+    const user = userEvent.setup()
+    render(<CombatScreen />)
+
+    await user.type(screen.getByLabelText('Player name'), 'Scout')
+    await user.click(screen.getByRole('button', { name: 'Create Guest' }))
+    expect(await screen.findByRole('heading', { name: 'Scout' })).toBeInTheDocument()
+
+    const workspaceShell = document.querySelector('.workspace-shell')
+    expect(workspaceShell).toHaveClass('workspace-shell--combat')
+
+    await user.click(screen.getByRole('button', { name: 'Open inventory workspace. 0 items available.' }))
+    expect(workspaceShell).toHaveClass('workspace-shell--inventory')
+  })
 })
