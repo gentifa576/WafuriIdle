@@ -211,7 +211,12 @@ describe('CombatScreen', () => {
     await user.type(screen.getByLabelText('Player name'), 'Scout')
     await user.click(screen.getByRole('button', { name: 'Create Guest' }))
 
-    expect(await screen.findByRole('heading', { name: 'Choose Your First Character' })).toBeInTheDocument()
+    expect(await screen.findByRole('dialog', { name: 'Choose Your First Character' })).toBeInTheDocument()
+    expect(screen.getByText('Pick one starter to begin. This prompt will remain until your roster is no longer empty.')).toBeInTheDocument()
+    const activeCombatNav = screen
+      .getAllByRole('button')
+      .find((element) => element.getAttribute('aria-pressed') === 'true' && element.textContent?.includes('Combat'))
+    expect(activeCombatNav).toHaveAttribute('aria-pressed', 'true')
     expect(await screen.findByText('connected')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Confirm Starter' }))
@@ -297,7 +302,7 @@ describe('CombatScreen', () => {
       })
     })
 
-    expect(await screen.findByText('Received an unsupported realtime update from the server. Refresh if the UI looks stale.')).toBeInTheDocument()
+    expect(await screen.findByRole('alert')).toHaveTextContent('Received an unsupported realtime update from the server. Refresh if the UI looks stale.')
   })
 
   it('renders team hp and enemy retaliation from combat sync', async () => {
@@ -536,5 +541,41 @@ describe('CombatScreen', () => {
       mocks.lastSocketOptions?.onOpen?.()
     })
     expect(await screen.findByText('connected')).toBeInTheDocument()
+  })
+
+  it('exposes alert popover state and dismiss controls with accessible names', async () => {
+    const readyPlayer = guestAuthResponse({ ownedCharacterKeys: ['hero'] })
+
+    mocks.createGuestPlayer.mockResolvedValue(readyPlayer)
+    mocks.getPlayer.mockResolvedValue(readyPlayer.player)
+    mocks.getPlayerTeams.mockResolvedValue([emptyTeam()])
+    mocks.getPlayerInventory.mockResolvedValue([])
+
+    const user = userEvent.setup()
+    render(<CombatScreen />)
+
+    await user.type(screen.getByLabelText('Player name'), 'Scout')
+    await user.click(screen.getByRole('button', { name: 'Create Guest' }))
+    expect(await screen.findByRole('heading', { name: 'Scout' })).toBeInTheDocument()
+
+    const alertsToggle = screen.getByRole('button', { name: 'Alerts' })
+    expect(alertsToggle).toHaveAttribute('aria-expanded', 'false')
+
+    act(() => {
+      mocks.lastSocketOptions?.onMessage({
+        type: 'COMMAND_ERROR',
+        playerId: 'player-1',
+        commandType: 'START_COMBAT',
+        message: 'Combat already running.',
+        serverTime: '2099-01-01T00:00:00Z',
+      })
+    })
+
+    await user.click(alertsToggle)
+
+    expect(screen.getByRole('button', { name: 'Alerts' })).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByRole('region', { name: 'Recent alerts' })).toBeInTheDocument()
+    expect(screen.getByRole('alert')).toHaveTextContent('Combat already running.')
+    expect(screen.getByRole('button', { name: 'Clear' })).toBeInTheDocument()
   })
 })

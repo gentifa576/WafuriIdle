@@ -128,33 +128,33 @@ export function CombatScreen() {
           </div>
 
           <div className="auth-mode-row">
-            <button className={authModeClass(authMode, 'guest')} onClick={() => setAuthMode('guest')}>
+            <button aria-pressed={authMode === 'guest'} className={authModeClass(authMode, 'guest')} onClick={() => setAuthMode('guest')} type="button">
               Guest
             </button>
-            <button className={authModeClass(authMode, 'signup')} onClick={() => setAuthMode('signup')}>
+            <button aria-pressed={authMode === 'signup'} className={authModeClass(authMode, 'signup')} onClick={() => setAuthMode('signup')} type="button">
               Sign Up
             </button>
-            <button className={authModeClass(authMode, 'login')} onClick={() => setAuthMode('login')}>
+            <button aria-pressed={authMode === 'login'} className={authModeClass(authMode, 'login')} onClick={() => setAuthMode('login')} type="button">
               Log In
             </button>
           </div>
 
           <label className="field">
             <span>{authMode === 'login' ? 'Name or email' : 'Player name'}</span>
-            <input placeholder={guestNamePlaceholder} value={playerName} onChange={(event) => setPlayerName(event.target.value)} />
+            <input autoComplete={authMode === 'login' ? 'username' : 'nickname'} placeholder={guestNamePlaceholder} value={playerName} onChange={(event) => setPlayerName(event.target.value)} />
           </label>
 
           {authMode === 'signup' ? (
             <label className="field">
               <span>Email</span>
-              <input placeholder="you@example.com" value={authEmail} onChange={(event) => setAuthEmail(event.target.value)} />
+              <input autoComplete="email" placeholder="you@example.com" value={authEmail} onChange={(event) => setAuthEmail(event.target.value)} />
             </label>
           ) : null}
 
           {authMode !== 'guest' ? (
             <label className="field">
               <span>Password</span>
-              <input type="password" value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} />
+              <input autoComplete={authMode === 'signup' ? 'new-password' : 'current-password'} type="password" value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} />
             </label>
           ) : null}
 
@@ -168,10 +168,11 @@ export function CombatScreen() {
                   void actions.createPlayer(nextName)
                   setGuestNamePlaceholder(randomGuestName())
                 }}
+                type="button"
               >
                 {loading ? 'Entering...' : 'Create Guest'}
               </button>
-              <button className="ghost-button" disabled={loading} onClick={() => setGuestNamePlaceholder(randomGuestName())}>
+              <button className="ghost-button" disabled={loading} onClick={() => setGuestNamePlaceholder(randomGuestName())} type="button">
                 Randomize
               </button>
             </div>
@@ -182,6 +183,7 @@ export function CombatScreen() {
               className="primary-cta"
               disabled={loading || playerName.trim().length === 0 || authPassword.trim().length === 0}
               onClick={() => void actions.signUp(playerName.trim(), authEmail.trim() || null, authPassword)}
+              type="button"
             >
               {loading ? 'Creating account...' : 'Sign Up'}
             </button>
@@ -192,15 +194,16 @@ export function CombatScreen() {
               className="primary-cta"
               disabled={loading || playerName.trim().length === 0 || authPassword.trim().length === 0}
               onClick={() => void actions.login(playerName.trim(), authPassword)}
+              type="button"
             >
               {loading ? 'Signing in...' : 'Log In'}
             </button>
           ) : null}
 
           {error ? (
-            <div className="error-banner">
+            <div aria-live="assertive" className="error-banner" role="alert">
               <span>{error}</span>
-              <button className="ghost-button" onClick={() => actions.clearError()}>
+              <button className="ghost-button" onClick={() => actions.clearError()} type="button">
                 Clear
               </button>
             </div>
@@ -238,7 +241,7 @@ export function CombatScreen() {
           </article>
           <article className="status-card">
             <span className="label">Active Team</span>
-                      <strong>{activeTeam?.id ? `Team ${activeTeam.shortLabel}` : 'None'}</strong>
+            <strong>{activeTeam?.id ? `Team ${activeTeam.shortLabel}` : 'None'}</strong>
           </article>
           <article className="status-card">
             <span className="label">Session</span>
@@ -248,17 +251,23 @@ export function CombatScreen() {
 
         <div className="status-tools">
           <div className="status-tools-row">
-            <button className="notification-toggle ghost-button" onClick={() => setNotificationsOpen((current) => !current)}>
+            <button
+              aria-controls="notification-popover"
+              aria-expanded={notificationsOpen}
+              className="notification-toggle ghost-button"
+              onClick={() => setNotificationsOpen((current) => !current)}
+              type="button"
+            >
               <span className="notification-bell">Alerts</span>
               {notifications.length > 0 ? <span className="notification-dot" /> : null}
             </button>
-            <button className="ghost-button" onClick={() => void actions.logout()} disabled={loading}>
+            <button className="ghost-button" onClick={() => void actions.logout()} disabled={loading} type="button">
               Log Out
             </button>
           </div>
 
           {notificationsOpen ? (
-            <div className="notification-popover">
+            <div aria-label="Recent alerts" className="notification-popover" id="notification-popover" role="region">
               <div className="section-heading">
                 <div>
                   <p className="eyebrow">Notifications</p>
@@ -275,7 +284,7 @@ export function CombatScreen() {
                       <p>{notification.detail}</p>
                       <span>{formatTime(notification.at)}</span>
                     </div>
-                    <button className="ghost-button slim" onClick={() => actions.dismissNotification(notification.id)}>
+                    <button aria-label={`Dismiss ${notification.title}`} className="ghost-button slim" onClick={() => actions.dismissNotification(notification.id)} type="button">
                       Dismiss
                     </button>
                   </article>
@@ -296,23 +305,23 @@ export function CombatScreen() {
           </div>
 
           <nav className="nav-list">
-            <button className={navClass(activeView, 'combat')} onClick={() => setActiveView('combat')}>
+            <button aria-pressed={activeView === 'combat'} className={navClass(activeView, 'combat')} onClick={() => setActiveView('combat')} type="button">
               <span>Combat</span>
               <small>{combat?.status ?? 'Idle'}</small>
             </button>
-            <button className={navClass(activeView, 'characters')} onClick={() => setActiveView('characters')}>
+            <button aria-pressed={activeView === 'characters'} className={navClass(activeView, 'characters')} onClick={() => setActiveView('characters')} type="button">
               <span>Characters</span>
               <small>{ownedCharacters.length} unlocked</small>
             </button>
-            <button className={navClass(activeView, 'team')} onClick={() => setActiveView('team')}>
+            <button aria-pressed={activeView === 'team'} className={navClass(activeView, 'team')} onClick={() => setActiveView('team')} type="button">
               <span>Team</span>
               <small>{selectedTeam ? `Editing ${selectedTeam.shortLabel}` : 'No team'}</small>
             </button>
-            <button className={navClass(activeView, 'inventory')} onClick={() => setActiveView('inventory')}>
+            <button aria-pressed={activeView === 'inventory'} className={navClass(activeView, 'inventory')} onClick={() => setActiveView('inventory')} type="button">
               <span>Inventory</span>
               <small>{inventory.length} items</small>
             </button>
-            <button className={navClass(activeView, 'gacha')} onClick={() => setActiveView('gacha')}>
+            <button aria-pressed={activeView === 'gacha'} className={navClass(activeView, 'gacha')} onClick={() => setActiveView('gacha')} type="button">
               <span>Gacha</span>
               <small>{player.gold} gold ready</small>
             </button>
@@ -400,10 +409,10 @@ export function CombatScreen() {
                   <strong>Essence: {player.essence}</strong>
                 </div>
                 <div className="button-row">
-                  <button className="primary-cta" disabled={loading} onClick={() => void actions.pullCharacter(1)}>
+                  <button className="primary-cta" disabled={loading} onClick={() => void actions.pullCharacter(1)} type="button">
                     {loading ? 'Pulling...' : 'Pull x1'}
                   </button>
-                  <button className="secondary-button" disabled={loading} onClick={() => void actions.pullCharacter(10)}>
+                  <button className="secondary-button" disabled={loading} onClick={() => void actions.pullCharacter(10)} type="button">
                     {loading ? 'Pulling...' : 'Pull x10'}
                   </button>
                 </div>
@@ -457,6 +466,7 @@ export function CombatScreen() {
                         <strong>{slot.characterKey ? ownedCharacterNames.get(slot.characterKey) ?? slot.characterKey : 'Empty'}</strong>
                       </div>
                       <select
+                        aria-label={`Assign character to slot ${slot.position}`}
                         value=""
                         disabled={loading || options.length === 0 || !selectedTeam}
                         onChange={(event) => {
@@ -505,7 +515,7 @@ export function CombatScreen() {
               </div>
 
               <div className="button-row workspace-actions">
-                <button className="secondary-button" disabled={loading || !selectedTeam} onClick={() => void actions.activateTeam(selectedTeam!.id)}>
+                <button className="secondary-button" disabled={loading || !selectedTeam} onClick={() => void actions.activateTeam(selectedTeam!.id)} type="button">
                   Set As Active Team
                 </button>
               </div>
@@ -549,13 +559,13 @@ export function CombatScreen() {
 
               <div className="stack-panel">
                 <div className="button-row workspace-actions context-actions">
-                  <button className="primary-cta" disabled={loading || !activeTeamId} onClick={() => void actions.startCombat()}>
+                  <button className="primary-cta" disabled={loading || !activeTeamId} onClick={() => void actions.startCombat()} type="button">
                     Start Combat
                   </button>
-                  <button className="ghost-button" disabled={loading || combat == null} onClick={() => void actions.stopCombat()}>
+                  <button className="ghost-button" disabled={loading || combat == null} onClick={() => void actions.stopCombat()} type="button">
                     Stop Combat
                   </button>
-                  <button className="ghost-button" disabled={loading} onClick={() => void actions.refreshPlayer()}>
+                  <button className="ghost-button" disabled={loading} onClick={() => void actions.refreshPlayer()} type="button">
                     Refresh State
                   </button>
                 </div>
@@ -682,9 +692,9 @@ export function CombatScreen() {
       </section>
 
       {error ? (
-        <div className="floating-error">
+        <div aria-live="assertive" className="floating-error" role="alert">
           <span>{error}</span>
-          <button className="ghost-button" onClick={() => actions.clearError()}>
+          <button className="ghost-button" onClick={() => actions.clearError()} type="button">
             Clear
           </button>
         </div>
@@ -692,17 +702,18 @@ export function CombatScreen() {
 
       {needsStarterChoice ? (
         <div className="starter-modal-backdrop">
-          <section className="starter-modal panel">
+          <section aria-describedby="starter-modal-description" aria-labelledby="starter-modal-title" aria-modal="true" className="starter-modal panel" role="dialog">
             <div className="section-heading">
               <div>
                 <p className="eyebrow">Starter Selection</p>
-                <h2>Choose Your First Character</h2>
+                <h2 id="starter-modal-title">Choose Your First Character</h2>
               </div>
             </div>
-            <p className="muted">Pick one starter to begin. This prompt will remain until your roster is no longer empty.</p>
+            <p className="muted" id="starter-modal-description">Pick one starter to begin. This prompt will remain until your roster is no longer empty.</p>
             <div className="starter-choice-grid">
               {starterTemplates.map((starter) => (
                 <button
+                  aria-pressed={selectedStarter?.key === starter.key}
                   className={starterChoiceClass(selectedStarter?.key ?? '', starter.key)}
                   key={starter.key}
                   onClick={() => setSelectedStarterKey(starter.key)}
@@ -718,11 +729,12 @@ export function CombatScreen() {
                 className="primary-cta"
                 disabled={loading || !selectedStarter}
                 onClick={() => selectedStarter && void actions.claimStarter(selectedStarter.key)}
+                type="button"
               >
                 {loading ? 'Claiming...' : 'Confirm Starter'}
               </button>
             </div>
-            {error ? <div className="error-banner"><span>{error}</span></div> : null}
+            {error ? <div aria-live="assertive" className="error-banner" role="alert"><span>{error}</span></div> : null}
           </section>
         </div>
       ) : null}
@@ -765,6 +777,7 @@ function EquipmentPicker({ label, equippedItem, options, disabled, onEquip, onUn
         )}
       </div>
       <select
+        aria-label={`${label} selection`}
         value=""
         disabled={disabled || options.length === 0}
         onChange={(event) => {
@@ -783,7 +796,7 @@ function EquipmentPicker({ label, equippedItem, options, disabled, onEquip, onUn
         ))}
       </select>
       {equippedItem ? (
-        <button className="ghost-button slim" disabled={disabled} onClick={onUnequip}>
+        <button aria-label={`Unequip ${label}`} className="ghost-button slim" disabled={disabled} onClick={onUnequip} type="button">
           Unequip
         </button>
       ) : null}
