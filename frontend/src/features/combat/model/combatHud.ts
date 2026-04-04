@@ -1,6 +1,6 @@
-import type { CombatSnapshot } from '../../../core/types/api'
+import type { ClientCombat } from '../../session/model/clientModels'
 
-export function toCombatHud(snapshot: CombatSnapshot | null) {
+export function toCombatHud(snapshot: ClientCombat | null) {
   if (!snapshot) {
     return {
       title: 'No active combat',
@@ -11,9 +11,6 @@ export function toCombatHud(snapshot: CombatSnapshot | null) {
     }
   }
 
-  const teamCurrentHp = snapshot.members.reduce((total, member) => total + member.currentHp, 0)
-  const teamMaxHp = snapshot.members.reduce((total, member) => total + member.maxHp, 0)
-
   return {
     title: snapshot.enemyName,
     subtitle:
@@ -21,8 +18,8 @@ export function toCombatHud(snapshot: CombatSnapshot | null) {
         ? `DOWN · Revive in ${reviveSecondsRemaining(snapshot.pendingReviveMillis)}s`
         : `${snapshot.status} · DPS ${snapshot.teamDps.toFixed(1)} · Retaliate ${snapshot.enemyAttack.toFixed(1)}`,
     enemyRatio: snapshot.enemyMaxHp === 0 ? 0 : snapshot.enemyHp / snapshot.enemyMaxHp,
-    teamCurrentHp,
-    teamMaxHp,
+    teamCurrentHp: snapshot.teamCurrentHp,
+    teamMaxHp: snapshot.teamMaxHp,
   }
 }
 

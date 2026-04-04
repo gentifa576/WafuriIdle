@@ -17,6 +17,7 @@ import type { EquipmentSlot } from '../../../core/types/api'
 import { useGameClientState } from './useGameClientState'
 import { useGameSession } from './useGameSession'
 import { usePlayerSocket } from './usePlayerSocket'
+import { mapPullResult, mapTeam, mapPlayer } from '../model/clientModels'
 
 export { type ActivityEntry, type HudNotification, type PullResult, type SocketStatus } from './gameClientTypes'
 
@@ -70,7 +71,7 @@ export function useGameClient() {
           const response = await signUpPlayer(name, email, password)
           setSession(response, response.player.id)
           state.setSessionExpiresAt(response.sessionExpiresAt)
-          state.setPlayer(response.player)
+          state.setPlayer(mapPlayer(response.player))
           state.setCombat(null)
           state.setNotifications([])
           await refreshPlayerState(response.player.id)
@@ -92,7 +93,7 @@ export function useGameClient() {
               : await loginPlayer({ name: trimmedIdentity, password })
           setSession(response, response.player.id)
           state.setSessionExpiresAt(response.sessionExpiresAt)
-          state.setPlayer(response.player)
+          state.setPlayer(mapPlayer(response.player))
           state.setCombat(null)
           state.setNotifications([])
           await refreshPlayerState(response.player.id)
@@ -110,7 +111,7 @@ export function useGameClient() {
           const response = await createGuestPlayer(name)
           setSession(response, response.player.id)
           state.setSessionExpiresAt(response.sessionExpiresAt)
-          state.setPlayer(response.player)
+          state.setPlayer(mapPlayer(response.player))
           state.setCombat(null)
           state.setNotifications([])
           await refreshPlayerState(response.player.id)
@@ -145,21 +146,16 @@ export function useGameClient() {
         state.setError(null)
         try {
           const result = await pullCharacter(state.player.id, count)
-          state.setPlayer(result.player)
-          state.setLatestPullResult({
-            count: result.count,
-            pulls: result.pulls,
-            totalEssenceGranted: result.totalEssenceGranted,
-          })
+          const mappedResult = mapPullResult(result)
+          state.setPlayer(mapPlayer(result.player))
+          state.setLatestPullResult(mappedResult)
           await refreshPlayerState(state.player.id)
-          const unlockedCount = result.pulls.filter((pull) => pull.grantedCharacterKey != null).length
-          const duplicateCount = result.pulls.length - unlockedCount
           const summary =
             result.count === 1
               ? result.pulls[0]?.grantedCharacterKey
                 ? `Pulled ${result.pulls[0].grantedCharacterKey}`
                 : `Pulled duplicate ${result.pulls[0]?.pulledCharacterKey} for +${result.pulls[0]?.essenceGranted ?? 0} essence`
-              : `Pulled ${result.count} characters: ${unlockedCount} unlocks, ${duplicateCount} duplicates, +${result.totalEssenceGranted} essence`
+              : `Pulled ${result.count} characters: ${mappedResult.unlockedCount} unlocks, ${mappedResult.duplicateCount} duplicates, +${result.totalEssenceGranted} essence`
           state.appendActivity(summary)
         } catch (caught) {
           state.setError(extractMessage(caught))
@@ -188,7 +184,7 @@ export function useGameClient() {
         state.setError(null)
         try {
           const updatedTeam = await assignCharacterToTeam(teamId, position, characterKey)
-          state.setTeams((current) => current.map((team) => (team.id === updatedTeam.id ? updatedTeam : team)))
+          state.setTeams((current) => current.map((team) => (team.id === updatedTeam.id ? mapTeam(updatedTeam) : team)))
           if (state.player) {
             await refreshPlayerState(state.player.id)
           }
@@ -207,7 +203,7 @@ export function useGameClient() {
         state.setError(null)
         try {
           const updatedTeam = await activateTeam(teamId)
-          state.setTeams((current) => current.map((team) => (team.id === updatedTeam.id ? updatedTeam : team)))
+          state.setTeams((current) => current.map((team) => (team.id === updatedTeam.id ? mapTeam(updatedTeam) : team)))
           state.setPlayer((current) => (current == null ? current : { ...current, activeTeamId: teamId }))
           await refreshPlayerState(state.player.id)
           state.appendActivity(`Activated team ${teamId.slice(0, 8)}`)

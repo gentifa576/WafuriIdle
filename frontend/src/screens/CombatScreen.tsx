@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import type { EquipmentSlot, InventoryItemSnapshot } from '../core/types/api'
+import type { EquipmentSlot } from '../core/types/api'
 import { CombatViewport } from '../features/combat/components/CombatViewport'
 import { reviveSecondsRemaining, toCombatHud } from '../features/combat/model/combatHud'
+import type { ClientInventoryItem } from '../features/session/model/clientModels'
 import { useGameClient } from '../features/session/hooks/useGameClient'
 
 type WorkspaceView = 'combat' | 'characters' | 'team' | 'inventory' | 'gacha'
@@ -58,7 +59,7 @@ export function CombatScreen() {
   )
   const memberLabels = useMemo(() => Object.fromEntries(ownedCharacters.map((character) => [character.key, character.name])), [ownedCharacters])
   const topZone = zoneProgress[0] ?? null
-  const needsStarterChoice = player != null && player.ownedCharacterKeys.length === 0
+  const needsStarterChoice = player?.hasStarterChoice === true
   const displayedPendingReviveMillis =
     combat?.status === 'DOWN'
       ? Math.min(
@@ -237,7 +238,7 @@ export function CombatScreen() {
           </article>
           <article className="status-card">
             <span className="label">Active Team</span>
-            <strong>{activeTeam?.id ? `Team ${activeTeam.id.slice(0, 8)}` : 'None'}</strong>
+                      <strong>{activeTeam?.id ? `Team ${activeTeam.shortLabel}` : 'None'}</strong>
           </article>
           <article className="status-card">
             <span className="label">Session</span>
@@ -305,7 +306,7 @@ export function CombatScreen() {
             </button>
             <button className={navClass(activeView, 'team')} onClick={() => setActiveView('team')}>
               <span>Team</span>
-              <small>{selectedTeam ? `Editing ${selectedTeam.id.slice(0, 8)}` : 'No team'}</small>
+              <small>{selectedTeam ? `Editing ${selectedTeam.shortLabel}` : 'No team'}</small>
             </button>
             <button className={navClass(activeView, 'inventory')} onClick={() => setActiveView('inventory')}>
               <span>Inventory</span>
@@ -410,9 +411,9 @@ export function CombatScreen() {
                   <div className="gacha-result">
                     <strong>Result</strong>
                     <p>Count: {latestPullResult.count}</p>
-                    <p>Unlocks: {latestPullResult.pulls.filter((pull) => pull.grantedCharacterKey != null).length}</p>
+                    <p>Unlocks: {latestPullResult.unlockedCount}</p>
                     <p>Essence gained: {latestPullResult.totalEssenceGranted}</p>
-                    <p>Pulled: {latestPullResult.pulls.map((pull) => pull.pulledCharacterKey).join(', ')}</p>
+                    <p>Pulled: {latestPullResult.pulledCharacterKeys.join(', ')}</p>
                   </div>
                 ) : (
                   <p className="muted">No pull yet.</p>
@@ -570,7 +571,7 @@ export function CombatScreen() {
                 </article>
                 <section className="workspace-card">
                   <span className="label">Active Team</span>
-                  <strong>{(activeTeam?.slots.filter((slot) => slot.characterKey != null).length ?? 0)}/3 ready</strong>
+                  <strong>{(activeTeam?.occupiedSlots ?? 0)}/3 ready</strong>
                   <div className="combat-member-list">
                     {(activeTeam?.slots ?? emptySlots()).map((slot) => {
                       if (slot.characterKey == null) {
@@ -590,7 +591,7 @@ export function CombatScreen() {
                           <strong>{ownedCharacterNames.get(slot.characterKey) ?? slot.characterKey}</strong>
                           {member ? (
                             <>
-                              <p>HP {member.currentHp.toFixed(0)} / {member.maxHp.toFixed(0)}</p>
+                              <p>HP {member.hpLabel}</p>
                               <p>ATK {member.attack.toFixed(1)} · HIT {member.hit.toFixed(1)}</p>
                               <p>{member.alive ? 'Alive' : 'Down'}</p>
                             </>
@@ -642,7 +643,7 @@ export function CombatScreen() {
               <div className="stack-panel">
                 <article className="workspace-card">
                   <span className="label">Active Team</span>
-                  <strong>{activeTeam?.id ? activeTeam.id.slice(0, 8) : 'None'}</strong>
+                  <strong>{activeTeam?.id ? activeTeam.shortLabel : 'None'}</strong>
                   <p>{selectedTeam?.id === activeTeam?.id ? 'You are editing the active team.' : 'You are editing a reserve team.'}</p>
                 </article>
                 <article className="workspace-card">
@@ -743,8 +744,8 @@ function starterChoiceClass(activeKey: string, key: string) {
 
 interface EquipmentPickerProps {
   label: string
-  equippedItem: InventoryItemSnapshot | null
-  options: InventoryItemSnapshot[]
+  equippedItem: ClientInventoryItem | null
+  options: ClientInventoryItem[]
   disabled: boolean
   onEquip: (inventoryItemId: string) => void
   onUnequip: () => void
@@ -790,7 +791,7 @@ function EquipmentPicker({ label, equippedItem, options, disabled, onEquip, onUn
   )
 }
 
-function ItemHoverCard({ item, children }: { item: InventoryItemSnapshot; children: ReactNode }) {
+function ItemHoverCard({ item, children }: { item: ClientInventoryItem; children: ReactNode }) {
   const [visible, setVisible] = useState(false)
   const timerRef = useRef<number | null>(null)
 
@@ -841,7 +842,7 @@ function availableCharactersForSlot(position: number, slots: Array<{ position: n
 }
 
 function availableItemsForSlot(
-  inventory: InventoryItemSnapshot[],
+  inventory: ClientInventoryItem[],
   teamId: string,
   position: number,
   equipmentSlot: EquipmentSlot,

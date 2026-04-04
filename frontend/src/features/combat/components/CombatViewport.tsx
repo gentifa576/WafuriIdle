@@ -1,16 +1,16 @@
 import { useEffect, useRef } from 'react'
-import type { CombatSnapshot } from '../../../core/types/api'
+import type { ClientCombat } from '../../session/model/clientModels'
 import { CombatScene } from '../scene/CombatScene'
 
 interface CombatViewportProps {
-  snapshot: CombatSnapshot | null
+  snapshot: ClientCombat | null
   memberLabels?: Record<string, string>
 }
 
 export function CombatViewport({ snapshot, memberLabels = {} }: CombatViewportProps) {
   const hostRef = useRef<HTMLDivElement | null>(null)
   const sceneRef = useRef<CombatScene | null>(null)
-  const latestSnapshotRef = useRef<CombatSnapshot | null>(snapshot)
+  const latestSnapshotRef = useRef<ClientCombat | null>(snapshot)
   const latestMemberLabelsRef = useRef<Record<string, string>>(memberLabels)
 
   latestSnapshotRef.current = snapshot

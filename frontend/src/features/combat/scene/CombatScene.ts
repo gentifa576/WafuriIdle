@@ -1,9 +1,9 @@
 import { Application, Container, Graphics, Text, TextStyle } from 'pixi.js'
-import type { CombatMember, CombatSnapshot } from '../../../core/types/api'
+import type { ClientCombat, ClientCombatMember } from '../../session/model/clientModels'
 import combatPresets from './combatPresets.json'
 
 interface CombatSceneRenderState {
-  snapshot: CombatSnapshot | null
+  snapshot: ClientCombat | null
   memberLabels: Record<string, string>
 }
 
@@ -101,7 +101,7 @@ export class CombatScene {
   private floatingTexts: FloatingDamageText[] = []
   private cycleElapsedMs = 0
   private previousProgress = 0
-  private previousStatus: CombatSnapshot['status'] | null = null
+  private previousStatus: ClientCombat['status'] | null = null
   private activePathPreset: ActivePathPreset | null = null
   private pathSizeKey = ''
   private enemyFlashMs = 0
@@ -156,7 +156,7 @@ export class CombatScene {
     this.applyState()
   }
 
-  render(snapshot: CombatSnapshot | null, memberLabels: Record<string, string> = {}) {
+  render(snapshot: ClientCombat | null, memberLabels: Record<string, string> = {}) {
     this.pendingState = {
       snapshot,
       memberLabels,
@@ -204,7 +204,7 @@ export class CombatScene {
     this.renderFrame()
   }
 
-  private syncMemberNodes(members: CombatMember[]) {
+  private syncMemberNodes(members: ClientCombatMember[]) {
     const visibleMembers = members.slice(0, MAX_VISIBLE_MEMBERS)
 
     while (this.memberNodes.length > visibleMembers.length) {
@@ -357,7 +357,7 @@ export class CombatScene {
     this.rails.circle(this.sx(468), this.sy(598), this.s(66)).stroke({ width: this.s(1), color: 0x2e3327, alpha: 0.8 })
   }
 
-  private drawEnemy(snapshot: CombatSnapshot | null) {
+  private drawEnemy(snapshot: ClientCombat | null) {
     const width = this.width()
     this.enemyBar.clear()
     this.enemyBody.clear()
@@ -393,7 +393,7 @@ export class CombatScene {
     this.flippers.stroke({ width: this.flipperRadius() * 2, color, cap: 'round' })
   }
 
-  private layoutMembers(snapshot: CombatSnapshot | null) {
+  private layoutMembers(snapshot: ClientCombat | null) {
     const members = snapshot?.members.slice(0, MAX_VISIBLE_MEMBERS) ?? []
 
     this.memberNodes.forEach((node, index) => {
@@ -411,7 +411,7 @@ export class CombatScene {
     })
   }
 
-  private spawnDamageTexts(members: CombatMember[]) {
+  private spawnDamageTexts(members: ClientCombatMember[]) {
     members.slice(0, MAX_VISIBLE_MEMBERS).forEach((member, memberIndex) => {
       const hitCount = Math.max(1, Math.round(member.hit))
       for (let index = 0; index < hitCount; index += 1) {
