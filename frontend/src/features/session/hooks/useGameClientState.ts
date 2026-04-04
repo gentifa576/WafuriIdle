@@ -2,7 +2,7 @@ import { useRef, useState } from 'react'
 import type { SocketMessageParseError } from '../../../core/api/socketMessages'
 import type {
   CharacterTemplate,
-  InventoryItemSnapshot,
+  InventoryItem,
   OfflineProgressionMessage,
   Player,
   PlayerSocketMessage,
@@ -20,7 +20,7 @@ import type {
   ClientTeam,
   ClientZoneProgress,
 } from '../model/clientModels'
-import { mapCharacterTemplates, mapInventory, mapPlayer, mapTeams } from '../model/clientModels'
+import { mapCharacterTemplates, mapPlayer, mapRestInventory, mapTeams } from '../model/clientModels'
 
 export function useGameClientState() {
   const [player, setPlayer] = useState<ClientPlayer | null>(null)
@@ -52,10 +52,10 @@ export function useGameClientState() {
     zoneProgress,
   }
 
-  function applyRefreshedPlayerState(reloadedPlayer: Player, playerTeams: Team[], playerInventory: InventoryItemSnapshot[]) {
+  function applyRefreshedPlayerState(reloadedPlayer: Player, playerTeams: Team[], playerInventory: InventoryItem[]) {
     setPlayer(mapPlayer(reloadedPlayer))
     setTeams(mapTeams(playerTeams))
-    setInventory(mapInventory(playerInventory))
+    setInventory(mapRestInventory(playerInventory))
   }
 
   function resetPlayerState() {

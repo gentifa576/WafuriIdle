@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { applyCombatStateSnapshot, applyPlayerStateSnapshot } from './socketSync'
 import type { CombatSnapshot, PlayerStateSnapshot } from '../../../core/types/api'
-import { mapCombat, mapInventory, mapOwnedCharacters, mapPlayer, mapZoneProgress } from '../model/clientModels'
+import { mapCombat, mapInventorySnapshots, mapOwnedCharacters, mapPlayer, mapZoneProgress } from '../model/clientModels'
 
 describe('socketSync', () => {
   it('reuses current references when a player snapshot is equivalent', () => {
@@ -15,7 +15,7 @@ describe('socketSync', () => {
       gold: 90,
       essence: 4,
     })
-    const inventory = mapInventory([])
+    const inventory = mapInventorySnapshots([])
     const ownedCharacters = mapOwnedCharacters([{ key: 'hero', name: 'Hero', level: 2 }])
     const zoneProgress = mapZoneProgress([{ zoneId: 'starter-plains', killCount: 6, level: 2 }])
     const snapshot: PlayerStateSnapshot = {

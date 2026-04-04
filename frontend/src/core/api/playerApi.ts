@@ -3,7 +3,7 @@ import type {
   AuthResponse,
   CharacterPullResult,
   CharacterTemplate,
-  InventoryItemSnapshot,
+  InventoryItem,
   Player,
   Team,
 } from '../types/api'
@@ -56,7 +56,7 @@ export function getPlayerTeams(playerId: string) {
 }
 
 export function getPlayerInventory(playerId: string) {
-  return http<InventoryItemSnapshot[]>(`/players/${playerId}/inventory`)
+  return http<InventoryItem[]>(`/players/${playerId}/inventory`)
 }
 
 export function getCharacterTemplates() {

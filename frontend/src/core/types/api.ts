@@ -64,6 +64,26 @@ export interface InventoryItemSnapshot {
   equippedPosition: number | null
 }
 
+export interface ItemDefinition {
+  name: string
+  displayName: string
+  type: string
+  baseStat: Stat
+  subStatPool: string[]
+}
+
+export interface InventoryItem {
+  id: string
+  playerId: string
+  item: ItemDefinition
+  itemLevel: number
+  subStats: Stat[]
+  rarity: string
+  upgrade: number
+  equippedTeamId: string | null
+  equippedPosition: number | null
+}
+
 export interface CombatMember {
   characterKey: string
   attack: number

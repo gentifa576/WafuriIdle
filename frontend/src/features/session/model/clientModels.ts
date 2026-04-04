@@ -2,6 +2,7 @@ import type {
   CharacterPull,
   CharacterTemplate,
   CombatSnapshot,
+  InventoryItem,
   InventoryItemSnapshot,
   OwnedCharacterSnapshot,
   Player,
@@ -170,7 +171,7 @@ export function mapZoneProgress(entries: ZoneProgressSnapshot[]): ClientZoneProg
   }))
 }
 
-export function mapInventory(items: InventoryItemSnapshot[]): ClientInventoryItem[] {
+export function mapInventorySnapshots(items: InventoryItemSnapshot[]): ClientInventoryItem[] {
   return items.map((item) => ({
     id: item.id,
     itemName: item.itemName,
@@ -178,6 +179,26 @@ export function mapInventory(items: InventoryItemSnapshot[]): ClientInventoryIte
     itemType: item.itemType,
     itemBaseStat: mapStat(item.itemBaseStat),
     itemSubStatPool: [...item.itemSubStatPool],
+    subStats: item.subStats.map(mapStat),
+    rarity: item.rarity,
+    upgrade: item.upgrade,
+    equippedTeamId: item.equippedTeamId,
+    equippedPosition: item.equippedPosition,
+    assignmentLabel:
+      item.equippedTeamId && item.equippedPosition != null
+        ? `Equipped on ${item.equippedTeamId.slice(0, 8)} · Slot ${item.equippedPosition}`
+        : 'In backpack',
+  }))
+}
+
+export function mapRestInventory(items: InventoryItem[]): ClientInventoryItem[] {
+  return items.map((item) => ({
+    id: item.id,
+    itemName: item.item.name,
+    itemDisplayName: item.item.displayName,
+    itemType: item.item.type,
+    itemBaseStat: mapStat(item.item.baseStat),
+    itemSubStatPool: [...item.item.subStatPool],
     subStats: item.subStats.map(mapStat),
     rarity: item.rarity,
     upgrade: item.upgrade,
@@ -236,7 +257,7 @@ export function mapPlayerSnapshot(snapshot: PlayerStateSnapshot) {
     }),
     ownedCharacters: mapOwnedCharacters(snapshot.ownedCharacters),
     zoneProgress: mapZoneProgress(snapshot.zoneProgress),
-    inventory: mapInventory(snapshot.inventory),
+    inventory: mapInventorySnapshots(snapshot.inventory),
   }
 }
 
