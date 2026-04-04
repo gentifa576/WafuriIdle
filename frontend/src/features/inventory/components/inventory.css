@@ -1,0 +1,37 @@
+.inventory-grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.inventory-wide-card {
+  min-height: 140px;
+}
+
+.item-hover-card {
+  min-width: 220px;
+  max-width: 280px;
+  padding: 0.85rem 0.95rem;
+  border-radius: 18px;
+  border: 1px solid var(--color-border-strong);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03)),
+    var(--color-surface-panel-strong);
+  box-shadow: var(--color-shadow-elevated);
+  z-index: 24;
+}
+
+.item-hover-card p {
+  margin: 0.3rem 0 0;
+  color: var(--color-text-secondary);
+}
+
+.item-detail-panel {
+  position: static;
+  margin-top: 0.75rem;
+  max-width: none;
+}
+
+@media (max-width: 720px) {
+  .inventory-grid {
+    grid-template-columns: 1fr;
+  }
+}

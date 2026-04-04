@@ -1,0 +1,45 @@
+.slot-grid {
+  grid-template-columns: 1fr;
+}
+
+.team-grid {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.slot-card {
+  padding: 1rem;
+  display: grid;
+  gap: 0.8rem;
+  border: 1px solid var(--color-border-default);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.slot-heading strong {
+  color: var(--color-text-primary);
+}
+
+.slot-heading {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.equipment-block {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.85rem;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.equipment-heading {
+  display: grid;
+  gap: 0.2rem;
+}
+
+@media (max-width: 720px) {
+  .slot-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,95 @@
+.combat-stage {
+  display: grid;
+  gap: 1rem;
+}
+
+.combat-bar-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.8rem;
+}
+
+.combat-bar-row > div,
+.member-strip {
+  border: 1px solid var(--color-border-default);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.combat-bar-row > div {
+  padding: 1rem;
+}
+
+.combat-bar-row strong {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 1.05rem;
+}
+
+.combat-viewport {
+  min-height: 100%;
+  overflow: hidden;
+  border-radius: 28px;
+  border: 1px solid var(--color-border-strong);
+  background:
+    radial-gradient(circle at top, rgba(249, 226, 175, 0.18), transparent 34%),
+    linear-gradient(180deg, rgba(55, 42, 28, 0.85), rgba(16, 14, 11, 0.95));
+}
+
+.combat-viewport-shell {
+  width: min(100%, 820px);
+  margin: 0;
+  aspect-ratio: 9 / 16;
+}
+
+.workspace-stage {
+  max-width: 100%;
+  justify-self: center;
+}
+
+.combat-member-list {
+  display: grid;
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.combat-member-card {
+  padding: 0.9rem 1rem;
+  border-radius: 18px;
+  border: 1px solid var(--color-border-default);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.combat-member-card p {
+  margin: 0.35rem 0 0;
+}
+
+.combat-member-card.is-empty {
+  opacity: 0.8;
+}
+
+.context-actions {
+  justify-content: stretch;
+}
+
+@media (max-width: 1100px) {
+  .combat-bar-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .combat-bar-row {
+    grid-template-columns: 1fr;
+  }
+
+  .combat-viewport {
+    min-height: 100%;
+  }
+
+  .combat-viewport-shell {
+    width: 100%;
+    max-width: none;
+    aspect-ratio: 4 / 5;
+  }
+}
