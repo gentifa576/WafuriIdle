@@ -153,7 +153,7 @@ class CombatProgressionE2ETest {
         enemyName = "Training Dummy",
         enemyHp = 0f,
         enemyMaxHp = 1000f,
-        members = listOf(expectedCombatMemberState("nimbus", 13.7f, 9.8f, 1.3000002f, 9.3f)),
+        members = listOf(expectedCombatMemberState("nimbus", 13.7f, 9.8f, 2.3000002f, 9.3f)),
         lastSimulatedAt = wonState.lastSimulatedAt,
       )
 
@@ -210,7 +210,7 @@ class CombatProgressionE2ETest {
         zoneId = "starter-plains",
         activeTeamId = UUID.fromString(prepared.teamId),
         enemyName = "Training Dummy",
-        enemyHp = 731.48f,
+        enemyHp = 597.22f,
         enemyMaxHp = 1000f,
         members = listOf(expectedCombatMemberState("nimbus", 13.7f, 9.8f, 0f, 9.3f)),
         lastSimulatedAt = downState.lastSimulatedAt,

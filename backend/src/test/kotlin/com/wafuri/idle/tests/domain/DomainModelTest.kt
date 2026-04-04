@@ -176,7 +176,90 @@ class DomainModelTest :
           enemyName = "Training Dummy",
           enemyHp = 0f,
           enemyMaxHp = 10f,
-          members = listOf(expectedCombatMemberState("warrior", 10f, 3f, 14f, 15f)),
+          members = listOf(expectedCombatMemberState("warrior", 10f, 3f, 15f, 15f)),
+        )
+    }
+
+    "combat state does not retaliate when the enemy dies in the same damage step" {
+      val state =
+        CombatState.active(
+          playerId = UUID.randomUUID(),
+          status = CombatStatus.FIGHTING,
+          zoneId = "starter-plains",
+          activeTeamId = UUID.randomUUID(),
+          enemyName = "Training Dummy",
+          enemyLevel = 1,
+          enemyBaseHp = 8f,
+          enemyAttack = 5f,
+          enemyHp = 8f,
+          enemyMaxHp = 8f,
+          members =
+            listOf(
+              CombatMemberState(
+                characterKey = "warrior",
+                attack = 8f,
+                hit = 3f,
+                currentHp = 12f,
+                maxHp = 12f,
+              ),
+            ),
+        )
+
+      val updated =
+        state.advance(1000L, 1000L, 1000L, 30_000L, 0.5f)
+
+      updated shouldBe
+        expectedCombatState(
+          playerId = state.playerId,
+          status = CombatStatus.WON,
+          zoneId = "starter-plains",
+          activeTeamId = state.activeTeamId,
+          enemyName = "Training Dummy",
+          enemyHp = 0f,
+          enemyMaxHp = 8f,
+          members = listOf(expectedCombatMemberState("warrior", 8f, 3f, 12f, 12f)),
+          enemyAttack = 5f,
+        )
+    }
+
+    "combat state still applies earlier retaliation steps before a later killing blow in the same batch" {
+      val state =
+        CombatState.active(
+          playerId = UUID.randomUUID(),
+          status = CombatStatus.FIGHTING,
+          zoneId = "starter-plains",
+          activeTeamId = UUID.randomUUID(),
+          enemyName = "Training Dummy",
+          enemyLevel = 1,
+          enemyBaseHp = 100f,
+          enemyAttack = 1f,
+          enemyHp = 100f,
+          enemyMaxHp = 100f,
+          members =
+            listOf(
+              CombatMemberState(
+                characterKey = "warrior",
+                attack = 10f,
+                hit = 1f,
+                currentHp = 20f,
+                maxHp = 20f,
+              ),
+            ),
+        )
+
+      val updated =
+        state.advance(10_000L, 1000L, 1000L, 30_000L, 0.5f)
+
+      updated shouldBe
+        expectedCombatState(
+          playerId = state.playerId,
+          status = CombatStatus.WON,
+          zoneId = "starter-plains",
+          activeTeamId = state.activeTeamId,
+          enemyName = "Training Dummy",
+          enemyHp = 0f,
+          enemyMaxHp = 100f,
+          members = listOf(expectedCombatMemberState("warrior", 10f, 1f, 11f, 20f)),
         )
     }
 

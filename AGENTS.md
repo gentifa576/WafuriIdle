@@ -68,7 +68,7 @@
 | Combat ownership | Combat simulation is zone-oriented; the tick processes active combats grouped by `zoneId`, not as a flat player list. |
 | Cluster combat ownership | Zone-oriented combat grouping is per server instance only; multiple instances may process combats for the same `zoneId` because combat state is currently player-scoped, not globally zone-scoped. |
 | Zone job lifecycle | Combat zone jobs should exist only while a zone has active players/combat state and must stop when the zone becomes empty. |
-| Combat damage cadence | Combat damage resolves on a separate 1s server-side cadence using elapsed-time correction, not on every 200ms tick. Each damage step applies team damage first, then immediate enemy retaliation in that same resolution step. |
+| Combat damage cadence | Combat damage resolves on a separate 1s server-side cadence using elapsed-time correction, not on every 200ms tick. Each damage step applies team damage first, then immediate enemy retaliation in that same resolution step only if the enemy survives that damage step. |
 | Combat stat caching | Live combat must not rebuild player/team/inventory-derived combat stats from repositories every tick. Cache those derived stats node-locally per player and invalidate them on combat-relevant mutations. |
 | Combat continuation | After an enemy dies, combat auto-continues after a configured respawn delay. |
 | Team model | Players may own multiple teams, but only one team may be active at a time. |
@@ -159,7 +159,7 @@
 | Passive execution | Only the team leader's passive may activate; aura passives may modify team stat derivation when their authored condition matches. |
 | Combat team refresh | Ongoing combat must refresh its active team id and member snapshot from the player's currently active team each combat tick so team edits and active-team switches are reflected in combat sync. |
 | Combat timing | Use real elapsed server tick time to correct drift; do not assume every loop executes exactly on schedule. |
-| Combat retaliation | Whenever a combat damage step applies player damage to the current enemy, that enemy immediately retaliates for its configured `enemyAttack` value with no mitigation, consuming team HP in member order across living members. |
+| Combat retaliation | Whenever a combat damage step applies player damage to the current enemy, that enemy immediately retaliates for its configured `enemyAttack` value with no mitigation only if it survives that same damage step; retaliation consumes team HP in member order across living members. |
 | Combat wipe recovery | When every combat member reaches `0 HP`, combat enters `DOWN` for `30s`, then the team revives at `50%` HP and combat resumes against a fresh full-HP enemy unless the player explicitly stops combat first. |
 | Offline progression | When a player reconnects after combat continued while they were disconnected, progression catch-up must be calculated from timestamp difference, not by replaying server ticks. |
 | Player progression | Players gain EXP and gold from kills and level globally based on configured thresholds; kill rewards currently scale by defeated enemy zone level through a softer config-driven reward exponent layered on top of the main zone multiplier. |

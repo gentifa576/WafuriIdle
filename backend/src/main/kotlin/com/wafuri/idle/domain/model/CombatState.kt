@@ -234,10 +234,21 @@ data class CombatState(
     }
 
     val intervalSeconds = damageIntervalMillis / 1000f
-    val playerDamage = teamDps * intervalSeconds * damageSteps
+    val damagePerStep = teamDps * intervalSeconds
+    val playerDamage = damagePerStep * damageSteps
     val nextEnemyHp = (enemyHp - playerDamage).coerceAtLeast(0f)
-    val retaliationDamage = enemyAttack * damageSteps
-    val updatedMembers = applyRetaliationDamage(retaliationDamage)
+    val retaliationSteps =
+      if (nextEnemyHp > 0f || damagePerStep <= 0f) {
+        damageSteps
+      } else {
+        kotlin.math
+          .ceil(enemyHp / damagePerStep)
+          .toLong()
+          .minus(1L)
+          .coerceAtLeast(0L)
+      }
+    val updatedMembers =
+      applyRetaliationDamage(enemyAttack * retaliationSteps)
     val nextStatus =
       when {
         updatedMembers.none { it.isAlive } -> CombatStatus.DOWN

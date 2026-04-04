@@ -194,8 +194,8 @@ Current loop direction:
 - combat auto-continues after respawn
 - zone is the unit that groups combat processing
 - when team stat refresh changes a combat member's max HP, current HP preserves the existing current-to-max ratio instead of keeping the old flat HP value
-- each 1s combat damage step applies team damage first and then immediate enemy retaliation in the same resolution
-- current enemy retaliation deals flat config-driven `enemyAttack` damage with no mitigation
+- each 1s combat damage step applies team damage first and then immediate enemy retaliation in the same resolution only if the enemy survives that step
+- current enemy retaliation deals flat config-driven `enemyAttack` damage with no mitigation, but a killed enemy does not retaliate on its death step
 - retaliation currently consumes team HP across living members in team order
 - if every combat member reaches `0 HP`, the team enters a downed state for `30s`
 - while the team is downed, combat-relevant team edits are blocked; players cannot swap characters, activate another team, or equip and unequip items until combat leaves `DOWN`
