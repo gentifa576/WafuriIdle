@@ -1,5 +1,4 @@
-import type { ActivityEntry } from '../../session/hooks/gameClientTypes'
-import type { ClientCombat, ClientTeam, ClientZoneProgress } from '../../session/model/clientModels'
+import type { ClientCombat, ClientTeam } from '../../session/model/clientModels'
 import './workspace.css'
 
 export type WorkspaceView = 'combat' | 'characters' | 'team' | 'inventory' | 'gacha'
@@ -11,8 +10,6 @@ interface WorkspaceNavProps {
   selectedTeam: ClientTeam | null
   inventoryCount: number
   playerGold: number
-  topZone: ClientZoneProgress | null
-  activity: ActivityEntry[]
   onViewChange: (view: WorkspaceView) => void
 }
 
@@ -23,8 +20,6 @@ export function WorkspaceNav({
   selectedTeam,
   inventoryCount,
   playerGold,
-  topZone,
-  activity,
   onViewChange,
 }: WorkspaceNavProps) {
   return (
@@ -89,12 +84,6 @@ export function WorkspaceNav({
           <small>{playerGold} gold ready</small>
         </button>
       </nav>
-
-      <section aria-label="General progress" className="nav-footnote">
-        <span className="label">General Info</span>
-        <strong>{combat?.zoneId ?? topZone?.zoneId ?? 'starter-plains'}</strong>
-        <p>{activity.length} recent activity entries</p>
-      </section>
     </aside>
   )
 }

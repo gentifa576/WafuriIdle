@@ -35,7 +35,6 @@ export function CombatScreen() {
     combat,
     socketStatus,
     notifications,
-    activity,
     sessionExpiresAt,
     latestPullResult,
     loading,
@@ -175,8 +174,6 @@ export function CombatScreen() {
           selectedTeam={selectedTeam}
           inventoryCount={inventory.length}
           playerGold={player.gold}
-          topZone={topZone}
-          activity={activity}
           onViewChange={setActiveView}
         />
 
