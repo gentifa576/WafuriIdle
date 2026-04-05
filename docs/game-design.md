@@ -166,7 +166,7 @@ Current combat direction:
 - combat then progresses on the server
 - combat currently uses the active team
 - team DPS is derived from living members only
-- enemies currently use a flat config-driven retaliation attack value
+- each spawned enemy resolves from static enemy template content
 
 Current stat derivation:
 - `attack = strength.base + strength.increment * (playerLevel - 1)`
@@ -180,6 +180,7 @@ Not in use yet:
 Current combat-content direction:
 - each character embeds one `skill` and one `passive`
 - characters also carry free-form `tags` for authored combat conditions
+- enemies are authored separately from zones with stable `id`, `name`, optional `image`, `baseHp`, and `attack`
 - skills are authored as cooldown-based definitions with ordered effects directly inside the character content
 - passives are authored as leader-owned team rules directly inside the character content
 - skill auto-use should be a player/runtime setting, not a character content field
@@ -195,12 +196,12 @@ Current loop direction:
 - zone is the unit that groups combat processing
 - when team stat refresh changes a combat member's max HP, current HP preserves the existing current-to-max ratio instead of keeping the old flat HP value
 - each 1s combat damage step applies team damage first and then immediate enemy retaliation in the same resolution only if the enemy survives that step
-- current enemy retaliation deals flat config-driven `enemyAttack` damage with no mitigation, but a killed enemy does not retaliate on its death step
+- current enemy retaliation deals the selected enemy template's `attack` damage with no mitigation, but a killed enemy does not retaliate on its death step
 - retaliation currently consumes team HP across living members in team order
 - if every combat member reaches `0 HP`, the team enters a downed state for `30s`
 - while the team is downed, combat-relevant team edits are blocked; players cannot swap characters, activate another team, or equip and unequip items until combat leaves `DOWN`
 - after that down timer, the same team revives at `50%` HP and combat resumes against a fresh full-HP enemy unless the player explicitly stops combat first
-- enemy HP scaling is currently the only implemented enemy-side zone scaling; enemy retaliation damage is not zone-scaled yet
+- enemy HP scaling is currently the only implemented enemy-side zone scaling; respawns reuse the active enemy template's `baseHp` and `attack`, with only HP scaling by zone level
 - zone reward scaling currently reuses the same zone multiplier with a softer exponent so reward growth stays below enemy HP growth
 
 ## Zones
@@ -209,9 +210,23 @@ Zones currently have static template data and separate player-owned progression.
 
 Static zone template purpose:
 - level range
-- enemy list
+- enemy ID list
 - loot table
 - future event references
+
+## Enemies
+
+Enemies are static template content referenced by zones.
+
+Current enemy template purpose:
+- define the authored enemy identity used by a zone
+- own the base HP before zone scaling
+- own the flat retaliation attack used in combat
+
+Current implementation:
+- zones reference enemies by stable `enemyId`
+- combat starts in the default zone and randomly selects an enemy from that zone's enemy ID pool whenever combat enters `FIGHTING`, including initial start, post-win respawns, and post-`DOWN` revives
+- enemy display name and optional combat portrait path come from the enemy template, not directly from zone content
 
 Dynamic zone progression purpose:
 - track how far an individual player has advanced in that zone

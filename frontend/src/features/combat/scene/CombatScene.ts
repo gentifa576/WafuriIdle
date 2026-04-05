@@ -92,6 +92,7 @@ export class CombatScene {
   private board = new Graphics()
   private rails = new Graphics()
   private enemyBody = new Graphics()
+  private enemyPortrait = new Sprite(Texture.EMPTY)
   private enemyBar = new Graphics()
   private flippers = new Graphics()
   private enemyLabel = new Text({
@@ -110,6 +111,9 @@ export class CombatScene {
   private activePathPreset: ActivePathPreset | null = null
   private pathSizeKey = ''
   private failedMemberImages = new Set<string>()
+  private failedEnemyImages = new Set<string>()
+  private enemyImageUrl: string | null = null
+  private enemyImageLoadVersion = 0
   private enemyFlashMs = 0
   private ballPosition: Vec2 = { x: BASE_WIDTH * 0.42, y: BASE_HEIGHT * 0.66 }
   private leaderTrail: Vec2[] = []
@@ -145,6 +149,8 @@ export class CombatScene {
     }
 
     this.app = app
+    this.enemyPortrait.anchor.set(0.5)
+    this.enemyPortrait.visible = false
     app.canvas.style.width = '100%'
     app.canvas.style.height = '100%'
     app.canvas.style.display = 'block'
@@ -154,6 +160,7 @@ export class CombatScene {
     this.stageRoot.addChild(this.rails)
     this.stageRoot.addChild(this.enemyBar)
     this.stageRoot.addChild(this.enemyBody)
+    this.stageRoot.addChild(this.enemyPortrait)
     this.stageRoot.addChild(this.flippers)
     this.stageRoot.addChild(this.enemyLabel)
     this.enemyLabel.position.set(this.sx(24), this.sy(22))
@@ -212,6 +219,7 @@ export class CombatScene {
       this.pendingState.snapshot == null
         ? 'Waiting for combat'
         : `${this.pendingState.snapshot.enemyName} · ${this.pendingState.snapshot.enemyHp.toFixed(0)} HP`
+    this.syncEnemyImage(this.pendingState.snapshot?.enemyImage ?? null)
     this.renderFrame()
   }
 
@@ -382,6 +390,11 @@ export class CombatScene {
     const barWidth = Math.max((width - this.sx(48)) * ratio, 0)
     this.enemyBar.roundRect(this.sx(24), this.sy(60), barWidth, this.sy(20), this.s(10)).fill('#d8572a')
 
+    this.enemyPortrait.position.set(this.enemyAnchor.x, this.enemyAnchor.y)
+    if (this.enemyPortrait.visible) {
+      return
+    }
+
     const coreColor = this.enemyFlashMs > 0 ? 0xffddb8 : 0x8f3d27
     this.enemyBody.circle(this.enemyAnchor.x, this.enemyAnchor.y, this.enemyRadius()).fill(coreColor)
     this.enemyBody.circle(this.enemyAnchor.x, this.enemyAnchor.y, this.enemyRadius() - this.s(16)).fill(0x24130d)
@@ -468,9 +481,51 @@ export class CombatScene {
       })
   }
 
+  private syncEnemyImage(imageUrl: string | null) {
+    if (this.enemyImageUrl === imageUrl) {
+      return
+    }
+
+    this.enemyImageUrl = imageUrl
+    this.enemyImageLoadVersion += 1
+    this.enemyPortrait.texture = Texture.EMPTY
+    this.enemyPortrait.visible = false
+
+    if (!imageUrl || this.failedEnemyImages.has(imageUrl)) {
+      return
+    }
+
+    const loadVersion = this.enemyImageLoadVersion
+    void Assets.load<Texture>(imageUrl)
+      .then((texture) => {
+        if (this.destroyed || this.enemyImageLoadVersion !== loadVersion || this.enemyImageUrl !== imageUrl) {
+          return
+        }
+        this.enemyPortrait.texture = texture
+        this.sizeEnemyPortrait(texture)
+        this.enemyPortrait.visible = true
+      })
+      .catch(() => {
+        if (this.enemyImageLoadVersion !== loadVersion || this.enemyImageUrl !== imageUrl) {
+          return
+        }
+        this.failedEnemyImages.add(imageUrl)
+        this.enemyPortrait.visible = false
+      })
+  }
+
   private sizePortrait(node: MemberNode, texture: Texture) {
     node.portrait.width = texture.width * 2
     node.portrait.height = texture.height * 2
+  }
+
+  private sizeEnemyPortrait(texture: Texture) {
+    const maxSize = this.enemyRadius() * 2.25
+    const textureWidth = texture.width || 1
+    const textureHeight = texture.height || 1
+    const scale = Math.min(maxSize / textureWidth, maxSize / textureHeight)
+    this.enemyPortrait.width = textureWidth * scale
+    this.enemyPortrait.height = textureHeight * scale
   }
 
   private spawnDamageTexts(members: ClientCombatMember[]) {
@@ -535,6 +590,10 @@ export class CombatScene {
     this.rightFlipper.pivot = { x: width * (1 - FLIPPER_PIVOT_OFFSET), y: height * 0.853 }
     this.leftFlipper.length = width * 0.195
     this.rightFlipper.length = width * 0.195
+    if (this.enemyPortrait.visible) {
+      this.enemyPortrait.position.set(this.enemyAnchor.x, this.enemyAnchor.y)
+      this.sizeEnemyPortrait(this.enemyPortrait.texture)
+    }
     if (this.pathSizeKey !== '' && this.pathSizeKey !== this.boardSizeKey()) {
       const currentPreset = this.activePathPreset
       this.activePathPreset =

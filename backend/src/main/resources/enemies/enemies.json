@@ -1,0 +1,30 @@
+[
+  {
+    "id": "training-dummy",
+    "name": "Training Dummy",
+    "image": null,
+    "baseHp": 1000,
+    "attack": 1
+  },
+  {
+    "id": "straw-golem",
+    "name": "Straw Golem",
+    "image": "/assets/enemies/straw-golem/front.png",
+    "baseHp": 1000,
+    "attack": 1
+  },
+  {
+    "id": "field-slime",
+    "name": "Field Slime",
+    "image": "/assets/enemies/field-slime/front.png",
+    "baseHp": 900,
+    "attack": 1.5
+  },
+  {
+    "id": "cobra-wind",
+    "name": "Cobra Wind",
+    "image": "/assets/enemies/cobra-wind/front.png",
+    "baseHp": 1400,
+    "attack": 0.5
+  }
+]

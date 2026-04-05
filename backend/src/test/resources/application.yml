@@ -35,8 +35,6 @@ game:
       - inaho
       - vyron
   combat:
-    enemy-max-hp: 1000
-    enemy-attack: 1
     damage-interval: 1s
     respawn-delay: 1s
     revive-delay: 30s

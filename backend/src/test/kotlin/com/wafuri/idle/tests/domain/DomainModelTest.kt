@@ -4,6 +4,7 @@ import com.wafuri.idle.domain.model.CombatMemberState
 import com.wafuri.idle.domain.model.CombatState
 import com.wafuri.idle.domain.model.CombatStatus
 import com.wafuri.idle.domain.model.DomainRuleViolationException
+import com.wafuri.idle.domain.model.EnemyTemplate
 import com.wafuri.idle.domain.model.EquipmentSlot
 import com.wafuri.idle.domain.model.InventoryItem
 import com.wafuri.idle.domain.model.LevelRange
@@ -132,6 +133,7 @@ class DomainModelTest :
           status = CombatStatus.FIGHTING,
           zoneId = "starter-plains",
           activeTeamId = UUID.randomUUID(),
+          enemyId = "training-dummy",
           enemyName = "Training Dummy",
           enemyLevel = 1,
           enemyBaseHp = 10f,
@@ -187,6 +189,7 @@ class DomainModelTest :
           status = CombatStatus.FIGHTING,
           zoneId = "starter-plains",
           activeTeamId = UUID.randomUUID(),
+          enemyId = "training-dummy",
           enemyName = "Training Dummy",
           enemyLevel = 1,
           enemyBaseHp = 8f,
@@ -229,6 +232,7 @@ class DomainModelTest :
           status = CombatStatus.FIGHTING,
           zoneId = "starter-plains",
           activeTeamId = UUID.randomUUID(),
+          enemyId = "training-dummy",
           enemyName = "Training Dummy",
           enemyLevel = 1,
           enemyBaseHp = 100f,
@@ -270,6 +274,7 @@ class DomainModelTest :
           status = CombatStatus.WON,
           zoneId = "starter-plains",
           activeTeamId = UUID.randomUUID(),
+          enemyId = "training-dummy",
           enemyName = "Training Dummy",
           enemyLevel = 1,
           enemyBaseHp = 10f,
@@ -318,6 +323,18 @@ class DomainModelTest :
       }
     }
 
+    "enemy template requires a non-blank id and positive combat stats" {
+      shouldThrow<IllegalArgumentException> {
+        EnemyTemplate(
+          id = "",
+          name = "Training Dummy",
+          image = "",
+          baseHp = 0f,
+          attack = -1f,
+        )
+      }
+    }
+
     "dead combat member contributes no dps" {
       val member =
         CombatMemberState(
@@ -338,6 +355,7 @@ class DomainModelTest :
           status = CombatStatus.FIGHTING,
           zoneId = "starter-plains",
           activeTeamId = UUID.randomUUID(),
+          enemyId = "training-dummy",
           enemyName = "Training Dummy",
           enemyLevel = 1,
           enemyBaseHp = 100f,

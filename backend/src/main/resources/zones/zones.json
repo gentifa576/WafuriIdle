@@ -7,6 +7,6 @@
       { "itemName": "sword_0001", "weight": 70 },
       { "itemName": "shield_0001", "weight": 30 }
     ],
-    "enemies": ["Training Dummy", "Straw Golem"]
+    "enemies": ["training-dummy", "straw-golem", "field-slime", "cobra-wind"]
   }
 ]

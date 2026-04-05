@@ -8,12 +8,17 @@ import com.wafuri.idle.application.port.out.PlayerStateWorkQueue
 import com.wafuri.idle.application.service.combat.CombatLootService
 import com.wafuri.idle.application.service.combat.CombatStatService
 import com.wafuri.idle.application.service.combat.CombatTickService
+import com.wafuri.idle.application.service.combat.RandomSource
+import com.wafuri.idle.application.service.enemy.EnemyTemplateCatalog
 import com.wafuri.idle.application.service.player.OfflineProgressionService
 import com.wafuri.idle.application.service.player.ProgressionService
 import com.wafuri.idle.application.service.scaling.ScalingRule
+import com.wafuri.idle.application.service.zone.ZoneTemplateCatalog
 import com.wafuri.idle.domain.model.CombatState
+import com.wafuri.idle.domain.model.LevelRange
 import com.wafuri.idle.domain.model.Player
 import com.wafuri.idle.domain.model.PlayerZoneProgress
+import com.wafuri.idle.domain.model.ZoneTemplate
 import com.wafuri.idle.tests.support.expectedInventoryItem
 import com.wafuri.idle.tests.support.expectedOfflineProgressionMessage
 import com.wafuri.idle.tests.support.expectedOfflineProgressionResult
@@ -23,7 +28,9 @@ import com.wafuri.idle.tests.support.expectedSingleMemberCombatState
 import com.wafuri.idle.tests.support.expectedSingleMemberTeamCombatStats
 import com.wafuri.idle.tests.support.expectedZoneProgress
 import com.wafuri.idle.tests.support.gameConfig
+import com.wafuri.idle.tests.support.strawGolemEnemy
 import com.wafuri.idle.tests.support.swordItem
+import com.wafuri.idle.tests.support.trainingDummyEnemy
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.every
@@ -42,6 +49,9 @@ class OfflineProgressionServiceTest : StringSpec() {
   private lateinit var progressionService: ProgressionService
   private lateinit var combatLootService: CombatLootService
   private lateinit var playerEventQueue: PlayerMessageQueue
+  private lateinit var zoneTemplateCatalog: ZoneTemplateCatalog
+  private lateinit var enemyTemplateCatalog: EnemyTemplateCatalog
+  private lateinit var randomSource: RandomSource
   private lateinit var config: GameConfig
   private lateinit var service: OfflineProgressionService
 
@@ -52,6 +62,9 @@ class OfflineProgressionServiceTest : StringSpec() {
       progressionService = mockk()
       combatLootService = mockk()
       playerEventQueue = mockk()
+      zoneTemplateCatalog = mockk()
+      enemyTemplateCatalog = mockk()
+      randomSource = mockk()
       config =
         gameConfig(
           damageInterval = Duration.ofSeconds(1),
@@ -65,6 +78,9 @@ class OfflineProgressionServiceTest : StringSpec() {
           progressionService,
           combatLootService,
           playerEventQueue,
+          zoneTemplateCatalog,
+          enemyTemplateCatalog,
+          randomSource,
           ScalingRule(config),
           config,
         )
@@ -88,6 +104,7 @@ class OfflineProgressionServiceTest : StringSpec() {
 
       every { combatStateRepository.findById(playerId) } returns state
       every { combatStateRepository.save(any()) } answers { firstArg() }
+      every { enemyTemplateCatalog.requireRandom(listOf("training-dummy"), randomSource) } returns trainingDummyEnemy(baseHp = 100f)
 
       val result = service.applyIfNeeded(playerId)
 
@@ -117,6 +134,7 @@ class OfflineProgressionServiceTest : StringSpec() {
       every { combatStateRepository.findById(playerId) } returns state
       every { combatStatService.teamStatsForPlayerOrNull(playerId, state.members) } returns null
       every { combatStateRepository.save(any()) } answers { firstArg() }
+      every { enemyTemplateCatalog.requireRandom(listOf("training-dummy"), randomSource) } returns trainingDummyEnemy(baseHp = 100f)
 
       val result = service.applyIfNeeded(playerId)
 
@@ -166,6 +184,9 @@ class OfflineProgressionServiceTest : StringSpec() {
         firstArg<CombatState>().also { savedState = it }
       }
       every { playerEventQueue.enqueue(any()) } just runs
+      every { zoneTemplateCatalog.require(zoneId) } returns
+        ZoneTemplate(zoneId, "Starter Plains", LevelRange(1, 10), emptyList(), emptyList(), listOf("training-dummy"))
+      every { enemyTemplateCatalog.requireRandom(listOf("training-dummy"), randomSource) } returns trainingDummyEnemy(baseHp = 100f)
 
       val result = service.applyIfNeeded(playerId)
       val actualResult = requireNotNull(result)
@@ -222,6 +243,9 @@ class OfflineProgressionServiceTest : StringSpec() {
       every { combatLootService.rollLoot(playerId, zoneId, any()) } returns null
       every { combatStateRepository.save(any()) } answers { firstArg() }
       every { playerEventQueue.enqueue(any()) } just runs
+      every { zoneTemplateCatalog.require(zoneId) } returns
+        ZoneTemplate(zoneId, "Starter Plains", LevelRange(1, 10), emptyList(), emptyList(), listOf("training-dummy"))
+      every { enemyTemplateCatalog.requireRandom(listOf("training-dummy"), randomSource) } returns trainingDummyEnemy(baseHp = 100f)
 
       val result = service.applyIfNeeded(playerId)
       val actualResult = requireNotNull(result)
@@ -262,6 +286,9 @@ class OfflineProgressionServiceTest : StringSpec() {
       val offlineProgressionServicePort = mockk<ProgressionService>()
       val offlineCombatLootService = mockk<CombatLootService>()
       val offlinePlayerMessageQueue = mockk<PlayerMessageQueue>()
+      val offlineZoneTemplateCatalog = mockk<ZoneTemplateCatalog>()
+      val offlineEnemyTemplateCatalog = mockk<EnemyTemplateCatalog>()
+      val offlineRandomSource = mockk<RandomSource>()
       val offlineService =
         OfflineProgressionService(
           offlineCombatStateRepository,
@@ -269,6 +296,9 @@ class OfflineProgressionServiceTest : StringSpec() {
           offlineProgressionServicePort,
           offlineCombatLootService,
           offlinePlayerMessageQueue,
+          offlineZoneTemplateCatalog,
+          offlineEnemyTemplateCatalog,
+          offlineRandomSource,
           ScalingRule(config),
           config,
         )
@@ -279,6 +309,9 @@ class OfflineProgressionServiceTest : StringSpec() {
       val livePlayerStateWorkQueue = mockk<PlayerStateWorkQueue>()
       val liveCombatLootService = mockk<CombatLootService>()
       val liveProgressionService = mockk<ProgressionService>()
+      val liveZoneTemplateCatalog = mockk<ZoneTemplateCatalog>()
+      val liveEnemyTemplateCatalog = mockk<EnemyTemplateCatalog>()
+      val liveRandomSource = mockk<RandomSource>()
       val liveTickService =
         CombatTickService(
           liveActivePlayerRegistry,
@@ -287,6 +320,9 @@ class OfflineProgressionServiceTest : StringSpec() {
           livePlayerStateWorkQueue,
           liveCombatLootService,
           liveProgressionService,
+          liveZoneTemplateCatalog,
+          liveEnemyTemplateCatalog,
+          liveRandomSource,
           ScalingRule(config),
           config,
         )
@@ -321,6 +357,14 @@ class OfflineProgressionServiceTest : StringSpec() {
       every { offlineProgressionServicePort.recordKill(playerId, zoneId, any()) } answers { offlineKills += 1 }
       every { offlineCombatLootService.rollLoot(playerId, zoneId, any()) } returns null
       every { offlinePlayerMessageQueue.enqueue(any()) } just runs
+      every { offlineZoneTemplateCatalog.require(zoneId) } returns
+        ZoneTemplate(zoneId, "Starter Plains", LevelRange(1, 10), emptyList(), emptyList(), listOf("training-dummy"))
+      every {
+        offlineEnemyTemplateCatalog.requireRandom(
+          listOf("training-dummy"),
+          offlineRandomSource,
+        )
+      } returns trainingDummyEnemy(baseHp = 100f)
 
       every { liveActivePlayerRegistry.activePlayerIds() } returns setOf(playerId)
       every { liveCombatStateRepository.findById(playerId) } answers { liveCurrentState }
@@ -340,6 +384,9 @@ class OfflineProgressionServiceTest : StringSpec() {
       }
       every { liveProgressionService.recordKill(playerId, zoneId, any()) } answers { liveKills += 1 }
       every { liveCombatLootService.rollLoot(playerId, zoneId, any()) } returns null
+      every { liveZoneTemplateCatalog.require(zoneId) } returns
+        ZoneTemplate(zoneId, "Starter Plains", LevelRange(1, 10), emptyList(), emptyList(), listOf("training-dummy"))
+      every { liveEnemyTemplateCatalog.requireRandom(listOf("training-dummy"), liveRandomSource) } returns trainingDummyEnemy(baseHp = 100f)
 
       val offlineResult = requireNotNull(offlineService.applyIfNeeded(playerId))
       val actualOfflineDurationMillis = offlineResult.offlineDuration.toMillis()
@@ -364,6 +411,53 @@ class OfflineProgressionServiceTest : StringSpec() {
           rewards = emptyList(),
         )
       offlineSavedState.copy(lastSimulatedAt = null) shouldBe liveCurrentState.copy(lastSimulatedAt = null)
+    }
+
+    "applyIfNeeded respawns a random enemy from the zone pool after a win" {
+      val playerId = UUID.randomUUID()
+      val teamId = UUID.randomUUID()
+      val zoneId = "starter-plains"
+      val state =
+        expectedSingleMemberCombatState(
+          playerId = playerId,
+          teamId = teamId,
+          attack = 150f,
+          hit = 1f,
+          currentHp = 100f,
+          maxHp = 100f,
+          enemyHp = 0f,
+          enemyMaxHp = 100f,
+          enemyAttack = 1f,
+          status = com.wafuri.idle.domain.model.CombatStatus.WON,
+          lastSimulatedAt = Instant.now().minus(Duration.ofSeconds(1)),
+        )
+      var savedState: CombatState? = null
+
+      every { combatStateRepository.findById(playerId) } returns state
+      every { combatStatService.teamStatsForPlayerOrNull(playerId, state.members) } returns
+        expectedSingleMemberTeamCombatStats(teamId, attack = 150f, hit = 1f, maxHp = 100f)
+      every { progressionService.requirePlayer(playerId) } returnsMany
+        listOf(expectedPlayer(playerId, "Alice"), expectedPlayer(playerId, "Alice"))
+      every { progressionService.requireZoneProgress(playerId, zoneId) } returnsMany
+        listOf(expectedZoneProgress(playerId, zoneId), expectedZoneProgress(playerId, zoneId))
+      every { combatStateRepository.save(any()) } answers {
+        firstArg<CombatState>().also { savedState = it }
+      }
+      every { combatLootService.rollLoot(playerId, zoneId, any()) } returns null
+      every { playerEventQueue.enqueue(any()) } just runs
+      every { zoneTemplateCatalog.require(zoneId) } returns
+        ZoneTemplate(zoneId, "Starter Plains", LevelRange(1, 10), emptyList(), emptyList(), listOf("training-dummy", "straw-golem"))
+      every { enemyTemplateCatalog.requireRandom(listOf("training-dummy", "straw-golem"), randomSource) } returns strawGolemEnemy()
+
+      val result = requireNotNull(service.applyIfNeeded(playerId))
+
+      result.kills shouldBe 0
+      savedState?.status shouldBe com.wafuri.idle.domain.model.CombatStatus.FIGHTING
+      savedState?.enemyId shouldBe "straw-golem"
+      savedState?.enemyName shouldBe "Straw Golem"
+      savedState?.enemyAttack shouldBe 2f
+      savedState?.enemyHp shouldBe 1200f
+      savedState?.enemyMaxHp shouldBe 1200f
     }
   }
 }

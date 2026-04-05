@@ -184,6 +184,7 @@ function isCombatSnapshot(value: unknown): value is CombatSnapshot {
     isNullableString(value.zoneId) &&
     isNullableString(value.activeTeamId) &&
     isNullableString(value.enemyName) &&
+    isNullableString(value.enemyImage) &&
     isNumber(value.enemyAttack) &&
     isNumber(value.enemyHp) &&
     isNumber(value.enemyMaxHp) &&

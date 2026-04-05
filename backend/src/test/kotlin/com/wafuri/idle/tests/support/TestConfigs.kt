@@ -12,8 +12,6 @@ fun gameConfig(
   starterChoices: List<String> = listOf("nimbus", "inaho", "vyron"),
   characterPullGoldCost: Int = 250,
   duplicateEssence: Int = 15,
-  enemyMaxHp: Float = 1000f,
-  enemyAttack: Float = 1f,
   damageInterval: Duration = Duration.ofSeconds(1),
   respawnDelay: Duration = Duration.ofSeconds(1),
   reviveDelay: Duration = Duration.ofSeconds(30),
@@ -67,8 +65,6 @@ fun gameConfig(
   every { gachaConfig.characterPull() } returns characterPullConfig
   every { characterPullConfig.goldCost() } returns characterPullGoldCost
   every { characterPullConfig.duplicateEssence() } returns duplicateEssence
-  every { combatConfig.enemyMaxHp() } returns enemyMaxHp
-  every { combatConfig.enemyAttack() } returns enemyAttack
   every { combatConfig.damageInterval() } returns damageInterval
   every { combatConfig.respawnDelay() } returns respawnDelay
   every { combatConfig.reviveDelay() } returns reviveDelay

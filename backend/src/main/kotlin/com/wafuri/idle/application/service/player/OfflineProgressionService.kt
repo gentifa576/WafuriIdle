@@ -7,7 +7,10 @@ import com.wafuri.idle.application.port.out.CombatStateRepository
 import com.wafuri.idle.application.port.out.PlayerMessageQueue
 import com.wafuri.idle.application.service.combat.CombatLootService
 import com.wafuri.idle.application.service.combat.CombatStatService
+import com.wafuri.idle.application.service.combat.RandomSource
+import com.wafuri.idle.application.service.enemy.EnemyTemplateCatalog
 import com.wafuri.idle.application.service.scaling.ScalingRule
+import com.wafuri.idle.application.service.zone.ZoneTemplateCatalog
 import com.wafuri.idle.domain.model.CombatState
 import com.wafuri.idle.domain.model.CombatStatus
 import com.wafuri.idle.domain.model.PlayerZoneProgress
@@ -24,6 +27,9 @@ class OfflineProgressionService(
   private val progressionService: ProgressionService,
   private val combatLootService: CombatLootService,
   private val playerEventQueue: PlayerMessageQueue,
+  private val zoneTemplateCatalog: ZoneTemplateCatalog,
+  private val enemyTemplateCatalog: EnemyTemplateCatalog,
+  private val randomSource: RandomSource,
   private val scalingRule: ScalingRule,
   private val gameConfig: GameConfig,
 ) {
@@ -117,7 +123,6 @@ class OfflineProgressionService(
         respawnDelayMillis = gameConfig.combat().respawnDelay().toMillis(),
         reviveDelayMillis = gameConfig.combat().reviveDelay().toMillis(),
         reviveHpRatio = gameConfig.combat().reviveHpRatio(),
-        enemyAttack = gameConfig.combat().enemyAttack(),
         killsPerLevel = gameConfig.progression().zone().killsPerLevel(),
       )
     var projection = MutableOfflineCombatProjection(state, elapsed.toMillis().coerceAtLeast(0), startingZoneProgress)
@@ -167,7 +172,7 @@ class OfflineProgressionService(
       )
     val recovered =
       if (elapsedMillis == waitMillis && advanced.status == CombatStatus.FIGHTING) {
-        refreshEnemyForZoneLevel(advanced, projection.zoneProgress.level, params.enemyAttack)
+        refreshEnemyForZoneLevel(advanced, projection.zoneProgress.level)
       } else {
         advanced
       }
@@ -204,10 +209,11 @@ class OfflineProgressionService(
   private fun refreshEnemyForZoneLevel(
     state: CombatState,
     zoneLevel: Int,
-    enemyAttack: Float,
   ): CombatState {
-    val enemyMaxHp = scalingRule.enemyHpFor(zoneLevel, state.enemyBaseHp)
-    return state.refreshEnemy(zoneLevel, enemyAttack, enemyMaxHp)
+    val zoneId = requireNotNull(state.zoneId) { "Active combat must keep a zone id." }
+    val enemy = enemyTemplateCatalog.requireRandom(zoneTemplateCatalog.require(zoneId).enemies, randomSource)
+    val enemyMaxHp = scalingRule.enemyHpFor(zoneLevel, enemy.baseHp)
+    return state.refreshEnemy(enemy.id, enemy.name, enemy.image, enemy.baseHp, zoneLevel, enemy.attack, enemyMaxHp)
   }
 
   private fun timeToKillMillis(
@@ -238,7 +244,6 @@ private data class OfflineCombatParams(
   val respawnDelayMillis: Long,
   val reviveDelayMillis: Long,
   val reviveHpRatio: Float,
-  val enemyAttack: Float,
   val killsPerLevel: Int,
 )
 

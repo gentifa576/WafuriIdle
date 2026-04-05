@@ -6,6 +6,8 @@ import com.wafuri.idle.application.port.out.PlayerStateWorkQueue
 import com.wafuri.idle.application.port.out.Repository
 import com.wafuri.idle.application.service.combat.CombatService
 import com.wafuri.idle.application.service.combat.CombatStatService
+import com.wafuri.idle.application.service.combat.RandomSource
+import com.wafuri.idle.application.service.enemy.EnemyTemplateCatalog
 import com.wafuri.idle.application.service.player.ProgressionService
 import com.wafuri.idle.application.service.scaling.ScalingRule
 import com.wafuri.idle.application.service.zone.ZoneTemplateCatalog
@@ -20,6 +22,8 @@ import com.wafuri.idle.tests.support.expectedPlayer
 import com.wafuri.idle.tests.support.expectedSingleMemberCombatState
 import com.wafuri.idle.tests.support.expectedSingleMemberTeamCombatStats
 import com.wafuri.idle.tests.support.gameConfig
+import com.wafuri.idle.tests.support.strawGolemEnemy
+import com.wafuri.idle.tests.support.trainingDummyEnemy
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.every
@@ -35,6 +39,8 @@ class CombatServiceTest : StringSpec() {
   private lateinit var combatStatService: CombatStatService
   private lateinit var playerStateWorkQueue: PlayerStateWorkQueue
   private lateinit var zoneTemplateCatalog: ZoneTemplateCatalog
+  private lateinit var enemyTemplateCatalog: EnemyTemplateCatalog
+  private lateinit var randomSource: RandomSource
   private lateinit var progressionService: ProgressionService
   private lateinit var config: GameConfig
   private lateinit var service: CombatService
@@ -46,8 +52,10 @@ class CombatServiceTest : StringSpec() {
       combatStatService = mockk()
       playerStateWorkQueue = mockk()
       zoneTemplateCatalog = mockk()
+      enemyTemplateCatalog = mockk()
+      randomSource = mockk()
       progressionService = mockk()
-      config = gameConfig(enemyMaxHp = 1000f)
+      config = gameConfig()
       service =
         CombatService(
           playerRepository,
@@ -55,9 +63,10 @@ class CombatServiceTest : StringSpec() {
           combatStatService,
           playerStateWorkQueue,
           zoneTemplateCatalog,
+          enemyTemplateCatalog,
+          randomSource,
           progressionService,
           ScalingRule(config),
-          config,
         )
     }
 
@@ -74,12 +83,14 @@ class CombatServiceTest : StringSpec() {
           LevelRange(1, 10),
           emptyList(),
           emptyList(),
-          listOf("Training Dummy"),
+          listOf("training-dummy"),
         )
+      val enemy = trainingDummyEnemy()
 
       every { playerRepository.require(playerId) } returns player
       every { combatStatService.teamStatsForPlayer(playerId) } returns teamStats
       every { zoneTemplateCatalog.default() } returns zone
+      every { enemyTemplateCatalog.requireRandom(zone.enemies, randomSource) } returns enemy
       every { progressionService.requireZoneProgress(playerId, zone.id) } returns mockk { every { level } returns 1 }
       every { combatStateRepository.findById(playerId) } returns null
       every { combatStateRepository.save(any()) } answers {
@@ -128,6 +139,39 @@ class CombatServiceTest : StringSpec() {
       result shouldBe expectedSnapshot
       savedState shouldBe expectedState
       verify(exactly = 1) { playerStateWorkQueue.markDirty(playerId) }
+    }
+
+    "start combat selects a random enemy from the zone pool" {
+      val playerId = UUID.randomUUID()
+      val teamId = UUID.randomUUID()
+      val player = expectedPlayer(playerId, "Alice")
+      val teamStats = expectedSingleMemberTeamCombatStats(teamId, attack = 12f, hit = 7f, maxHp = 11f)
+      val zone =
+        ZoneTemplate(
+          "starter-plains",
+          "Starter Plains",
+          LevelRange(1, 10),
+          emptyList(),
+          emptyList(),
+          listOf("training-dummy", "straw-golem"),
+        )
+
+      every { playerRepository.require(playerId) } returns player
+      every { combatStatService.teamStatsForPlayer(playerId) } returns teamStats
+      every { zoneTemplateCatalog.default() } returns zone
+      every { enemyTemplateCatalog.requireRandom(zone.enemies, randomSource) } returns strawGolemEnemy()
+      every { progressionService.requireZoneProgress(playerId, zone.id) } returns mockk { every { level } returns 1 }
+      every { combatStateRepository.findById(playerId) } returns null
+      every { combatStateRepository.save(any()) } answers { firstArg<CombatState>() }
+      every { playerStateWorkQueue.markDirty(playerId) } just runs
+
+      val result = service.start(playerId)
+
+      result.enemyName shouldBe "Straw Golem"
+      result.enemyAttack shouldBe 2f
+      result.enemyHp shouldBe 1200f
+      result.enemyMaxHp shouldBe 1200f
+      verify(exactly = 1) { enemyTemplateCatalog.requireRandom(zone.enemies, randomSource) }
     }
 
     "stop combat resets the player to idle combat state" {

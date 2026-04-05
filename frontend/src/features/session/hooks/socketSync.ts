@@ -128,6 +128,7 @@ function combatEquals(left: ClientCombat | null, right: ClientCombat | null) {
     left.zoneId === right.zoneId &&
     left.activeTeamId === right.activeTeamId &&
     left.enemyName === right.enemyName &&
+    left.enemyImage === right.enemyImage &&
     left.enemyAttack === right.enemyAttack &&
     left.enemyHp === right.enemyHp &&
     left.enemyMaxHp === right.enemyMaxHp &&

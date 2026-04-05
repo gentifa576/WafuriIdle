@@ -7,15 +7,22 @@ import com.wafuri.idle.application.port.out.PlayerStateWorkQueue
 import com.wafuri.idle.application.service.combat.CombatLootService
 import com.wafuri.idle.application.service.combat.CombatStatService
 import com.wafuri.idle.application.service.combat.CombatTickService
+import com.wafuri.idle.application.service.combat.RandomSource
+import com.wafuri.idle.application.service.enemy.EnemyTemplateCatalog
 import com.wafuri.idle.application.service.player.ProgressionService
 import com.wafuri.idle.application.service.scaling.ScalingRule
+import com.wafuri.idle.application.service.zone.ZoneTemplateCatalog
 import com.wafuri.idle.domain.model.CombatState
 import com.wafuri.idle.domain.model.CombatStatus
+import com.wafuri.idle.domain.model.LevelRange
+import com.wafuri.idle.domain.model.ZoneTemplate
 import com.wafuri.idle.tests.support.expectedCombatMemberState
 import com.wafuri.idle.tests.support.expectedCombatState
 import com.wafuri.idle.tests.support.expectedSingleMemberCombatState
 import com.wafuri.idle.tests.support.expectedSingleMemberTeamCombatStats
 import com.wafuri.idle.tests.support.gameConfig
+import com.wafuri.idle.tests.support.strawGolemEnemy
+import com.wafuri.idle.tests.support.trainingDummyEnemy
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.every
@@ -34,6 +41,9 @@ class CombatTickServiceTest : StringSpec() {
   private lateinit var playerStateWorkQueue: PlayerStateWorkQueue
   private lateinit var combatLootService: CombatLootService
   private lateinit var progressionService: ProgressionService
+  private lateinit var zoneTemplateCatalog: ZoneTemplateCatalog
+  private lateinit var enemyTemplateCatalog: EnemyTemplateCatalog
+  private lateinit var randomSource: RandomSource
   private lateinit var config: GameConfig
   private lateinit var service: CombatTickService
 
@@ -45,6 +55,9 @@ class CombatTickServiceTest : StringSpec() {
       playerStateWorkQueue = mockk()
       combatLootService = mockk()
       progressionService = mockk()
+      zoneTemplateCatalog = mockk()
+      enemyTemplateCatalog = mockk()
+      randomSource = mockk()
       config =
         gameConfig(
           damageInterval = Duration.ofSeconds(1),
@@ -58,6 +71,9 @@ class CombatTickServiceTest : StringSpec() {
           playerStateWorkQueue,
           combatLootService,
           progressionService,
+          zoneTemplateCatalog,
+          enemyTemplateCatalog,
+          randomSource,
           ScalingRule(config),
           config,
         )
@@ -90,6 +106,7 @@ class CombatTickServiceTest : StringSpec() {
       every { playerStateWorkQueue.markDirty(playerId) } just runs
       every { combatLootService.rollLoot(any(), any(), any()) } returns null
       every { progressionService.recordKill(any(), any(), any()) } returns Unit
+      every { enemyTemplateCatalog.requireRandom(listOf("training-dummy"), randomSource) } returns trainingDummyEnemy()
 
       runBlocking {
         service.tickZone("starter-plains", Duration.ofMillis(200))
@@ -153,6 +170,7 @@ class CombatTickServiceTest : StringSpec() {
         firstArg<CombatState>().also { savedState = it }
       }
       every { playerStateWorkQueue.markDirty(playerId) } just runs
+      every { enemyTemplateCatalog.requireRandom(listOf("training-dummy"), randomSource) } returns trainingDummyEnemy()
 
       runBlocking {
         service.tickZone("starter-plains", Duration.ofMillis(200))
@@ -160,6 +178,66 @@ class CombatTickServiceTest : StringSpec() {
 
       savedState shouldBe CombatState.idle(playerId, lastSimulatedAt = savedState?.lastSimulatedAt)
       verify(exactly = 1) { playerStateWorkQueue.markDirty(playerId) }
+    }
+
+    "tick respawns a random enemy from the current zone pool after a win" {
+      val playerId = UUID.randomUUID()
+      val teamId = UUID.randomUUID()
+      val zone =
+        ZoneTemplate(
+          "starter-plains",
+          "Starter Plains",
+          LevelRange(1, 10),
+          emptyList(),
+          emptyList(),
+          listOf("training-dummy", "straw-golem"),
+        )
+      val current =
+        expectedSingleMemberCombatState(
+          playerId = playerId,
+          teamId = teamId,
+          attack = 150f,
+          hit = 1f,
+          currentHp = 100f,
+          maxHp = 100f,
+          enemyHp = 1f,
+          enemyMaxHp = 1f,
+          enemyAttack = 1f,
+        )
+      var currentState = current
+      var savedState: CombatState? = null
+
+      every { combatStateRepository.findActiveByZoneId(zone.id) } answers { listOf(currentState) }
+      every { activePlayerRegistry.activePlayerIds() } returns setOf(playerId)
+      every { combatStateRepository.findById(playerId) } answers { currentState }
+      every { combatStatService.teamStatsForPlayerOrNull(playerId, any()) } returns
+        expectedSingleMemberTeamCombatStats(teamId = teamId, attack = 150f, hit = 1f, maxHp = 100f)
+      every { combatStateRepository.save(any()) } answers {
+        firstArg<CombatState>().also {
+          currentState = it
+          savedState = it
+        }
+      }
+      every { playerStateWorkQueue.markDirty(playerId) } just runs
+      every { combatLootService.rollLoot(playerId, zone.id, any()) } returns null
+      every { progressionService.recordKill(playerId, zone.id, any()) } returns Unit
+      every { progressionService.requireZoneProgress(playerId, zone.id) } returns mockk { every { level } returns 1 }
+      every { zoneTemplateCatalog.require(zone.id) } returns zone
+      every { enemyTemplateCatalog.requireRandom(zone.enemies, randomSource) } returns strawGolemEnemy()
+
+      runBlocking {
+        service.tickZone(zone.id, Duration.ofSeconds(1))
+      }
+      runBlocking {
+        service.tickZone(zone.id, Duration.ofSeconds(1))
+      }
+
+      savedState?.status shouldBe CombatStatus.FIGHTING
+      savedState?.enemyId shouldBe "straw-golem"
+      savedState?.enemyName shouldBe "Straw Golem"
+      savedState?.enemyAttack shouldBe 2f
+      savedState?.enemyHp shouldBe 1200f
+      savedState?.enemyMaxHp shouldBe 1200f
     }
   }
 }

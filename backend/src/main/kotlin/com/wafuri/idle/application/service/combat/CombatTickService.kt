@@ -4,9 +4,11 @@ import com.wafuri.idle.application.config.GameConfig
 import com.wafuri.idle.application.port.out.ActivePlayerRegistry
 import com.wafuri.idle.application.port.out.CombatStateRepository
 import com.wafuri.idle.application.port.out.PlayerStateWorkQueue
+import com.wafuri.idle.application.service.enemy.EnemyTemplateCatalog
 import com.wafuri.idle.application.service.player.ProgressionService
 import com.wafuri.idle.application.service.runInNewTransaction
 import com.wafuri.idle.application.service.scaling.ScalingRule
+import com.wafuri.idle.application.service.zone.ZoneTemplateCatalog
 import com.wafuri.idle.domain.model.CombatState
 import com.wafuri.idle.domain.model.CombatStatus
 import jakarta.enterprise.context.ApplicationScoped
@@ -26,6 +28,9 @@ class CombatTickService(
   private val playerStateWorkQueue: PlayerStateWorkQueue,
   private val combatLootService: CombatLootService,
   private val progressionService: ProgressionService,
+  private val zoneTemplateCatalog: ZoneTemplateCatalog,
+  private val enemyTemplateCatalog: EnemyTemplateCatalog,
+  private val randomSource: RandomSource,
   private val scalingRule: ScalingRule,
   private val gameConfig: GameConfig,
 ) {
@@ -116,19 +121,16 @@ class CombatTickService(
 
   private fun refreshRespawnedEnemy(
     playerId: UUID,
-    previousState: com.wafuri.idle.domain.model.CombatState,
-    nextState: com.wafuri.idle.domain.model.CombatState,
-  ): com.wafuri.idle.domain.model.CombatState {
+    previousState: CombatState,
+    nextState: CombatState,
+  ): CombatState {
     if (previousState.status !in setOf(CombatStatus.WON, CombatStatus.DOWN) || nextState.status != CombatStatus.FIGHTING) {
       return nextState
     }
     val zoneId = requireNotNull(nextState.zoneId) { "Respawned combat must retain a zone id." }
     val zoneLevel = progressionService.requireZoneProgress(playerId, zoneId).level
-    val scaledEnemyHp = scalingRule.enemyHpFor(zoneLevel, nextState.enemyBaseHp)
-    return nextState.refreshEnemy(
-      enemyLevel = zoneLevel,
-      enemyAttack = gameConfig.combat().enemyAttack(),
-      enemyMaxHp = scaledEnemyHp,
-    )
+    val enemy = enemyTemplateCatalog.requireRandom(zoneTemplateCatalog.require(zoneId).enemies, randomSource)
+    val scaledEnemyHp = scalingRule.enemyHpFor(zoneLevel, enemy.baseHp)
+    return nextState.refreshEnemy(enemy.id, enemy.name, enemy.image, enemy.baseHp, zoneLevel, enemy.attack, scaledEnemyHp)
   }
 }

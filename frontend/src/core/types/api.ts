@@ -99,6 +99,7 @@ export interface CombatSnapshot {
   zoneId: string | null
   activeTeamId: string | null
   enemyName: string | null
+  enemyImage: string | null
   enemyAttack: number
   enemyHp: number
   enemyMaxHp: number

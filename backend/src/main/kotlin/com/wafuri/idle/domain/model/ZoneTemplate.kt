@@ -12,7 +12,7 @@ data class ZoneTemplate(
     require(id.isNotBlank()) { "Zone id must not be blank." }
     require(name.isNotBlank()) { "Zone name must not be blank." }
     require(enemies.isNotEmpty()) { "Zone must define at least one enemy." }
-    require(enemies.none { it.isBlank() }) { "Zone enemy names must not be blank." }
+    require(enemies.none { it.isBlank() }) { "Zone enemy ids must not be blank." }
     require(eventRefs.none { it.isBlank() }) { "Zone event refs must not be blank." }
     require(lootTable.map { it.itemName }.distinct().size == lootTable.size) {
       "Zone loot entries must be unique by item name."

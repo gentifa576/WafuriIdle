@@ -98,6 +98,7 @@ test('guest onboarding can reach combat with mocked backend transport', async ({
                 zoneId: 'starter-plains',
                 activeTeamId: 'team-1',
                 enemyName: 'Training Slime',
+                enemyImage: null,
                 enemyAttack: 1,
                 enemyHp: 12,
                 enemyMaxHp: 20,

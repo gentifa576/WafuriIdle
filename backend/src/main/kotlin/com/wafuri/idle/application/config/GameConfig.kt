@@ -32,10 +32,6 @@ interface GameConfig {
   }
 
   interface Combat {
-    fun enemyMaxHp(): Float
-
-    fun enemyAttack(): Float
-
     fun damageInterval(): Duration
 
     fun respawnDelay(): Duration

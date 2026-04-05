@@ -154,6 +154,7 @@ class CombatProgressionE2ETest {
         enemyHp = 0f,
         enemyMaxHp = 1000f,
         members = listOf(expectedCombatMemberState("nimbus", 13.7f, 9.8f, 2.3000002f, 9.3f)),
+        pendingDamageMillis = wonState.pendingDamageMillis,
         lastSimulatedAt = wonState.lastSimulatedAt,
       )
 

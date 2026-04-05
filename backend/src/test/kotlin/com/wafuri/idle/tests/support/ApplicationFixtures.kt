@@ -11,6 +11,7 @@ import com.wafuri.idle.domain.model.CombatStatType
 import com.wafuri.idle.domain.model.CombatTargetType
 import com.wafuri.idle.domain.model.CombatValueFormula
 import com.wafuri.idle.domain.model.CombatValueFormulaType
+import com.wafuri.idle.domain.model.EnemyTemplate
 import com.wafuri.idle.domain.model.Item
 import com.wafuri.idle.domain.model.ItemType
 import com.wafuri.idle.domain.model.PassiveDefinition
@@ -194,4 +195,30 @@ fun armorItem(): Item =
     type = ItemType.ARMOR,
     baseStat = Stat(StatType.VITALITY, 18f),
     subStatPool = listOf(StatType.STRENGTH, StatType.WISDOM, StatType.CRIT_DAMAGE),
+  )
+
+fun trainingDummyEnemy(
+  id: String = "training-dummy",
+  image: String? = null,
+  baseHp: Float = 1000f,
+  attack: Float = 1f,
+): EnemyTemplate =
+  EnemyTemplate(
+    id = id,
+    name = "Training Dummy",
+    image = image,
+    baseHp = baseHp,
+    attack = attack,
+  )
+
+fun strawGolemEnemy(
+  id: String = "straw-golem",
+  image: String? = null,
+): EnemyTemplate =
+  EnemyTemplate(
+    id = id,
+    name = "Straw Golem",
+    image = image,
+    baseHp = 1200f,
+    attack = 2f,
   )

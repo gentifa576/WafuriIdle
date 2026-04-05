@@ -80,8 +80,21 @@ Zones are static content, not runtime combat state.
   - `levelRange`
   - future `eventRefs`
   - `lootTable`
-  - `enemies`
-- Combat currently uses the default zone from the cached zone catalog as its source of enemy data.
+  - `enemies` as enemy template ids
+- Combat currently uses the default zone from the cached zone catalog as its source of enemy references and randomly selects from that zone's enemy pool whenever combat enters `FIGHTING`.
+
+## Enemy Templates
+Enemies are static templates referenced by zones.
+
+- Non-prod startup loads enemy templates from [enemies.json](src/main/resources/enemies/enemies.json).
+- Prod startup skips the resource fetcher and loads enemy templates from the database into an in-memory catalog.
+- Prod also refreshes the DB-backed enemy template cache periodically.
+- Enemy templates currently define:
+  - `id`
+  - `name`
+  - optional `image`
+  - `baseHp`
+  - `attack`
 
 ## Item Templates
 Items are static template content plus generated inventory state.
@@ -121,8 +134,8 @@ Items are static template content plus generated inventory state.
   - `hit = agility.base`
   - `hp = vitality.base`
   - `teamDps = sum(attack * hit)` across living combat members only
-- Combat starts in the default zone and uses that zone's first enemy name.
-- Enemy base HP is configured globally at `1000` for now, then scaled per spawn by the player's current zone level through `game.combat.zone-scaling`.
+- Combat starts in the default zone and randomly selects an enemy template id from that zone's enemy pool.
+- Enemy base HP and retaliation attack come from the selected enemy template, and enemy HP is then scaled per spawn by the player's current zone level through `game.combat.zone-scaling`.
 - Damage resolves on a separate `1s` cadence using real elapsed tick time.
 - After an enemy dies, combat auto-continues after the configured respawn delay (`1s` by default).
 - Loot drop settings are grouped under `game.combat.loot`:

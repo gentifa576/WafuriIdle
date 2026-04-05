@@ -99,6 +99,7 @@ export interface ClientCombat {
   zoneId: string | null
   activeTeamId: string | null
   enemyName: string | null
+  enemyImage: string | null
   enemyAttack: number
   enemyHp: number
   enemyMaxHp: number
@@ -242,6 +243,7 @@ export function mapCombat(snapshot: CombatSnapshot | null): ClientCombat | null 
     zoneId: snapshot.zoneId,
     activeTeamId: snapshot.activeTeamId,
     enemyName: snapshot.enemyName,
+    enemyImage: snapshot.enemyImage,
     enemyAttack: snapshot.enemyAttack,
     enemyHp: snapshot.enemyHp,
     enemyMaxHp: snapshot.enemyMaxHp,
