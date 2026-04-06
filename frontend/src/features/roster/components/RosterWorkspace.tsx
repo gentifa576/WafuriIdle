@@ -80,74 +80,76 @@ export function RosterWorkspace({ ownedCharacters, templates }: RosterWorkspaceP
                 }
               />
 
-              <div className="roster-detail-layout">
-                <div className="roster-detail-stage">
-                  <div className="roster-detail-header">
-                    <CharacterRosterTile
-                      compact
-                      image={selectedCharacter.image}
-                      name={selectedCharacter.name}
-                      selected
-                    />
-                  </div>
-
-                  <SurfaceCard className="roster-detail-panel">
-                    <div className="roster-detail-summary">
-                      <span className="label">Character Details</span>
-                      <h3>{selectedCharacter.name}</h3>
-                      <p>Level {selectedCharacter.level}</p>
-                      <p className="muted">
-                        Roster member with {selectedCharacter.tags.length || 'no'} authored tag{selectedCharacter.tags.length === 1 ? '' : 's'}.
-                      </p>
+              <div className="roster-scroll-body">
+                <div className="roster-detail-layout">
+                  <div className="roster-detail-stage">
+                    <div className="roster-detail-header">
+                      <CharacterRosterTile
+                        compact
+                        image={selectedCharacter.image}
+                        name={selectedCharacter.name}
+                        selected
+                      />
                     </div>
 
-                    <div className="roster-stat-grid">
-                      {statEntries(selectedCharacter).map((stat) => (
-                        <div className="roster-stat" key={stat.label}>
-                          <span className="label">{stat.label}</span>
-                          <strong>{stat.value}</strong>
-                          <small className="muted">Base {stat.base} + {stat.increment}/lv</small>
-                        </div>
-                      ))}
-                    </div>
+                    <SurfaceCard className="roster-detail-panel">
+                      <div className="roster-detail-summary">
+                        <span className="label">Character Details</span>
+                        <h3>{selectedCharacter.name}</h3>
+                        <p>Level {selectedCharacter.level}</p>
+                        <p className="muted">
+                          Roster member with {selectedCharacter.tags.length || 'no'} authored tag{selectedCharacter.tags.length === 1 ? '' : 's'}.
+                        </p>
+                      </div>
 
-                    <div className="roster-detail-meta">
-                      <SurfaceCard className="roster-info-card">
-                        <span className="label">Combat Kit</span>
-                        <h3>{selectedCharacter.skill?.name ?? 'No skill configured'}</h3>
-                        <div className="roster-kit-copy">
-                          <p className="muted">
-                            {selectedCharacter.skill
-                              ? `${Math.round(selectedCharacter.skill.cooldownMillis / 100) / 10}s cooldown`
-                              : 'This character currently has no authored active skill.'}
-                          </p>
-                          <p>
-                            Passive: <strong>{selectedCharacter.passive?.name ?? 'No passive configured'}</strong>
-                          </p>
-                          {selectedCharacter.passive ? <p className="muted">{describePassive(selectedCharacter.passive)}</p> : null}
-                        </div>
-                      </SurfaceCard>
-
-                      <SurfaceCard className="roster-info-card">
-                        <span className="label">Identity</span>
-                        <h3>{selectedCharacter.key}</h3>
-                        <div className="roster-kit-copy">
-                          <p className="muted">Owned characters currently scale with the player level.</p>
-                          <div className="roster-tags">
-                            {selectedCharacter.tags.length > 0 ? (
-                              selectedCharacter.tags.map((tag) => (
-                                <span className="roster-tag" key={tag}>
-                                  {tag}
-                                </span>
-                              ))
-                            ) : (
-                              <span className="muted">No authored tags</span>
-                            )}
+                      <div className="roster-stat-grid">
+                        {statEntries(selectedCharacter).map((stat) => (
+                          <div className="roster-stat" key={stat.label}>
+                            <span className="label">{stat.label}</span>
+                            <strong>{stat.value}</strong>
+                            <small className="muted">Base {stat.base} + {stat.increment}/lv</small>
                           </div>
-                        </div>
-                      </SurfaceCard>
-                    </div>
-                  </SurfaceCard>
+                        ))}
+                      </div>
+
+                      <div className="roster-detail-meta">
+                        <SurfaceCard className="roster-info-card">
+                          <span className="label">Combat Kit</span>
+                          <h3>{selectedCharacter.skill?.name ?? 'No skill configured'}</h3>
+                          <div className="roster-kit-copy">
+                            <p className="muted">
+                              {selectedCharacter.skill
+                                ? `${Math.round(selectedCharacter.skill.cooldownMillis / 100) / 10}s cooldown`
+                                : 'This character currently has no authored active skill.'}
+                            </p>
+                            <p>
+                              Passive: <strong>{selectedCharacter.passive?.name ?? 'No passive configured'}</strong>
+                            </p>
+                            {selectedCharacter.passive ? <p className="muted">{describePassive(selectedCharacter.passive)}</p> : null}
+                          </div>
+                        </SurfaceCard>
+
+                        <SurfaceCard className="roster-info-card">
+                          <span className="label">Identity</span>
+                          <h3>{selectedCharacter.key}</h3>
+                          <div className="roster-kit-copy">
+                            <p className="muted">Owned characters currently scale with the player level.</p>
+                            <div className="roster-tags">
+                              {selectedCharacter.tags.length > 0 ? (
+                                selectedCharacter.tags.map((tag) => (
+                                  <span className="roster-tag" key={tag}>
+                                    {tag}
+                                  </span>
+                                ))
+                              ) : (
+                                <span className="muted">No authored tags</span>
+                              )}
+                            </div>
+                          </div>
+                        </SurfaceCard>
+                      </div>
+                    </SurfaceCard>
+                  </div>
                 </div>
               </div>
             </>
@@ -155,37 +157,39 @@ export function RosterWorkspace({ ownedCharacters, templates }: RosterWorkspaceP
             <>
               <SectionHeader eyebrow="Roster" title="Character Unlocks" />
 
-              {roster.length > 0 ? (
-                <div className="card-grid roster-grid">
-                  {roster.map((character) => (
-                    <CharacterRosterTile
-                      badge={`Lv ${character.level}`}
-                      image={character.image}
-                      key={character.key}
-                      name={character.name}
-                      onBlur={() => setHoverState((current) => (current?.key === character.key ? null : current))}
-                      onClick={() => {
-                        clearHoverTimer(hoverTimeoutRef)
-                        setHoverState(null)
-                        setSelectedCharacterKey(character.key)
-                      }}
-                      onFocus={() => setHoverState({ key: character.key, x: window.innerWidth / 2, y: 176 })}
-                      onMouseEnter={(event) => queueHover(character.key, event, hoverTimeoutRef, setHoverState)}
-                      onMouseLeave={() => {
-                        clearHoverTimer(hoverTimeoutRef)
-                        setHoverState((current) => (current?.key === character.key ? null : current))
-                      }}
-                      onMouseMove={(event) => updateHoverPosition(character.key, event, setHoverState)}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <SurfaceCard>
-                  <span className="label">No Unlocks</span>
-                  <strong>Your roster is empty.</strong>
-                  <p>Claim a starter or pull characters from the gacha to populate this view.</p>
-                </SurfaceCard>
-              )}
+              <div className="roster-scroll-body">
+                {roster.length > 0 ? (
+                  <div className="card-grid roster-grid">
+                    {roster.map((character) => (
+                      <CharacterRosterTile
+                        badge={`Lv ${character.level}`}
+                        image={character.image}
+                        key={character.key}
+                        name={character.name}
+                        onBlur={() => setHoverState((current) => (current?.key === character.key ? null : current))}
+                        onClick={() => {
+                          clearHoverTimer(hoverTimeoutRef)
+                          setHoverState(null)
+                          setSelectedCharacterKey(character.key)
+                        }}
+                        onFocus={() => setHoverState({ key: character.key, x: window.innerWidth / 2, y: 176 })}
+                        onMouseEnter={(event) => queueHover(character.key, event, hoverTimeoutRef, setHoverState)}
+                        onMouseLeave={() => {
+                          clearHoverTimer(hoverTimeoutRef)
+                          setHoverState((current) => (current?.key === character.key ? null : current))
+                        }}
+                        onMouseMove={(event) => updateHoverPosition(character.key, event, setHoverState)}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <SurfaceCard>
+                    <span className="label">No Unlocks</span>
+                    <strong>Your roster is empty.</strong>
+                    <p>Claim a starter or pull characters from the gacha to populate this view.</p>
+                  </SurfaceCard>
+                )}
+              </div>
             </>
           )}
         </section>

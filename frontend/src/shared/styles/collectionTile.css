@@ -1,0 +1,59 @@
+.collection-tile {
+  width: 100%;
+  padding: 0.45rem;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
+    rgba(19, 19, 29, 0.88);
+  display: grid;
+  gap: 0.7rem;
+  text-align: left;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.collection-tile:hover:not(:disabled),
+.collection-tile:focus-visible {
+  border-color: rgba(250, 179, 135, 0.34);
+  background:
+    linear-gradient(180deg, rgba(250, 179, 135, 0.12), rgba(255, 255, 255, 0.03)),
+    rgba(24, 24, 37, 0.96);
+}
+
+.collection-tile.is-selected {
+  border-color: rgba(250, 179, 135, 0.5);
+  box-shadow:
+    0 0 0 1px rgba(250, 179, 135, 0.16),
+    0 18px 40px rgba(0, 0, 0, 0.28);
+}
+
+.collection-tile--compact {
+  max-width: 250px;
+}
+
+.collection-tile__portrait-frame {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.06);
+  background:
+    radial-gradient(circle at top, rgba(250, 179, 135, 0.2), transparent 58%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(17, 17, 27, 0.88));
+}
+
+.collection-tile__copy {
+  display: grid;
+  gap: 0.18rem;
+  padding: 0 0.15rem 0.2rem;
+}
+
+.collection-tile__copy strong {
+  font-size: 0.95rem;
+  line-height: 1.1;
+  display: -webkit-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+}

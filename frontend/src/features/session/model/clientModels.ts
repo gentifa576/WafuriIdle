@@ -110,6 +110,7 @@ export interface ClientInventoryItem {
   itemName: string
   itemDisplayName: string
   itemType: string
+  itemLevel: number
   itemBaseStat: ClientStat
   itemSubStatPool: string[]
   subStats: ClientStat[]
@@ -222,6 +223,7 @@ export function mapInventorySnapshots(items: InventoryItemSnapshot[]): ClientInv
     itemName: item.itemName,
     itemDisplayName: item.itemDisplayName,
     itemType: item.itemType,
+    itemLevel: item.itemLevel,
     itemBaseStat: mapStat(item.itemBaseStat),
     itemSubStatPool: [...item.itemSubStatPool],
     subStats: item.subStats.map(mapStat),
@@ -251,6 +253,7 @@ export function mapRestInventory(items: Array<InventoryItem | InventoryItemSnaps
       itemName: itemDefinition.name,
       itemDisplayName: itemDefinition.displayName,
       itemType: itemDefinition.type,
+      itemLevel: item.itemLevel,
       itemBaseStat: mapStat(itemDefinition.baseStat),
       itemSubStatPool: [...itemDefinition.subStatPool],
       subStats: item.subStats.map(mapStat),

@@ -221,6 +221,7 @@ function isInventoryItemSnapshot(value: unknown): value is InventoryItemSnapshot
     isString(value.itemName) &&
     isString(value.itemDisplayName) &&
     isString(value.itemType) &&
+    isNumber(value.itemLevel) &&
     isStat(value.itemBaseStat) &&
     isStringArray(value.itemSubStatPool) &&
     isStatArray(value.subStats) &&

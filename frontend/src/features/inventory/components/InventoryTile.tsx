@@ -1,10 +1,12 @@
-import type { MouseEvent, ReactNode } from 'react'
+import type { MouseEvent } from 'react'
 import { CollectionTile } from '../../../shared/ui/CollectionTile'
 
-interface CharacterRosterTileProps {
+interface InventoryTileProps {
   name: string
-  image?: string | null
-  badge?: ReactNode
+  type: string
+  level: number
+  rarity: string
+  equipped: boolean
   onClick?: () => void
   onMouseEnter?: (event: MouseEvent<HTMLButtonElement>) => void
   onMouseLeave?: () => void
@@ -15,10 +17,12 @@ interface CharacterRosterTileProps {
   compact?: boolean
 }
 
-export function CharacterRosterTile({
+export function InventoryTile({
   name,
-  image,
-  badge,
+  type,
+  level,
+  rarity,
+  equipped,
   onClick,
   onMouseEnter,
   onMouseLeave,
@@ -27,11 +31,11 @@ export function CharacterRosterTile({
   onBlur,
   selected = false,
   compact = false,
-}: CharacterRosterTileProps) {
+}: InventoryTileProps) {
   return (
     <CollectionTile
       ariaLabel={`View ${name}`}
-      className="character-tile"
+      className={`item-tile${equipped ? ' is-equipped' : ''}`}
       compact={compact}
       name={name}
       onBlur={onBlur}
@@ -42,14 +46,11 @@ export function CharacterRosterTile({
       onMouseMove={onMouseMove}
       portrait={
         <>
-          {image ? (
-            <img alt="" className="character-tile__portrait" loading="lazy" src={image} />
-          ) : (
-            <div aria-hidden="true" className="character-tile__fallback">
-              {initials(name)}
-            </div>
-          )}
-          {badge ? <span className="character-tile__badge">{badge}</span> : null}
+          <div aria-hidden="true" className={`item-tile__placeholder item-tile__placeholder--${type.toLowerCase()}`}>
+            <span>{typeAbbreviation(type)}</span>
+          </div>
+          <span className="item-tile__badge">Lv {level}</span>
+          <span className="item-tile__rarity">{rarity}</span>
         </>
       }
       selected={selected}
@@ -57,10 +58,15 @@ export function CharacterRosterTile({
   )
 }
 
-function initials(name: string) {
-  return name
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? '')
-    .join('')
+function typeAbbreviation(type: string) {
+  switch (type) {
+    case 'WEAPON':
+      return 'WP'
+    case 'ARMOR':
+      return 'AR'
+    case 'ACCESSORY':
+      return 'AC'
+    default:
+      return type.slice(0, 2).toUpperCase()
+  }
 }

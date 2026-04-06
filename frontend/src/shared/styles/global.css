@@ -150,6 +150,13 @@ select:focus-visible {
   min-height: calc(100vh - 2rem);
 }
 
+.app-workspace--inventory,
+.app-workspace--characters {
+  height: calc(100vh - 2rem);
+  max-height: calc(100vh - 2rem);
+  overflow: hidden;
+}
+
 .panel {
   border: 1px solid var(--color-border-default);
   border-radius: 28px;

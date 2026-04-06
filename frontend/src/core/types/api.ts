@@ -88,6 +88,7 @@ export interface InventoryItemSnapshot {
   itemName: string
   itemDisplayName: string
   itemType: string
+  itemLevel: number
   itemBaseStat: Stat
   itemSubStatPool: string[]
   subStats: Stat[]

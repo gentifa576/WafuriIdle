@@ -152,7 +152,11 @@ export function CombatScreen() {
   }
 
   return (
-    <main className="hud-shell app-workspace">
+    <main
+      className={`hud-shell app-workspace${
+        activeView === 'inventory' || activeView === 'characters' ? ` app-workspace--${activeView}` : ''
+      }`}
+    >
       <div aria-atomic="true" aria-live="polite" className="sr-only">
         {screenReaderStatus}
       </div>

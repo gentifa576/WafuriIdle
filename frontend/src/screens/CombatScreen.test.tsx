@@ -613,6 +613,7 @@ describe('CombatScreen', () => {
         itemName: 'iron-sword',
         itemDisplayName: 'Iron Sword',
         itemType: 'WEAPON',
+        itemLevel: 4,
         itemBaseStat: { type: 'ATK', value: 12 },
         itemSubStatPool: [],
         subStats: [{ type: 'CRIT', value: 2 }],
@@ -633,10 +634,13 @@ describe('CombatScreen', () => {
     expect(screen.getByRole('button', { name: 'Open combat workspace. Current combat status: Idle.' })).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Open inventory workspace. 1 items available.' }))
-    await user.click(screen.getByRole('button', { name: 'Inspect details' }))
+    await user.click(screen.getByRole('button', { name: 'View Iron Sword' }))
 
-    expect(screen.getByRole('region', { name: 'Iron Sword details' })).toBeInTheDocument()
-    expect(screen.getByText('ATK 12')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Back' })).toBeInTheDocument()
+    expect(screen.getByText('Item Details')).toBeInTheDocument()
+    expect(screen.getAllByText('Iron Sword').length).toBeGreaterThan(0)
+    expect(screen.getByText('ATK')).toBeInTheDocument()
+    expect(screen.getByText('12')).toBeInTheDocument()
   })
 
   it('shows standardized disconnected and empty combat states', async () => {

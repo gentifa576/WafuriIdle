@@ -30,6 +30,7 @@ describe('clientModels', () => {
         itemName: 'rusty-sword',
         itemDisplayName: 'Rusty Sword',
         itemType: 'WEAPON',
+        itemLevel: 3,
         itemBaseStat: { type: 'ATTACK', value: 7 },
         itemSubStatPool: ['HIT', 'HP'],
         subStats: [{ type: 'HIT', value: 2 }],
