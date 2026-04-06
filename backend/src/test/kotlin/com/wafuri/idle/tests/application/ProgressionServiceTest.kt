@@ -72,8 +72,10 @@ class ProgressionServiceTest : StringSpec() {
       service.recordKill(playerId, zoneId)
 
       savedPlayer shouldBe expectedPlayer(playerId, "Alice", experience = 25, level = 1, gold = 25)
-      savedProgress shouldBe expectedZoneProgress(playerId, zoneId, 1, 1)
-      verify(exactly = 0) { playerEventQueue.enqueue(any()) }
+      savedProgress shouldBe expectedZoneProgress(playerId, zoneId, 16, 5)
+      verify(exactly = 1) {
+        playerEventQueue.enqueue(ZoneLevelUpMessage(playerId = playerId, zoneId = zoneId, level = 5))
+      }
       verify(exactly = 0) { combatStatService.invalidatePlayer(any()) }
       verify(exactly = 1) { playerStateWorkQueue.markDirty(playerId) }
     }
@@ -97,8 +99,8 @@ class ProgressionServiceTest : StringSpec() {
 
       service.recordKill(playerId, zoneId, 50)
 
-      savedPlayer shouldBe expectedPlayer(playerId, "Alice", experience = 44, level = 1, gold = 44)
-      savedProgress shouldBe expectedZoneProgress(playerId, zoneId, 1, 1)
+      savedPlayer shouldBe expectedPlayer(playerId, "Alice", experience = 38, level = 1, gold = 38)
+      savedProgress shouldBe expectedZoneProgress(playerId, zoneId, 24, 6)
     }
 
     "record kill levels player and zone based on configured thresholds" {
@@ -123,11 +125,48 @@ class ProgressionServiceTest : StringSpec() {
       service.recordKill(playerId, zoneId)
 
       savedPlayer shouldBe expectedPlayer(playerId, "Alice", experience = 115, level = 2, gold = 25)
-      savedProgress shouldBe expectedZoneProgress(playerId, zoneId, 3, 2)
+      savedProgress shouldBe expectedZoneProgress(playerId, zoneId, 18, 5)
+      verify(exactly = 1) {
+        playerEventQueue.enqueue(ZoneLevelUpMessage(playerId = playerId, zoneId = zoneId, level = 5))
+      }
+      verify(exactly = 1) { combatStatService.invalidatePlayer(playerId) }
+    }
+
+    "record kill can grant multiple zone progress points from one kill" {
+      val playerId = UUID.randomUUID()
+      val zoneId = "starter-plains"
+      val currentPlayer = expectedPlayer(playerId, "Alice")
+      val currentProgress = PlayerZoneProgress(playerId, zoneId, 2, 1)
+      var savedProgress: PlayerZoneProgress? = null
+
+      config = gameConfig(killExperience = 25, experiencePerLevel = 100, zoneKillsPerLevel = 3, zoneProgressMultiplier = 2.5f)
+      service =
+        ProgressionService(
+          playerRepository,
+          playerZoneProgressRepository,
+          playerEventQueue,
+          playerStateWorkQueue,
+          combatStatService,
+          ScalingRule(config),
+          config,
+        )
+
+      every { playerRepository.require(playerId) } returns currentPlayer
+      every { playerRepository.save(any()) } answers { firstArg<Player>() }
+      every { playerZoneProgressRepository.findByPlayerIdAndZoneId(playerId, zoneId) } returns currentProgress
+      every { playerZoneProgressRepository.save(any()) } answers {
+        firstArg<PlayerZoneProgress>().also { savedProgress = it }
+      }
+      every { playerEventQueue.enqueue(any()) } just runs
+      every { playerStateWorkQueue.markDirty(playerId) } just runs
+      every { combatStatService.invalidatePlayer(any()) } just runs
+
+      service.recordKill(playerId, zoneId)
+
+      savedProgress shouldBe expectedZoneProgress(playerId, zoneId, 5, 2)
       verify(exactly = 1) {
         playerEventQueue.enqueue(ZoneLevelUpMessage(playerId = playerId, zoneId = zoneId, level = 2))
       }
-      verify(exactly = 1) { combatStatService.invalidatePlayer(playerId) }
     }
   }
 }

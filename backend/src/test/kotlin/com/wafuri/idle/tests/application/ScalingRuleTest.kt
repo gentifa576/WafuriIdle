@@ -29,34 +29,34 @@ class ScalingRuleTest :
         ScalingCheckpoint(
           zoneLevel = 15,
           zoneMultiplier = "1.072",
-          rewardMultiplier = "1.036",
+          rewardMultiplier = "1.026",
           enemyHpForBase100 = "107.232",
-          scaledBaseStat = "22.896",
-          scaledSubStat = "7.420",
+          scaledBaseStat = "75.354",
+          scaledSubStat = "24.420",
         ),
         ScalingCheckpoint(
           zoneLevel = 50,
           zoneMultiplier = "3.074",
-          rewardMultiplier = "1.753",
+          rewardMultiplier = "1.515",
           enemyHpForBase100 = "307.388",
-          scaledBaseStat = "53.136",
-          scaledSubStat = "17.220",
+          scaledBaseStat = "366.042",
+          scaledSubStat = "118.625",
         ),
         ScalingCheckpoint(
           zoneLevel = 100,
           zoneMultiplier = "10.942",
-          rewardMultiplier = "3.308",
+          rewardMultiplier = "2.424",
           enemyHpForBase100 = "1094.187",
-          scaledBaseStat = "96.336",
-          scaledSubStat = "31.220",
+          scaledBaseStat = "1088.680",
+          scaledSubStat = "352.813",
         ),
         ScalingCheckpoint(
           zoneLevel = 1000,
           zoneMultiplier = "5628647424.000",
-          rewardMultiplier = "75024.313",
+          rewardMultiplier = "4051.814",
           enemyHpForBase100 = "562864717824.000",
-          scaledBaseStat = "873.936",
-          scaledSubStat = "283.220",
+          scaledBaseStat = "18736.133",
+          scaledSubStat = "6071.895",
         ),
       )
 
@@ -94,6 +94,20 @@ class ScalingRuleTest :
         rounded3(scalingRule.scaledBaseStat(inventoryItem).value) shouldBe checkpoint.scaledBaseStat
         rounded3(scalingRule.scaledSubStats(inventoryItem).single().value) shouldBe checkpoint.scaledSubStat
       }
+    }
+
+    "player and zone progression thresholds use the nonlinear scaling curves" {
+      scalingRule.totalExperienceForLevel(2) shouldBe 85
+      scalingRule.totalExperienceForLevel(3) shouldBe 180
+      scalingRule.playerLevelForExperience(200) shouldBe 3
+
+      scalingRule.totalKillsForZoneLevel(2) shouldBe 9
+      scalingRule.totalKillsForZoneLevel(3) shouldBe 20
+      scalingRule.zoneLevelForKillCount(32) shouldBe 3
+    }
+
+    "enemy attack scaling uses the zone multiplier and configured exponent" {
+      rounded3(scalingRule.enemyAttackFor(zoneLevel = 50, baseEnemyAttack = 25f)) shouldBe "102.903"
     }
   })
 

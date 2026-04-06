@@ -50,8 +50,13 @@ Current implementation:
 - players start at `0` essence
 - each kill grants base `10` player EXP and base `25` gold before zone reward scaling
 - kill rewards currently scale by defeated enemy zone level through a softer reward curve: `rewardMultiplier = zoneMultiplier ^ rewardScalingExponent`
-- player level currently advances every `100` EXP
-- player level directly scales all owned character combat stats through template stat growth
+- player level currently uses a nonlinear threshold curve with three progression bands:
+  - early `1-20` is fast
+  - mid `21-50` steepens
+  - post-`50` continues scaling without a hard cap
+- the configured `experiencePerLevel` value anchors the level-2 threshold, while later thresholds come from the authoritative scaling rule
+- player level scales all owned character combat stats through a shared soft-capped progression factor instead of raw linear growth
+- the current playtest tuning anchors level `2` at `85` total EXP and targets roughly `1-20` in `~2h` and level `100` in `~28d`
 
 Open questions:
 - exact EXP curve per level
@@ -89,9 +94,16 @@ Current implementation:
 - zone progression starts at level `1`
 - zone progression starts at `0` kills
 - each kill in a zone increments only that player’s progress in that zone
-- zone level currently advances every `10` kills in that zone
+- zone level uses a nonlinear threshold curve with the same three bands as player progression, normalized so the configured `killsPerLevel` value remains the level-2 threshold
+- the current playtest tuning anchors zone level `2` at `9` local progress points
+- zone progression gain is now decoupled slightly from player EXP gain:
+  - each kill still awards one kill for reward and loot purposes
+  - but zone level progression may gain more than one local progress point per kill through config
+  - the current playtest tuning uses `progressMultiplier = 16.0`
+  - this is intended to let local zone pressure outrun global player leveling instead of lagging behind it
 - when a zone level increases, the server pushes a player-scoped WebSocket notification
 - future enemy spawns in that combat now scale their HP from the player's current zone level using config-driven smooth growth plus dynamic spike spacing
+- enemy retaliation attack now also scales from current zone level through the authoritative zone-scaling rule
 - EXP and gold rewards for kills in that zone also scale from the defeated enemy zone level, but use a softer exponent than enemy HP so the economy grows more slowly than combat durability
 
 ## Kill Rewards
@@ -169,9 +181,12 @@ Current combat direction:
 - each spawned enemy resolves from static enemy template content
 
 Current stat derivation:
-- `attack = strength.base + strength.increment * (playerLevel - 1)`
-- `hit = agility.base + agility.increment * (playerLevel - 1)`
-- `hp = vitality.base + vitality.increment * (playerLevel - 1)`
+- `attack`, `hit`, and `hp` still come from `strength`, `agility`, and `vitality`
+- player-level stat growth is no longer raw linear growth
+- the authoritative scaling rule now applies a shared soft-capped player factor across combat-relevant stats
+- scaled `strength` and `vitality` are then converted into combat-space `attack` and `hp`, so the live combat numbers are not the raw authored template stat values
+- agility currently converts into hit with `sqrt(agility)` and a minimum of `1`
+- items are added on top of those scaled character stats and use the validated nonlinear `softcap_surge` item curve, which stays modest early and ramps much harder after about item level `24`
 
 Not in use yet:
 - intelligence
@@ -196,13 +211,13 @@ Current loop direction:
 - zone is the unit that groups combat processing
 - when team stat refresh changes a combat member's max HP, current HP preserves the existing current-to-max ratio instead of keeping the old flat HP value
 - each 1s combat damage step applies team damage first and then immediate enemy retaliation in the same resolution only if the enemy survives that step
-- current enemy retaliation deals the selected enemy template's `attack` damage with no mitigation, but a killed enemy does not retaliate on its death step
+- current enemy retaliation deals the selected enemy template's zone-scaled `attack` damage with no mitigation, but a killed enemy does not retaliate on its death step
 - retaliation currently consumes team HP across living members in team order
 - if every combat member reaches `0 HP`, the team enters a downed state for `30s`
 - while the team is downed, combat-relevant team edits are blocked; players cannot swap characters, activate another team, or equip and unequip items until combat leaves `DOWN`
 - after that down timer, the same team revives at `50%` HP and combat resumes against a fresh full-HP enemy unless the player explicitly stops combat first
-- enemy HP scaling is currently the only implemented enemy-side zone scaling; respawns reuse the active enemy template's `baseHp` and `attack`, with only HP scaling by zone level
-- zone reward scaling currently reuses the same zone multiplier with a softer exponent so reward growth stays below enemy HP growth
+- enemy HP and retaliation attack are both scaled by current zone level; respawns reuse the active enemy template's `baseHp` and `attack` and then apply the authoritative zone scaling rule
+- zone reward scaling currently reuses the same zone multiplier with reward exponent `0.37` so reward growth stays below enemy HP growth
 
 ## Zones
 
@@ -242,7 +257,7 @@ Current loot direction:
 - loot is server-generated and added directly to player inventory
 - loot config is driven by game configuration
 - dropped items inherit an `itemLevel` from the defeated enemy's zone level
-- effective item stats scale from template stat values by item level
+- effective item stats scale from template stat values by item level through the nonlinear `softcap_surge` item curve so items start weaker early and take over more of the power budget later
 
 Current default tuning:
 - base item drop rate: `1%` per kill

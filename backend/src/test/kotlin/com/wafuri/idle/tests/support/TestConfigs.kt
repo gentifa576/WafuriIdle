@@ -17,7 +17,8 @@ fun gameConfig(
   reviveDelay: Duration = Duration.ofSeconds(30),
   reviveHpRatio: Float = 0.5f,
   zoneHpScalingConstant: Float = 1f,
-  rewardScalingExponent: Float = 0.5f,
+  enemyAttackScalingExponent: Float = 1.26f,
+  rewardScalingExponent: Float = 0.37f,
   tutorialEndLevel: Int = 19,
   tutorialGrowthRate: Float = 0.005f,
   normalGrowthRate: Float = 0.02f,
@@ -35,9 +36,10 @@ fun gameConfig(
   sessionDuration: Duration = Duration.ofHours(12),
   authIssuer: String = "wafuri-idle-test",
   killExperience: Int = 10,
-  experiencePerLevel: Int = 100,
+  experiencePerLevel: Int = 85,
   killGold: Int = 25,
-  zoneKillsPerLevel: Int = 10,
+  zoneKillsPerLevel: Int = 9,
+  zoneProgressMultiplier: Float = 16f,
   offlineNotifyThreshold: Duration = Duration.ofMinutes(5),
   contentRefreshInterval: Duration = Duration.ofMinutes(1),
 ): GameConfig {
@@ -85,6 +87,7 @@ fun gameConfig(
   every { progressionConfig.zone() } returns zoneProgressionConfig
   every { progressionConfig.offline() } returns offlineProgressionConfig
   every { zoneScalingConfig.hpScalingConstant() } returns zoneHpScalingConstant
+  every { zoneScalingConfig.enemyAttackScalingExponent() } returns enemyAttackScalingExponent
   every { zoneScalingConfig.rewardScalingExponent() } returns rewardScalingExponent
   every { zoneScalingConfig.tutorialEndLevel() } returns tutorialEndLevel
   every { zoneScalingConfig.tutorialGrowthRate() } returns tutorialGrowthRate
@@ -98,6 +101,7 @@ fun gameConfig(
   every { playerProgressionConfig.experiencePerLevel() } returns experiencePerLevel
   every { playerProgressionConfig.killGold() } returns killGold
   every { zoneProgressionConfig.killsPerLevel() } returns zoneKillsPerLevel
+  every { zoneProgressionConfig.progressMultiplier() } returns zoneProgressMultiplier
   every { offlineProgressionConfig.notifyThreshold() } returns offlineNotifyThreshold
   every { contentConfig.refreshInterval() } returns contentRefreshInterval
   every { gameConfig.tick() } returns tickConfig

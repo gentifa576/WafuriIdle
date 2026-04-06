@@ -89,11 +89,21 @@ class CombatStatService(
                     inventoryItem.equippedPosition == teamSlot.position
                 }
 
+            val totalStrength =
+              scalingRule.scaledStrength(template.strength, player.level) +
+                equippedStatBonus(equippedItems, StatType.STRENGTH)
+            val totalAgility =
+              scalingRule.scaledAgility(template.agility, player.level) +
+                equippedStatBonus(equippedItems, StatType.AGILITY)
+            val totalVitality =
+              scalingRule.scaledVitality(template.vitality, player.level) +
+                equippedStatBonus(equippedItems, StatType.VITALITY)
+
             CharacterCombatStats(
               ownedCharacterKey,
-              template.strength.atLevel(player.level) + equippedItems.sumOf { statBonus(it, StatType.STRENGTH).toDouble() }.toFloat(),
-              template.agility.atLevel(player.level) + equippedItems.sumOf { statBonus(it, StatType.AGILITY).toDouble() }.toFloat(),
-              template.vitality.atLevel(player.level) + equippedItems.sumOf { statBonus(it, StatType.VITALITY).toDouble() }.toFloat(),
+              scalingRule.attackForStrength(totalStrength),
+              scalingRule.hitForAgility(totalAgility),
+              scalingRule.hpForVitality(totalVitality),
             )
           }
         }.filterNotNull()
@@ -102,17 +112,32 @@ class CombatStatService(
       return null
     }
 
-    return PlayerCombatBaseStats(team.id, baseCharacterStats.map { it.characterKey }, baseCharacterStats)
+    return PlayerCombatBaseStats(
+      team.id,
+      baseCharacterStats.map { it.characterKey },
+      baseCharacterStats,
+    )
   }
 
   private fun statBonus(
     inventoryItem: InventoryItem,
     statType: StatType,
-  ): Float =
-    listOf(scalingRule.scaledBaseStat(inventoryItem), *scalingRule.scaledSubStats(inventoryItem).toTypedArray())
+  ): Float {
+    val scaledStats =
+      listOf(
+        scalingRule.scaledBaseStat(inventoryItem),
+        *scalingRule.scaledSubStats(inventoryItem).toTypedArray(),
+      )
+    return scaledStats
       .filter { it.type == statType }
       .sumOf { it.value.toDouble() }
       .toFloat()
+  }
+
+  private fun equippedStatBonus(
+    equippedItems: List<InventoryItem>,
+    statType: StatType,
+  ): Float = equippedItems.sumOf { statBonus(it, statType).toDouble() }.toFloat()
 
   private data class PlayerCombatBaseStats(
     val teamId: UUID,

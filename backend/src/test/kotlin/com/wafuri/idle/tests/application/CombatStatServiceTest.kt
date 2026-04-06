@@ -101,16 +101,16 @@ class CombatStatServiceTest : StringSpec() {
           teamId,
           characterStats =
             listOf(
-              expectedCharacterCombatStats("warrior", 16f, 9.2f, 14.6f),
-              expectedCharacterCombatStats("cleric", 6.4f, 5.2f, 10.4f),
+              expectedCharacterCombatStats("warrior", 24.627907f, 2.8531034f, 643.28906f),
+              expectedCharacterCombatStats("cleric", 10.019767f, 2.1498666f, 462.1927f),
             ),
         )
 
       result shouldBe expected
       result.toCombatMembers() shouldBe
         listOf(
-          expectedCombatMemberState("warrior", 16f, 9.2f, 14.6f, 14.6f),
-          expectedCombatMemberState("cleric", 6.4f, 5.2f, 10.4f, 10.4f),
+          expectedCombatMemberState("warrior", 24.627907f, 2.8531034f, 643.28906f, 643.28906f),
+          expectedCombatMemberState("cleric", 10.019767f, 2.1498666f, 462.1927f, 462.1927f),
         )
     }
 
@@ -119,14 +119,14 @@ class CombatStatServiceTest : StringSpec() {
       val stats =
         expectedTeamCombatStats(
           teamId,
-          listOf(expectedCharacterCombatStats("warrior", 16f, 9.2f, 14.6f)),
+          listOf(expectedCharacterCombatStats("warrior", 28f, 2f, 730f)),
         )
 
       stats.toCombatMembers(
         listOf(expectedCombatMemberState("warrior", 14f, 8f, currentHp = 5f, maxHp = 10f)),
       ) shouldBe
         listOf(
-          expectedCombatMemberState("warrior", 16f, 9.2f, currentHp = 7.3f, maxHp = 14.6f),
+          expectedCombatMemberState("warrior", 28f, 2f, currentHp = 365f, maxHp = 730f),
         )
     }
 
@@ -158,8 +158,8 @@ class CombatStatServiceTest : StringSpec() {
           teamId,
           characterStats =
             listOf(
-              expectedCharacterCombatStats("cleric", 8.549999f, 4.6f, 9.2f),
-              expectedCharacterCombatStats("ranger", 13.5f, 13.8f, 10.3f),
+              expectedCharacterCombatStats("cleric", 14.095638f, 2.0777254f, 431.69427f),
+              expectedCharacterCombatStats("ranger", 22.386627f, 3.598726f, 484.33548f),
             ),
         )
     }
@@ -230,14 +230,14 @@ class CombatStatServiceTest : StringSpec() {
             player.id,
             existingMembers =
               listOf(
-                expectedCombatMemberState("cleric", 5.7f, 4.6f, 9.2f, 9.2f),
-                expectedCombatMemberState("ranger", 9f, 13.8f, 0f, 10.3f),
+                expectedCombatMemberState("cleric", 5.7f, 1f, 9.2f, 9.2f),
+                expectedCombatMemberState("ranger", 9f, 2f, 0f, 10.3f),
               ),
           ),
         )
 
-      buffed.characterStats.first { it.characterKey == "cleric" }.attack shouldBe 8.549999f
-      unbuffed.characterStats.first { it.characterKey == "cleric" }.attack shouldBe 5.7f
+      buffed.characterStats.first { it.characterKey == "cleric" }.attack shouldBe 14.095638f
+      unbuffed.characterStats.first { it.characterKey == "cleric" }.attack shouldBe 9.397092f
       verify(exactly = 1) { playerRepository.require(player.id) }
       verify(exactly = 1) { teamRepository.require(teamId) }
     }

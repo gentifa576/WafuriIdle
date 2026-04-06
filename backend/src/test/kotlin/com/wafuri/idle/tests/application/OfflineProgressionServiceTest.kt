@@ -42,6 +42,8 @@ import kotlinx.coroutines.runBlocking
 import java.time.Duration
 import java.time.Instant
 import java.util.UUID
+import kotlin.math.abs
+import kotlin.math.roundToInt
 
 class OfflineProgressionServiceTest : StringSpec() {
   private lateinit var combatStateRepository: CombatStateRepository
@@ -326,11 +328,14 @@ class OfflineProgressionServiceTest : StringSpec() {
           ScalingRule(config),
           config,
         )
+      val scalingRule = ScalingRule(config)
 
       var offlineSavedState = initialState
       var offlineKills = 0
+      var offlineZoneProgressPoints = 0
       var liveCurrentState = initialState.copy(lastSimulatedAt = null)
       var liveKills = 0
+      var liveZoneProgressPoints = 0
 
       every { offlineCombatStateRepository.findById(playerId) } answers { offlineSavedState }
       every { offlineCombatStateRepository.save(any()) } answers {
@@ -350,11 +355,19 @@ class OfflineProgressionServiceTest : StringSpec() {
         PlayerZoneProgress(
           playerId,
           zoneId,
-          killCount = offlineKills,
-          level = 1 + (offlineKills / 10),
+          killCount = offlineZoneProgressPoints,
+          level = scalingRule.zoneLevelForKillCount(offlineZoneProgressPoints),
         )
       }
-      every { offlineProgressionServicePort.recordKill(playerId, zoneId, any()) } answers { offlineKills += 1 }
+      every { offlineProgressionServicePort.recordKill(playerId, zoneId, any()) } answers {
+        offlineKills += 1
+        val zoneLevel = scalingRule.zoneLevelForKillCount(offlineZoneProgressPoints)
+        val zoneProgressGain =
+          (config.progression().zone().progressMultiplier() * scalingRule.rewardMultiplier(zoneLevel))
+            .roundToInt()
+            .coerceAtLeast(1)
+        offlineZoneProgressPoints += zoneProgressGain
+      }
       every { offlineCombatLootService.rollLoot(playerId, zoneId, any()) } returns null
       every { offlinePlayerMessageQueue.enqueue(any()) } just runs
       every { offlineZoneTemplateCatalog.require(zoneId) } returns
@@ -378,11 +391,19 @@ class OfflineProgressionServiceTest : StringSpec() {
         PlayerZoneProgress(
           playerId,
           zoneId,
-          killCount = liveKills,
-          level = 1 + (liveKills / 10),
+          killCount = liveZoneProgressPoints,
+          level = scalingRule.zoneLevelForKillCount(liveZoneProgressPoints),
         )
       }
-      every { liveProgressionService.recordKill(playerId, zoneId, any()) } answers { liveKills += 1 }
+      every { liveProgressionService.recordKill(playerId, zoneId, any()) } answers {
+        liveKills += 1
+        val zoneLevel = scalingRule.zoneLevelForKillCount(liveZoneProgressPoints)
+        val zoneProgressGain =
+          (config.progression().zone().progressMultiplier() * scalingRule.rewardMultiplier(zoneLevel))
+            .roundToInt()
+            .coerceAtLeast(1)
+        liveZoneProgressPoints += zoneProgressGain
+      }
       every { liveCombatLootService.rollLoot(playerId, zoneId, any()) } returns null
       every { liveZoneTemplateCatalog.require(zoneId) } returns
         ZoneTemplate(zoneId, "Starter Plains", LevelRange(1, 10), emptyList(), emptyList(), listOf("training-dummy"))
@@ -402,15 +423,15 @@ class OfflineProgressionServiceTest : StringSpec() {
         }
       }
 
-      offlineResult shouldBe
-        expectedOfflineProgressionResult(
-          playerId = playerId,
-          offlineDuration = offlineResult.offlineDuration,
-          kills = liveKills,
-          zoneId = zoneId,
-          rewards = emptyList(),
-        )
-      offlineSavedState.copy(lastSimulatedAt = null) shouldBe liveCurrentState.copy(lastSimulatedAt = null)
+      offlineResult.kills shouldBe liveKills
+      offlineResult.zoneId shouldBe zoneId
+      offlineResult.rewards shouldBe emptyList()
+      offlineResult.experienceGained shouldBe liveKills * 10
+      offlineResult.goldGained shouldBe liveKills * 25
+      assertCombatStateMatchesWithHpTolerance(
+        actual = liveCurrentState.copy(lastSimulatedAt = null),
+        expected = offlineSavedState.copy(lastSimulatedAt = null),
+      )
     }
 
     "applyIfNeeded respawns a random enemy from the zone pool after a win" {
@@ -459,5 +480,32 @@ class OfflineProgressionServiceTest : StringSpec() {
       savedState?.enemyHp shouldBe 1200f
       savedState?.enemyMaxHp shouldBe 1200f
     }
+  }
+}
+
+private fun assertCombatStateMatchesWithHpTolerance(
+  actual: CombatState,
+  expected: CombatState,
+  hpTolerance: Float = 0.001f,
+) {
+  actual.playerId shouldBe expected.playerId
+  actual.status shouldBe expected.status
+  actual.zoneId shouldBe expected.zoneId
+  actual.activeTeamId shouldBe expected.activeTeamId
+  actual.enemyId shouldBe expected.enemyId
+  actual.enemyName shouldBe expected.enemyName
+  actual.enemyImage shouldBe expected.enemyImage
+  actual.enemyLevel shouldBe expected.enemyLevel
+  actual.enemyBaseHp shouldBe expected.enemyBaseHp
+  actual.enemyAttack shouldBe expected.enemyAttack
+  actual.enemyHp shouldBe expected.enemyHp
+  actual.enemyMaxHp shouldBe expected.enemyMaxHp
+  actual.pendingDamageMillis shouldBe expected.pendingDamageMillis
+  actual.pendingRespawnMillis shouldBe expected.pendingRespawnMillis
+  actual.pendingReviveMillis shouldBe expected.pendingReviveMillis
+  actual.members.size shouldBe expected.members.size
+  actual.members.zip(expected.members).forEach { (actualMember, expectedMember) ->
+    actualMember.copy(currentHp = 0f) shouldBe expectedMember.copy(currentHp = 0f)
+    (abs(actualMember.currentHp - expectedMember.currentHp) < hpTolerance) shouldBe true
   }
 }

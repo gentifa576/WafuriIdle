@@ -1,6 +1,7 @@
 package com.wafuri.idle.tests.e2e
 
 import com.wafuri.idle.application.port.out.CombatStateRepository
+import com.wafuri.idle.application.service.scaling.ScalingRule
 import com.wafuri.idle.domain.model.CombatStatus
 import com.wafuri.idle.domain.model.InventoryItem
 import com.wafuri.idle.domain.model.Player
@@ -42,6 +43,9 @@ class CombatProgressionE2ETest {
 
   @Inject
   lateinit var combatStateRepository: CombatStateRepository
+
+  @Inject
+  lateinit var scalingRule: ScalingRule
 
   @field:TestHTTPResource("/ws/player")
   lateinit var wsBaseUri: URI
@@ -153,8 +157,9 @@ class CombatProgressionE2ETest {
         enemyName = "Training Dummy",
         enemyHp = 0f,
         enemyMaxHp = 1000f,
-        members = listOf(expectedCombatMemberState("nimbus", 13.7f, 9.8f, 2.3000002f, 9.3f)),
+        members = listOf(expectedCombatMemberState("nimbus", 23.975f, 3.1304953f, 452f, 465f)),
         pendingDamageMillis = wonState.pendingDamageMillis,
+        pendingRespawnMillis = wonState.pendingRespawnMillis,
         lastSimulatedAt = wonState.lastSimulatedAt,
       )
 
@@ -172,8 +177,8 @@ class CombatProgressionE2ETest {
         expectedZoneProgress(
           playerId = UUID.fromString(playerId),
           zoneId = "starter-plains",
-          killCount = 1,
-          level = 1,
+          killCount = 16,
+          level = 2,
         ),
       )
   }
@@ -200,59 +205,77 @@ class CombatProgressionE2ETest {
     val playerId = prepared.playerId
     val token = prepared.token
 
-    tickWarpService.warpCombatUntilStatus(UUID.fromString(playerId), CombatStatus.WON)
-    val downState = tickWarpService.warpCombatUntilStatus(UUID.fromString(playerId), CombatStatus.DOWN)
+    tickWarpService.warpCombatWins(UUID.fromString(playerId), wins = 60)
+    val downState = tickWarpService.warpCombatUntilStatus(UUID.fromString(playerId), CombatStatus.DOWN, maxSteps = 2_000)
     val revivedState = tickWarpService.warpCombat(UUID.fromString(playerId), java.time.Duration.ofSeconds(30))
+    val zoneProgress = zoneProgressResponse(token, playerId).single()
+    val expectedEnemyAttack = scalingRule.enemyAttackFor(zoneProgress.level, 1f)
+    val expectedEnemyMaxHp = scalingRule.enemyHpFor(zoneProgress.level, 1_000f)
 
-    downState shouldBe
-      expectedCombatState(
-        playerId = UUID.fromString(playerId),
-        status = CombatStatus.DOWN,
-        zoneId = "starter-plains",
-        activeTeamId = UUID.fromString(prepared.teamId),
-        enemyName = "Training Dummy",
-        enemyHp = 597.22f,
-        enemyMaxHp = 1000f,
-        members = listOf(expectedCombatMemberState("nimbus", 13.7f, 9.8f, 0f, 9.3f)),
-        lastSimulatedAt = downState.lastSimulatedAt,
-      )
-    revivedState shouldBe
-      expectedCombatState(
-        playerId = UUID.fromString(playerId),
-        status = CombatStatus.FIGHTING,
-        zoneId = "starter-plains",
-        activeTeamId = UUID.fromString(prepared.teamId),
-        enemyName = "Training Dummy",
-        enemyHp = 1000f,
-        enemyMaxHp = 1000f,
-        members = listOf(expectedCombatMemberState("nimbus", 13.7f, 9.8f, 4.65f, 9.3f)),
-        lastSimulatedAt = revivedState.lastSimulatedAt,
-      )
+    downState.status shouldBe CombatStatus.DOWN
+    downState.playerId shouldBe UUID.fromString(playerId)
+    downState.zoneId shouldBe "starter-plains"
+    downState.activeTeamId shouldBe UUID.fromString(prepared.teamId)
+    downState.enemyName shouldBe "Training Dummy"
+    downState.enemyLevel shouldBe zoneProgress.level
+    downState.enemyBaseHp shouldBe 1_000f
+    downState.enemyAttack shouldBe expectedEnemyAttack
+    downState.enemyMaxHp shouldBe expectedEnemyMaxHp
+    (downState.enemyHp > 0f) shouldBe true
+    (downState.enemyHp < expectedEnemyMaxHp) shouldBe true
+    downState.members.size shouldBe 1
+    downState.members.single().characterKey shouldBe "nimbus"
+    downState.members.single().currentHp shouldBe 0f
+    (downState.members.single().maxHp > 0f) shouldBe true
+    (downState.members.single().attack > 0f) shouldBe true
+    (downState.members.single().hit > 0f) shouldBe true
 
-    playerResponse(token, playerId) shouldBe
+    revivedState.status shouldBe CombatStatus.FIGHTING
+    revivedState.playerId shouldBe UUID.fromString(playerId)
+    revivedState.zoneId shouldBe "starter-plains"
+    revivedState.activeTeamId shouldBe UUID.fromString(prepared.teamId)
+    revivedState.enemyName shouldBe "Training Dummy"
+    revivedState.enemyLevel shouldBe zoneProgress.level
+    revivedState.enemyBaseHp shouldBe 1_000f
+    revivedState.enemyAttack shouldBe expectedEnemyAttack
+    revivedState.enemyHp shouldBe expectedEnemyMaxHp
+    revivedState.enemyMaxHp shouldBe expectedEnemyMaxHp
+    revivedState.members.size shouldBe 1
+    revivedState.members.single().characterKey shouldBe "nimbus"
+    revivedState.members.single().attack shouldBe downState.members.single().attack
+    revivedState.members.single().hit shouldBe downState.members.single().hit
+    revivedState.members.single().maxHp shouldBe downState.members.single().maxHp
+    (kotlin.math.abs(revivedState.members.single().currentHp - (revivedState.members.single().maxHp / 2f)) < 0.001f) shouldBe true
+
+    val playerSnapshot = playerResponse(token, playerId)
+
+    playerSnapshot shouldBe
       expectedPlayer(
         id = UUID.fromString(playerId),
         name = "LevelTenGuest",
         ownedCharacterKeys = setOf("nimbus"),
         activeTeamId = UUID.fromString(prepared.teamId),
-        experience = 10,
-        gold = 25,
+        experience = playerSnapshot.experience,
+        level = playerSnapshot.level,
+        gold = playerSnapshot.gold,
       )
-    zoneProgressResponse(token, playerId) shouldBe
+    listOf(zoneProgress) shouldBe
       listOf(
         expectedZoneProgress(
           playerId = UUID.fromString(playerId),
           zoneId = "starter-plains",
-          killCount = 1,
-          level = 1,
+          killCount = zoneProgress.killCount,
+          level = zoneProgress.level,
         ),
       )
-    normalizeInventory(inventoryResponse(token, playerId)) shouldBe
-      listOf(
-        normalizedInventoryItem(
-          playerId = UUID.fromString(playerId),
-        ),
-      )
+    val inventory = normalizeInventory(inventoryResponse(token, playerId))
+    inventory.isNotEmpty() shouldBe true
+    (inventory.size <= playerSnapshot.gold / 25) shouldBe true
+    inventory.first().playerId shouldBe UUID.fromString(playerId)
+    inventory.last().playerId shouldBe UUID.fromString(playerId)
+    inventory.first().itemLevel shouldBe 1
+    (inventory.last().itemLevel >= inventory.first().itemLevel) shouldBe true
+    inventory.map { it.item.name }.distinct() shouldBe listOf("sword_0001")
   }
 
   private fun startCombatOverWebSocket(
@@ -284,7 +307,7 @@ class CombatProgressionE2ETest {
           enemyName = "Training Dummy",
           enemyHp = 1000f,
           enemyMaxHp = 1000f,
-          members = listOf(expectedCombatMemberState("nimbus", 13.7f, 9.8f, 9.3f, 9.3f)),
+          members = listOf(expectedCombatMemberState("nimbus", 23.975f, 3.1304953f, 465f, 465f)),
           lastSimulatedAt = combatState.lastSimulatedAt,
         )
     } finally {
@@ -338,11 +361,13 @@ private fun normalizeInventory(items: List<InventoryItem>): List<InventoryItem> 
 private fun normalizedInventoryItem(
   playerId: UUID,
   ordinal: Int = 0,
+  itemLevel: Int = 1,
 ): InventoryItem =
   InventoryItem(
     id = normalizedInventoryId(ordinal),
     playerId = playerId,
     item = swordItem(),
+    itemLevel = itemLevel,
   )
 
 private fun normalizedInventoryId(index: Int): UUID = UUID.nameUUIDFromBytes("inventory-$index".toByteArray())

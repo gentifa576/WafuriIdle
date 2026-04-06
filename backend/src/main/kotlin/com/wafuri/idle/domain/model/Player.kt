@@ -58,4 +58,15 @@ data class Player(
     val nextLevel = (nextExperience / experiencePerLevel) + 1
     return copy(experience = nextExperience, level = nextLevel)
   }
+
+  fun grantExperience(
+    amount: Int,
+    levelForExperience: (Int) -> Int,
+  ): Player {
+    require(amount >= 0) { "Granted experience must not be negative." }
+    val nextExperience = experience + amount
+    val nextLevel = levelForExperience(nextExperience)
+    require(nextLevel >= 1) { "Resolved player level must be at least 1." }
+    return copy(experience = nextExperience, level = nextLevel)
+  }
 }

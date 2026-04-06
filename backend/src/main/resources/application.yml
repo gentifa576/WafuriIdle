@@ -39,10 +39,11 @@ game:
   progression:
     player:
       kill-experience: 10
-      experience-per-level: 100
+      experience-per-level: 85
       kill-gold: 25
     zone:
-      kills-per-level: 10
+      kills-per-level: 9
+      progress-multiplier: 16.0
     offline:
       notify-threshold: 5m
   gacha:
@@ -62,7 +63,8 @@ game:
     revive-hp-ratio: 0.5
     zone-scaling:
       hp-scaling-constant: 1.0
-      reward-scaling-exponent: 0.5
+      enemy-attack-scaling-exponent: 1.26
+      reward-scaling-exponent: 0.37
       tutorial-end-level: 19
       tutorial-growth-rate: 0.005
       normal-growth-rate: 0.02

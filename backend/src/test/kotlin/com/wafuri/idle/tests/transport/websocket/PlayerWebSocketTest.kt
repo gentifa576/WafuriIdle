@@ -196,7 +196,7 @@ class PlayerWebSocketTest {
           enemyName = "Training Dummy",
           enemyHp = 1000f,
           enemyMaxHp = 1000f,
-          members = listOf(expectedCombatMemberState("nimbus", 13.7f, 9.8f, 9.3f, 9.3f)),
+          members = listOf(expectedCombatMemberState("nimbus", 23.975f, 3.1304953f, 465f, 465f)),
           pendingDamageMillis = combatState.pendingDamageMillis,
           lastSimulatedAt = combatState.lastSimulatedAt,
         )

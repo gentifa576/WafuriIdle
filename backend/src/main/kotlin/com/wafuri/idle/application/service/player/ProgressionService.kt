@@ -1,6 +1,5 @@
 package com.wafuri.idle.application.service.player
 
-import com.wafuri.idle.application.config.GameConfig
 import com.wafuri.idle.application.model.ZoneLevelUpMessage
 import com.wafuri.idle.application.port.out.PlayerMessageQueue
 import com.wafuri.idle.application.port.out.PlayerStateWorkQueue
@@ -23,7 +22,7 @@ class ProgressionService(
   private val playerStateWorkQueue: PlayerStateWorkQueue,
   private val combatStatService: CombatStatService,
   private val scalingRule: ScalingRule,
-  private val gameConfig: GameConfig,
+  private val gameConfig: com.wafuri.idle.application.config.GameConfig,
 ) {
   @Transactional
   fun recordKill(
@@ -36,7 +35,7 @@ class ProgressionService(
     val config = gameConfig.progression().player()
     val rewardMultiplier = scalingRule.rewardMultiplier(enemyLevel)
     val amount = (config.killExperience() * rewardMultiplier).roundToInt()
-    val rewardedPlayer = player.grantExperience(amount, config.experiencePerLevel())
+    val rewardedPlayer = player.grantExperience(amount, scalingRule::playerLevelForExperience)
     val updatedPlayer = rewardedPlayer.grantGold((config.killGold() * rewardMultiplier).roundToInt())
     if (updatedPlayer != player) {
       playerRepository.save(updatedPlayer)
@@ -46,7 +45,11 @@ class ProgressionService(
     }
 
     val currentProgress = requireZoneProgress(playerId, zoneId)
-    val updatedProgress = currentProgress.recordKill(gameConfig.progression().zone().killsPerLevel())
+    val zoneProgressGain =
+      (gameConfig.progression().zone().progressMultiplier() * rewardMultiplier)
+        .roundToInt()
+        .coerceAtLeast(1)
+    val updatedProgress = currentProgress.recordKills(zoneProgressGain, scalingRule::zoneLevelForKillCount)
     playerZoneProgressRepository.save(updatedProgress)
     if (updatedProgress.level > currentProgress.level) {
       playerEventQueue.enqueue(ZoneLevelUpMessage(playerId, zoneId, updatedProgress.level))

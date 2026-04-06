@@ -105,10 +105,14 @@ interface GameConfig {
 
   interface Zone {
     fun killsPerLevel(): Int
+
+    fun progressMultiplier(): Float
   }
 
   interface ZoneScaling {
     fun hpScalingConstant(): Float
+
+    fun enemyAttackScalingExponent(): Float
 
     fun rewardScalingExponent(): Float
 

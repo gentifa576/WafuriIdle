@@ -131,6 +131,7 @@ class CombatTickService(
     val zoneLevel = progressionService.requireZoneProgress(playerId, zoneId).level
     val enemy = enemyTemplateCatalog.requireRandom(zoneTemplateCatalog.require(zoneId).enemies, randomSource)
     val scaledEnemyHp = scalingRule.enemyHpFor(zoneLevel, enemy.baseHp)
-    return nextState.refreshEnemy(enemy.id, enemy.name, enemy.image, enemy.baseHp, zoneLevel, enemy.attack, scaledEnemyHp)
+    val scaledEnemyAttack = scalingRule.enemyAttackFor(zoneLevel, enemy.attack)
+    return nextState.refreshEnemy(enemy.id, enemy.name, enemy.image, enemy.baseHp, zoneLevel, scaledEnemyAttack, scaledEnemyHp)
   }
 }

@@ -19,6 +19,7 @@ import jakarta.transaction.Transactional
 import java.time.Duration
 import java.time.Instant
 import java.util.UUID
+import kotlin.math.roundToInt
 
 @ApplicationScoped
 class OfflineProgressionService(
@@ -123,7 +124,6 @@ class OfflineProgressionService(
         respawnDelayMillis = gameConfig.combat().respawnDelay().toMillis(),
         reviveDelayMillis = gameConfig.combat().reviveDelay().toMillis(),
         reviveHpRatio = gameConfig.combat().reviveHpRatio(),
-        killsPerLevel = gameConfig.progression().zone().killsPerLevel(),
       )
     var projection = MutableOfflineCombatProjection(state, elapsed.toMillis().coerceAtLeast(0), startingZoneProgress)
 
@@ -202,7 +202,11 @@ class OfflineProgressionService(
     return if (!defeatedEnemy) {
       projection.copy(state = advanced, remainingMillis = projection.remainingMillis - elapsedMillis)
     } else {
-      projection.recordKill(advanced, elapsedMillis, params.killsPerLevel)
+      val zoneProgressGain =
+        (gameConfig.progression().zone().progressMultiplier() * scalingRule.rewardMultiplier(projection.zoneProgress.level))
+          .roundToInt()
+          .coerceAtLeast(1)
+      projection.recordKill(advanced, elapsedMillis, zoneProgressGain, scalingRule::zoneLevelForKillCount)
     }
   }
 
@@ -213,7 +217,8 @@ class OfflineProgressionService(
     val zoneId = requireNotNull(state.zoneId) { "Active combat must keep a zone id." }
     val enemy = enemyTemplateCatalog.requireRandom(zoneTemplateCatalog.require(zoneId).enemies, randomSource)
     val enemyMaxHp = scalingRule.enemyHpFor(zoneLevel, enemy.baseHp)
-    return state.refreshEnemy(enemy.id, enemy.name, enemy.image, enemy.baseHp, zoneLevel, enemy.attack, enemyMaxHp)
+    val enemyAttack = scalingRule.enemyAttackFor(zoneLevel, enemy.attack)
+    return state.refreshEnemy(enemy.id, enemy.name, enemy.image, enemy.baseHp, zoneLevel, enemyAttack, enemyMaxHp)
   }
 
   private fun timeToKillMillis(
@@ -244,7 +249,6 @@ private data class OfflineCombatParams(
   val respawnDelayMillis: Long,
   val reviveDelayMillis: Long,
   val reviveHpRatio: Float,
-  val killsPerLevel: Int,
 )
 
 private data class MutableOfflineCombatProjection(
@@ -259,12 +263,13 @@ private data class MutableOfflineCombatProjection(
   fun recordKill(
     nextState: CombatState,
     elapsedMillis: Long,
-    killsPerLevel: Int,
+    zoneProgressGain: Int,
+    levelForKillCount: (Int) -> Int,
   ): MutableOfflineCombatProjection =
     copy(
       state = nextState,
       remainingMillis = remainingMillis - elapsedMillis,
-      zoneProgress = zoneProgress.recordKill(killsPerLevel),
+      zoneProgress = zoneProgress.recordKills(zoneProgressGain, levelForKillCount),
       kills = kills + 1,
       killEnemyLevels = killEnemyLevels + nextState.enemyLevel,
     )
