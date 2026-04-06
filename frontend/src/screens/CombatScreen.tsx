@@ -202,7 +202,7 @@ export function CombatScreen() {
           />
         ) : null}
 
-        {activeView === 'characters' ? <RosterWorkspace ownedCharacters={ownedCharacters} /> : null}
+        {activeView === 'characters' ? <RosterWorkspace ownedCharacters={ownedCharacters} templates={templates} /> : null}
 
         {activeView === 'team' ? (
           <TeamWorkspace

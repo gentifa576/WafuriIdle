@@ -2,12 +2,16 @@ import type {
   CharacterPull,
   CharacterTemplate,
   CombatSnapshot,
+  CombatConditionDefinition,
   InventoryItem,
   InventoryItemSnapshot,
   OwnedCharacterSnapshot,
+  PassiveDefinition,
   Player,
   PlayerStateSnapshot,
+  SkillDefinition,
   Stat,
+  StatGrowth,
   Team,
   TeamMemberSlot,
   ZoneProgressSnapshot,
@@ -45,8 +49,15 @@ export interface ClientTeam {
 export interface ClientCharacterTemplate {
   key: string
   name: string
+  strength: ClientStatGrowth
+  agility: ClientStatGrowth
+  intelligence: ClientStatGrowth
+  wisdom: ClientStatGrowth
+  vitality: ClientStatGrowth
   image?: string | null
   tags?: string[]
+  skill?: ClientSkillDefinition | null
+  passive?: ClientPassiveDefinition | null
 }
 
 export interface ClientOwnedCharacter {
@@ -66,6 +77,32 @@ export interface ClientZoneProgress {
 export interface ClientStat {
   type: string
   value: number
+}
+
+export interface ClientStatGrowth {
+  base: number
+  increment: number
+}
+
+export interface ClientSkillDefinition {
+  key: string
+  name: string
+  cooldownMillis: number
+}
+
+export interface ClientPassiveDefinition {
+  key: string
+  name: string
+  leaderOnly: boolean
+  trigger: string
+  condition: ClientCombatConditionDefinition
+}
+
+export interface ClientCombatConditionDefinition {
+  type: string
+  percent?: number | null
+  minimumCount?: number | null
+  tag?: string | null
 }
 
 export interface ClientInventoryItem {
@@ -145,8 +182,15 @@ export function mapCharacterTemplate(template: CharacterTemplate): ClientCharact
   return {
     key: template.key,
     name: template.name,
+    strength: mapStatGrowth(template.strength),
+    agility: mapStatGrowth(template.agility),
+    intelligence: mapStatGrowth(template.intelligence),
+    wisdom: mapStatGrowth(template.wisdom),
+    vitality: mapStatGrowth(template.vitality),
     image: template.image,
     tags: template.tags,
+    skill: mapSkillDefinition(template.skill),
+    passive: mapPassiveDefinition(template.passive),
   }
 }
 
@@ -299,5 +343,47 @@ function mapStat(stat: Stat): ClientStat {
   return {
     type: stat.type,
     value: stat.value,
+  }
+}
+
+function mapStatGrowth(stat: StatGrowth): ClientStatGrowth {
+  return {
+    base: stat.base,
+    increment: stat.increment,
+  }
+}
+
+function mapSkillDefinition(skill: SkillDefinition | null | undefined): ClientSkillDefinition | null {
+  if (skill == null) {
+    return null
+  }
+
+  return {
+    key: skill.key,
+    name: skill.name,
+    cooldownMillis: skill.cooldownMillis,
+  }
+}
+
+function mapPassiveDefinition(passive: PassiveDefinition | null | undefined): ClientPassiveDefinition | null {
+  if (passive == null) {
+    return null
+  }
+
+  return {
+    key: passive.key,
+    name: passive.name,
+    leaderOnly: passive.leaderOnly,
+    trigger: passive.trigger,
+    condition: mapCombatConditionDefinition(passive.condition),
+  }
+}
+
+function mapCombatConditionDefinition(condition: CombatConditionDefinition): ClientCombatConditionDefinition {
+  return {
+    type: condition.type,
+    percent: condition.percent,
+    minimumCount: condition.minimumCount,
+    tag: condition.tag,
   }
 }

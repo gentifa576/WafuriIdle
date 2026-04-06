@@ -174,10 +174,26 @@ function emptyTeam() {
   }
 }
 
+function characterTemplate(overrides?: { key?: string; name?: string }) {
+  return {
+    key: overrides?.key ?? 'hero',
+    name: overrides?.name ?? 'Hero',
+    strength: { base: 10, increment: 1 },
+    agility: { base: 8, increment: 0.8 },
+    intelligence: { base: 6, increment: 0.5 },
+    wisdom: { base: 5, increment: 0.4 },
+    vitality: { base: 12, increment: 1.1 },
+    image: null,
+    tags: [],
+    skill: null,
+    passive: null,
+  }
+}
+
 beforeEach(() => {
   mocks.reset()
-  mocks.getCharacterTemplates.mockResolvedValue([{ key: 'hero', name: 'Hero' }])
-  mocks.getStarterCharacterTemplates.mockResolvedValue([{ key: 'hero', name: 'Hero' }])
+  mocks.getCharacterTemplates.mockResolvedValue([characterTemplate()])
+  mocks.getStarterCharacterTemplates.mockResolvedValue([characterTemplate()])
 })
 
 describe('CombatScreen', () => {

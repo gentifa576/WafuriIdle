@@ -26,11 +26,44 @@ export interface Team {
   characterKeys: string[]
 }
 
+export interface StatGrowth {
+  base: number
+  increment: number
+}
+
+export interface CombatConditionDefinition {
+  type: string
+  percent?: number | null
+  minimumCount?: number | null
+  tag?: string | null
+}
+
+export interface SkillDefinition {
+  key: string
+  name: string
+  cooldownMillis: number
+}
+
+export interface PassiveDefinition {
+  key: string
+  name: string
+  leaderOnly: boolean
+  trigger: string
+  condition: CombatConditionDefinition
+}
+
 export interface CharacterTemplate {
   key: string
   name: string
+  strength: StatGrowth
+  agility: StatGrowth
+  intelligence: StatGrowth
+  wisdom: StatGrowth
+  vitality: StatGrowth
   image?: string | null
   tags?: string[]
+  skill?: SkillDefinition | null
+  passive?: PassiveDefinition | null
 }
 
 export interface OwnedCharacterSnapshot {
