@@ -1,13 +1,4 @@
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type Dispatch,
-  type MouseEvent as ReactMouseEvent,
-  type MutableRefObject,
-  type SetStateAction,
-} from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type {
   ClientCharacterTemplate,
   ClientOwnedCharacter,
@@ -17,6 +8,7 @@ import type {
 import { ActionButton } from '../../../shared/ui/ActionButton'
 import { SectionHeader } from '../../../shared/ui/SectionHeader'
 import { SurfaceCard } from '../../../shared/ui/SurfaceCard'
+import { useDelayedHover } from '../../../shared/ui/useDelayedHover'
 import { CharacterRosterTile } from './CharacterRosterTile'
 import './roster.css'
 
@@ -40,29 +32,20 @@ interface RosterCharacter {
   passive?: ClientPassiveDefinition | null
 }
 
-interface HoverState {
-  key: string
-  x: number
-  y: number
-}
-
-const HOVER_DELAY_MS = 400
-
 export function RosterWorkspace({ ownedCharacters, templates }: RosterWorkspaceProps) {
   const [selectedCharacterKey, setSelectedCharacterKey] = useState<string | null>(null)
-  const [hoverState, setHoverState] = useState<HoverState | null>(null)
-  const hoverTimeoutRef = useRef<number | null>(null)
+  const hover = useDelayedHover<{ key: string }>({
+    matches: (current, target) => current.key === target.key,
+  })
   const roster = useMemo(() => mapRoster(ownedCharacters, templates), [ownedCharacters, templates])
   const selectedCharacter = roster.find((character) => character.key === selectedCharacterKey) ?? null
-  const hoveredCharacter = roster.find((character) => character.key === hoverState?.key) ?? null
+  const hoveredCharacter = roster.find((character) => character.key === hover.hoverState?.key) ?? null
 
   useEffect(() => {
     if (selectedCharacterKey && !roster.some((character) => character.key === selectedCharacterKey)) {
       setSelectedCharacterKey(null)
     }
   }, [roster, selectedCharacterKey])
-
-  useEffect(() => () => clearHoverTimer(hoverTimeoutRef), [])
 
   return (
     <>
@@ -166,19 +149,15 @@ export function RosterWorkspace({ ownedCharacters, templates }: RosterWorkspaceP
                         image={character.image}
                         key={character.key}
                         name={character.name}
-                        onBlur={() => setHoverState((current) => (current?.key === character.key ? null : current))}
+                        onBlur={() => hover.clearIfTarget({ key: character.key })}
                         onClick={() => {
-                          clearHoverTimer(hoverTimeoutRef)
-                          setHoverState(null)
+                          hover.clear()
                           setSelectedCharacterKey(character.key)
                         }}
-                        onFocus={() => setHoverState({ key: character.key, x: window.innerWidth / 2, y: 176 })}
-                        onMouseEnter={(event) => queueHover(character.key, event, hoverTimeoutRef, setHoverState)}
-                        onMouseLeave={() => {
-                          clearHoverTimer(hoverTimeoutRef)
-                          setHoverState((current) => (current?.key === character.key ? null : current))
-                        }}
-                        onMouseMove={(event) => updateHoverPosition(character.key, event, setHoverState)}
+                        onFocus={() => hover.showFromFocus({ key: character.key })}
+                        onMouseEnter={(event) => hover.queueFromPointer({ key: character.key }, event)}
+                        onMouseLeave={() => hover.clearIfTarget({ key: character.key })}
+                        onMouseMove={(event) => hover.updateFromPointer({ key: character.key }, event)}
                       />
                     ))}
                   </div>
@@ -218,8 +197,8 @@ export function RosterWorkspace({ ownedCharacters, templates }: RosterWorkspaceP
           aria-hidden="true"
           className="roster-hover-card"
           style={{
-            left: `${Math.min(hoverState!.x + 18, window.innerWidth - 340)}px`,
-            top: `${Math.min(hoverState!.y + 18, window.innerHeight - 280)}px`,
+            left: `${Math.min(hover.hoverState!.x + 18, window.innerWidth - 340)}px`,
+            top: `${Math.min(hover.hoverState!.y + 18, window.innerHeight - 280)}px`,
           }}
         >
           <div className="roster-hover-header">
@@ -304,34 +283,6 @@ function formatGrowth(value: number) {
 
 function emptyGrowth(): ClientStatGrowth {
   return { base: 0, increment: 0 }
-}
-
-function queueHover(
-  key: string,
-  event: ReactMouseEvent<HTMLButtonElement>,
-  hoverTimeoutRef: MutableRefObject<number | null>,
-  setHoverState: Dispatch<SetStateAction<HoverState | null>>,
-) {
-  clearHoverTimer(hoverTimeoutRef)
-  const { clientX, clientY } = event
-  hoverTimeoutRef.current = window.setTimeout(() => {
-    setHoverState({ key, x: clientX, y: clientY })
-  }, HOVER_DELAY_MS)
-}
-
-function updateHoverPosition(
-  key: string,
-  event: ReactMouseEvent<HTMLButtonElement>,
-  setHoverState: Dispatch<SetStateAction<HoverState | null>>,
-) {
-  setHoverState((current) => (current?.key === key ? { key, x: event.clientX, y: event.clientY } : current))
-}
-
-function clearHoverTimer(hoverTimeoutRef: MutableRefObject<number | null>) {
-  if (hoverTimeoutRef.current != null) {
-    window.clearTimeout(hoverTimeoutRef.current)
-    hoverTimeoutRef.current = null
-  }
 }
 
 function describePassive(passive: ClientPassiveDefinition) {

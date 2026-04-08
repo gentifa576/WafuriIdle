@@ -53,6 +53,7 @@
 | Clarification | If any requirement or expected behavior is ambiguous, ask follow-up questions until the scope is fully clear before editing files. |
 | Decision tracking | Before recording a finalized architecture or implementation decision in `AGENTS.md`, draft a brief summary and ask the user to confirm the decision. Once confirmed, record it in `AGENTS.md` in the same change if future work depends on it; do not rely on session memory for repo rules. |
 | Frontend production assets | For production frontend CI/CD builds, exclude local character sprite assets under `frontend/public/assets/characters` from the shipped FE artifact; keep local/dev behavior unchanged unless the user explicitly requests otherwise. |
+| Frontend reuse | When adding or changing frontend behavior that is repeated or very similar across screens, extract shared components/hooks/utilities instead of duplicating logic. |
 | Validation compliance | After any code change, do not stop at targeted or localized tests when `AGENTS.md` defines a required build gate. Run `./gradlew check` before closing the task when the change modifies files under `backend/`, unless the user explicitly waives it or the gate is blocked; if blocked, state the blocker clearly. |
 | Protocol adherence | Follow all repo protocol in `AGENTS.md` as written. Do not bypass, weaken, or invent ad hoc exceptions to established repo rules unless the user explicitly approves a deviation for the current task. If a rule is blocked, state the blocker clearly instead of silently improvising. |
 
@@ -125,10 +126,8 @@
 | `POST /players/{id}/starter` | `{ characterKey }` | `204 No Content` | Grants one configured starter to a player that currently owns no characters. |
 | `POST /players/{id}/gacha/characters/pull` | `{ count? }` | `{ player, count, pulls: [{ pulledCharacterKey, grantedCharacterKey?, essenceGranted }], totalEssenceGranted }` | Spends configured gold for `1` or `10` even-odds character pulls across all loaded character templates; duplicates convert into essence instead of granting another copy. |
 | `POST /internal/players/{id}/dirty` | none | `202 Accepted` | Internal node-to-node endpoint only; requires the `InternalNode` JWT role and marks a player dirty on the receiving node. |
-| `POST /teams/{id}/slots/{position}/characters/{characterKey}` | none | `Team` | Assigns an owned character to the selected team position. |
 | `POST /teams/{id}/activate` | none | `Team` | Activates a non-empty team for its owning player. |
-| `POST /teams/{id}/slots/{position}/equip` | `{ inventoryItemId, slot }` | `204 No Content` | Equips an owned inventory item into the selected team position and equipment slot. |
-| `POST /teams/{id}/slots/{position}/unequip` | `{ slot }` | `204 No Content` | Unequips the selected team position equipment slot. |
+| `POST /teams/{id}/loadout` | `{ slots: [{ position, characterKey, weaponItemId, armorItemId, accessoryItemId }] }` | `Team` | Atomically saves all 3 team slots (character + equipment) in one request; validation applies to the full payload and equipment changes are committed together. |
 | `GET /characters/starters` | none | `[{ key, name, strength, agility, intelligence, wisdom, vitality, image, tags, skill, passive }]` | Returns the configured starter character choices in config order. |
 | `GET /characters/templates` | none | `[{ key, name, strength, agility, intelligence, wisdom, vitality, image, tags, skill, passive }]` | Returns the currently loaded character templates. |
 | `GET /players/{id}` | none | `Player` | Returns the player domain model directly, including player EXP, level, gold, and essence. Owned character level is implicitly the same as player level. |
@@ -151,10 +150,11 @@
 | Starting roster | New players begin with no owned characters and may claim exactly one configured starter while their roster is empty. |
 | Character acquisition | Public REST may spend configured gold for `1` or `10` character pulls across all loaded character templates with equal odds. If a pulled character is already owned, grant configured essence compensation instead of a duplicate character. Multi-pull batches must apply ownership updates within the same batch so later rolls can become duplicates of earlier unlocks. |
 | Team slots | New players begin with a configured number of empty team slots. |
-| Team assignment | Public REST may assign an owned character to a player-owned team position by `characterKey`. The same owned character may appear across multiple teams, but not twice in the same team. |
-| Equipment assignment | Public REST equips generated inventory items to team positions, not directly to characters. |
+| Team assignment | Public REST may assign owned characters to player-owned team positions through atomic team loadout save (`POST /teams/{id}/loadout`). The same owned character may appear across multiple teams, but not twice in the same team. |
+| Equipment assignment | Public REST equips generated inventory items to team positions through atomic team loadout save, not directly to characters. |
+| Team loadout save | Public REST may atomically save a full 3-slot team loadout in one request (`POST /teams/{id}/loadout`), including character and equipment references per slot, with validation applied against the full payload before commit. |
 | Team activation | Combat requires an active team, and a team cannot be activated unless it has at least one character. |
-| Downed team edits | Character assignment, team activation, equip, and unequip are blocked while the player's combat state is `DOWN`. |
+| Downed team edits | Team loadout save and team activation are blocked while the player's combat state is `DOWN`. |
 | Combat start | Player combat start must come from the player WebSocket as a player-scoped command; combat progression itself remains server-driven after start. |
 | Combat stop | Player combat stop must come from the player WebSocket as a player-scoped command and immediately clears active combat state, including during `DOWN`. |
 | Cluster combat start | In multi-instance mode, combat start should originate from the player's active WebSocket owner node so a single node becomes the initial owner of that player's combat state. |

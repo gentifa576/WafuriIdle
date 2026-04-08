@@ -43,10 +43,18 @@ class EquipmentService(
       throw ValidationException("Items cannot be equipped to an empty team slot.")
     }
     val equippedItem = inventoryRepository.findByTeamPositionAndSlot(teamId, position, slot)
-    if (equippedItem != null && equippedItem.id != inventoryItem.id) {
-      throw ValidationException("Only one item may be equipped per team slot.")
+    if (equippedItem?.id == inventoryItem.id) {
+      return
     }
 
+    val unequippedItem =
+      equippedItem?.let {
+        try {
+          it.unequip(teamId, position, slot)
+        } catch (exception: DomainRuleViolationException) {
+          throw ValidationException(exception.message ?: "Unequip validation failed.", exception)
+        }
+      }
     val updatedItem =
       try {
         inventoryItem.equip(player.id, teamId, position, slot)
@@ -61,6 +69,9 @@ class EquipmentService(
       }
 
     teamRepository.save(updatedTeam)
+    if (unequippedItem != null) {
+      inventoryRepository.save(unequippedItem)
+    }
     inventoryRepository.save(updatedItem)
     combatStatService.invalidatePlayer(player.id)
     playerStateWorkQueue.markDirty(player.id)

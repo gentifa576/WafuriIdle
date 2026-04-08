@@ -26,3 +26,18 @@ export function unequipTeamItem(teamId: string, position: number, slot: Equipmen
     body: JSON.stringify({ slot }),
   })
 }
+
+export interface TeamSlotLoadoutRequest {
+  position: number
+  characterKey: string | null
+  weaponItemId: string | null
+  armorItemId: string | null
+  accessoryItemId: string | null
+}
+
+export function saveTeamLoadout(teamId: string, slots: TeamSlotLoadoutRequest[]) {
+  return http<Team>(`/teams/${teamId}/loadout`, {
+    method: 'POST',
+    body: JSON.stringify({ slots }),
+  })
+}

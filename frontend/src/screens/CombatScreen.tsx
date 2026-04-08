@@ -42,13 +42,13 @@ export function CombatScreen() {
     error,
     actions,
   } = useGameClient()
-  const activeTeam = useMemo(() => teams.find((team) => team.id === player?.activeTeamId) ?? teams[0] ?? null, [player?.activeTeamId, teams])
+  const activeTeam = useMemo(() => teams.find((team) => team.id === player?.activeTeamId) ?? null, [player?.activeTeamId, teams])
   const selectedTeam = useMemo(() => teams.find((team) => team.id === selectedTeamId) ?? activeTeam ?? teams[0] ?? null, [activeTeam, selectedTeamId, teams])
   const selectedStarter = useMemo(
     () => starterTemplates.find((template) => template.key === selectedStarterKey) ?? starterTemplates[0] ?? null,
     [selectedStarterKey, starterTemplates],
   )
-  const activeTeamId = activeTeam?.id ?? ''
+  const activeTeamId = player?.activeTeamId ?? ''
   const ownedCharacterNames = useMemo(
     () =>
       new Map(
@@ -215,13 +215,12 @@ export function CombatScreen() {
             activeTeamId={activeTeamId}
             inventory={inventory}
             ownedCharacters={ownedCharacters}
+            templates={templates}
             ownedCharacterNames={ownedCharacterNames}
             activeTeam={activeTeam}
             loading={loading}
             onTeamChange={setSelectedTeamId}
-            onAssignCharacter={(teamId, position, characterKey) => void actions.assignCharacter(teamId, position, characterKey)}
-            onEquipItem={(teamId, position, inventoryItemId, slot) => void actions.equipItem(teamId, position, inventoryItemId, slot)}
-            onUnequipItem={(teamId, position, slot) => void actions.unequipItem(teamId, position, slot)}
+            onSaveTeam={(teamId, slots) => actions.saveTeamLoadoutAction(teamId, slots)}
             onActivateTeam={(teamId) => void actions.activateTeam(teamId)}
           />
         ) : null}

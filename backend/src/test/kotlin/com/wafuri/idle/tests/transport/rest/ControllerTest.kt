@@ -8,7 +8,6 @@ import com.wafuri.idle.application.service.inventory.InventoryService
 import com.wafuri.idle.application.service.player.ProgressionService
 import com.wafuri.idle.application.service.team.TeamService
 import com.wafuri.idle.domain.model.CharacterTemplate
-import com.wafuri.idle.domain.model.EquipmentSlot
 import com.wafuri.idle.domain.model.InventoryItem
 import com.wafuri.idle.domain.model.Player
 import com.wafuri.idle.domain.model.PlayerZoneProgress
@@ -403,7 +402,7 @@ class ControllerTest {
   }
 
   @Test
-  fun `equip and unequip endpoints return dto state`() {
+  fun `save loadout endpoint equips and unequips team items`() {
     val characterKey = "nimbus"
     val signupResponse = signup("Cara", password = null)
     val playerId = signupResponse.player.id.toString()
@@ -415,23 +414,85 @@ class ControllerTest {
       .then()
       .statusCode(204)
     val teamId = firstTeamId(token)
-    teamService.assignCharacter(UUID.fromString(teamId), 1, characterKey)
     val inventoryItemId =
       inventoryService.addGeneratedItem(UUID.fromString(playerId), "sword_0001", Rarity.COMMON).id.toString()
 
     auth(token)
       .contentType("application/json")
-      .body("""{"inventoryItemId":"$inventoryItemId","slot":"${EquipmentSlot.WEAPON}"}""")
-      .post("/teams/$teamId/slots/1/equip")
+      .body(
+        """
+        {
+          "slots":[
+            {"position":1,"characterKey":"$characterKey","weaponItemId":"$inventoryItemId","armorItemId":null,"accessoryItemId":null},
+            {"position":2,"characterKey":null,"weaponItemId":null,"armorItemId":null,"accessoryItemId":null},
+            {"position":3,"characterKey":null,"weaponItemId":null,"armorItemId":null,"accessoryItemId":null}
+          ]
+        }
+        """.trimIndent(),
+      ).post("/teams/$teamId/loadout")
       .then()
-      .statusCode(204)
+      .statusCode(200)
 
     auth(token)
       .contentType("application/json")
-      .body("""{"slot":"${EquipmentSlot.WEAPON}"}""")
-      .post("/teams/$teamId/slots/1/unequip")
+      .body(
+        """
+        {
+          "slots":[
+            {"position":1,"characterKey":"$characterKey","weaponItemId":null,"armorItemId":null,"accessoryItemId":null},
+            {"position":2,"characterKey":null,"weaponItemId":null,"armorItemId":null,"accessoryItemId":null},
+            {"position":3,"characterKey":null,"weaponItemId":null,"armorItemId":null,"accessoryItemId":null}
+          ]
+        }
+        """.trimIndent(),
+      ).post("/teams/$teamId/loadout")
+      .then()
+      .statusCode(200)
+  }
+
+  @Test
+  fun `save loadout endpoint applies team and equipment changes in one request`() {
+    val characterKey = "nimbus"
+    val signupResponse = signup("LoadoutUser", password = null)
+    val playerId = signupResponse.player.id.toString()
+    val token = signupResponse.sessionToken
+    auth(token)
+      .contentType("application/json")
+      .body("""{"characterKey":"$characterKey"}""")
+      .post("/players/$playerId/starter")
       .then()
       .statusCode(204)
+    val teamId = firstTeamId(token)
+    val inventoryItemId =
+      inventoryService.addGeneratedItem(UUID.fromString(playerId), "sword_0001", Rarity.COMMON).id.toString()
+
+    auth(token)
+      .contentType("application/json")
+      .body(
+        """
+        {
+          "slots":[
+            {"position":1,"characterKey":"$characterKey","weaponItemId":"$inventoryItemId","armorItemId":null,"accessoryItemId":null},
+            {"position":2,"characterKey":null,"weaponItemId":null,"armorItemId":null,"accessoryItemId":null},
+            {"position":3,"characterKey":null,"weaponItemId":null,"armorItemId":null,"accessoryItemId":null}
+          ]
+        }
+        """.trimIndent(),
+      ).post("/teams/$teamId/loadout")
+      .then()
+      .statusCode(200)
+
+    val savedTeam = teamsResponse(token, playerId).first()
+    savedTeam.slots.first().characterKey shouldBe characterKey
+    savedTeam
+      .slots
+      .first()
+      .weaponItemId
+      ?.toString() shouldBe inventoryItemId
+
+    val savedItem = inventoryResponse(token, playerId).first { it.id.toString() == inventoryItemId }
+    savedItem.equippedTeamId?.toString() shouldBe teamId
+    savedItem.equippedPosition shouldBe 1
   }
 
   @Test
@@ -445,7 +506,7 @@ class ControllerTest {
   }
 
   @Test
-  fun `assign character endpoint rejects duplicate team member`() {
+  fun `save loadout endpoint rejects duplicate team member`() {
     val signupResponse = signup("Dora", password = null)
     val playerId = signupResponse.player.id.toString()
     val token = signupResponse.sessionToken
@@ -457,14 +518,24 @@ class ControllerTest {
       .then()
       .statusCode(204)
     val teamId = firstTeamId(token)
-    teamService.assignCharacter(UUID.fromString(teamId), 1, characterKey)
-
-    errorResponse(auth(token), "/teams/$teamId/slots/2/characters/$characterKey") shouldBe
-      expectedErrorResponse("Character is already on the team.")
+    errorResponse(
+      auth(token),
+      "/teams/$teamId/loadout",
+      """
+      {
+        "slots":[
+          {"position":1,"characterKey":"$characterKey","weaponItemId":null,"armorItemId":null,"accessoryItemId":null},
+          {"position":2,"characterKey":"$characterKey","weaponItemId":null,"armorItemId":null,"accessoryItemId":null},
+          {"position":3,"characterKey":null,"weaponItemId":null,"armorItemId":null,"accessoryItemId":null}
+        ]
+      }
+      """.trimIndent(),
+    ) shouldBe
+      expectedErrorResponse("Duplicate characters are not allowed in a team.")
   }
 
   @Test
-  fun `assign character endpoint adds owned character to team`() {
+  fun `save loadout endpoint adds owned character to team`() {
     val signupResponse = signup("Eli", password = null)
     val playerId = signupResponse.player.id.toString()
     val token = signupResponse.sessionToken
@@ -479,7 +550,18 @@ class ControllerTest {
 
     val assignedTeam =
       auth(token)
-        .post("/teams/$teamId/slots/1/characters/$characterKey")
+        .contentType("application/json")
+        .body(
+          """
+          {
+            "slots":[
+              {"position":1,"characterKey":"$characterKey","weaponItemId":null,"armorItemId":null,"accessoryItemId":null},
+              {"position":2,"characterKey":null,"weaponItemId":null,"armorItemId":null,"accessoryItemId":null},
+              {"position":3,"characterKey":null,"weaponItemId":null,"armorItemId":null,"accessoryItemId":null}
+            ]
+          }
+          """.trimIndent(),
+        ).post("/teams/$teamId/loadout")
         .then()
         .statusCode(200)
         .extract()

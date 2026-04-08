@@ -12,7 +12,7 @@ import {
   signUpPlayer,
 } from '../../../core/api/playerApi'
 import { sendStartCombat, sendStopCombat } from '../../../core/api/wsClient'
-import { activateTeam, assignCharacterToTeam, equipTeamItem, unequipTeamItem } from '../../../core/api/teamApi'
+import { activateTeam, assignCharacterToTeam, equipTeamItem, saveTeamLoadout, unequipTeamItem, type TeamSlotLoadoutRequest } from '../../../core/api/teamApi'
 import type { EquipmentSlot } from '../../../core/types/api'
 import { useGameClientState } from './useGameClientState'
 import { useGameSession } from './useGameSession'
@@ -239,6 +239,23 @@ export function useGameClient() {
           await unequipTeamItem(teamId, position, slotName)
           await refreshPlayerState(state.player.id)
           state.appendActivity(`Unequipped ${slotName.toLowerCase()} from slot ${position}`)
+        } catch (caught) {
+          state.setError(extractMessage(caught))
+        } finally {
+          state.setLoading(false)
+        }
+      },
+      async saveTeamLoadoutAction(teamId: string, slots: TeamSlotLoadoutRequest[]) {
+        if (!state.player) {
+          return
+        }
+        state.setLoading(true)
+        state.setError(null)
+        try {
+          const updatedTeam = await saveTeamLoadout(teamId, slots)
+          state.setTeams((current) => current.map((team) => (team.id === updatedTeam.id ? mapTeam(updatedTeam) : team)))
+          await refreshPlayerState(state.player.id)
+          state.appendActivity(`Saved team ${teamId.slice(0, 8)} loadout`)
         } catch (caught) {
           state.setError(extractMessage(caught))
         } finally {

@@ -51,33 +51,53 @@ document.getElementById("createPlayerForm").addEventListener("submit", async (ev
 document.getElementById("assignCharacterForm").addEventListener("submit", async (event) => {
   event.preventDefault();
   const teamId = requireValue(ids.teamId.value.trim(), "Current team ID is required.");
-  const position = requireValue(ids.teamSlotPosition.value.trim(), "Current team slot is required.");
+  const position = Number.parseInt(requireValue(ids.teamSlotPosition.value.trim(), "Current team slot is required."), 10);
   const characterKey = requireValue(ids.ownedCharacterKey.value.trim(), "Owned character is required.");
-  const response = await request(`/teams/${teamId}/slots/${position}/characters/${characterKey}`, "POST");
-  updateTeam(response);
+  const response = await saveTeamLoadout(teamId, (slots) => slots.map((slot) => (
+    slot.position === position ? { ...slot, characterKey } : slot
+  )));
   appendLog("Character assigned to team slot", response);
 });
 
 document.getElementById("equipForm").addEventListener("submit", async (event) => {
   event.preventDefault();
   const teamId = requireValue(ids.teamId.value.trim(), "Current team ID is required.");
-  const position = requireValue(ids.teamSlotPosition.value.trim(), "Current team slot is required.");
+  const position = Number.parseInt(requireValue(ids.teamSlotPosition.value.trim(), "Current team slot is required."), 10);
   const inventoryItemId = requireValue(ids.inventoryItemPicker.value.trim(), "Inventory item is required.");
-  await request(`/teams/${teamId}/slots/${position}/equip`, "POST", {
-    inventoryItemId,
-    slot: document.getElementById("equipSlot").value,
-  });
-  appendLog("Equip command sent", { teamId, position, inventoryItemId });
+  const slotType = document.getElementById("equipSlot").value;
+  const response = await saveTeamLoadout(teamId, (slots) => slots.map((slot) => {
+    if (slot.position !== position) {
+      return slot;
+    }
+    if (slotType === "WEAPON") {
+      return { ...slot, weaponItemId: inventoryItemId };
+    }
+    if (slotType === "ARMOR") {
+      return { ...slot, armorItemId: inventoryItemId };
+    }
+    return { ...slot, accessoryItemId: inventoryItemId };
+  }));
+  appendLog("Equip command sent", { teamId, position, inventoryItemId, response });
 });
 
 document.getElementById("unequipForm").addEventListener("submit", async (event) => {
   event.preventDefault();
   const teamId = requireValue(ids.teamId.value.trim(), "Current team ID is required.");
-  const position = requireValue(ids.teamSlotPosition.value.trim(), "Current team slot is required.");
-  await request(`/teams/${teamId}/slots/${position}/unequip`, "POST", {
-    slot: document.getElementById("unequipSlot").value,
+  const position = Number.parseInt(requireValue(ids.teamSlotPosition.value.trim(), "Current team slot is required."), 10);
+  const slotType = document.getElementById("unequipSlot").value;
+  const response = await saveTeamLoadout(teamId, (slots) => slots.map((slot) => {
+    if (slot.position !== position) {
+      return slot;
+    }
+    if (slotType === "WEAPON") {
+      return { ...slot, weaponItemId: null };
+    }
+    if (slotType === "ARMOR") {
+      return { ...slot, armorItemId: null };
+    }
+    return { ...slot, accessoryItemId: null };
   });
-  appendLog("Unequip command sent", { teamId, position });
+  appendLog("Unequip command sent", { teamId, position, response });
 });
 
 document.getElementById("fetchPlayer").addEventListener("click", async () => {
@@ -450,6 +470,17 @@ function updateTeam(updatedTeam) {
     state.latestTeams.push(updatedTeam);
   }
   syncTeamOptions();
+}
+
+async function saveTeamLoadout(teamId, mutateSlots) {
+  const team = state.latestTeams.find((entry) => entry.id === teamId);
+  if (!team || !Array.isArray(team.slots)) {
+    throw new Error("Fetch teams first so loadout updates have a baseline.");
+  }
+  const nextSlots = mutateSlots(team.slots.map((slot) => ({ ...slot })));
+  const response = await request(`/teams/${teamId}/loadout`, "POST", { slots: nextSlots });
+  updateTeam(response);
+  return response;
 }
 
 function parseJson(value) {

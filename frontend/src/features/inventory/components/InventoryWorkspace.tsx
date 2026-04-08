@@ -1,18 +1,10 @@
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type Dispatch,
-  type MouseEvent as ReactMouseEvent,
-  type MutableRefObject,
-  type SetStateAction,
-} from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { ClientInventoryItem } from '../../session/model/clientModels'
 import { FeedbackState } from '../../workspace/components/FeedbackState'
 import { ActionButton } from '../../../shared/ui/ActionButton'
 import { SectionHeader } from '../../../shared/ui/SectionHeader'
 import { SurfaceCard } from '../../../shared/ui/SurfaceCard'
+import { useDelayedHover } from '../../../shared/ui/useDelayedHover'
 import { InventoryTile } from './InventoryTile'
 import './inventory.css'
 
@@ -20,13 +12,6 @@ interface InventoryWorkspaceProps {
   inventory: ClientInventoryItem[]
 }
 
-interface HoverState {
-  id: string
-  x: number
-  y: number
-}
-
-const HOVER_DELAY_MS = 400
 const ITEM_TYPE_PRIORITY: Record<string, number> = {
   WEAPON: 0,
   ARMOR: 1,
@@ -35,11 +20,12 @@ const ITEM_TYPE_PRIORITY: Record<string, number> = {
 
 export function InventoryWorkspace({ inventory }: InventoryWorkspaceProps) {
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null)
-  const [hoverState, setHoverState] = useState<HoverState | null>(null)
-  const hoverTimeoutRef = useRef<number | null>(null)
+  const hover = useDelayedHover<{ id: string }>({
+    matches: (current, target) => current.id === target.id,
+  })
   const sortedInventory = useMemo(() => [...inventory].sort(compareInventoryItems), [inventory])
   const selectedItem = sortedInventory.find((item) => item.id === selectedItemId) ?? null
-  const hoveredItem = sortedInventory.find((item) => item.id === hoverState?.id) ?? null
+  const hoveredItem = sortedInventory.find((item) => item.id === hover.hoverState?.id) ?? null
   const equippedCount = sortedInventory.filter((item) => isEquipped(item)).length
 
   useEffect(() => {
@@ -47,8 +33,6 @@ export function InventoryWorkspace({ inventory }: InventoryWorkspaceProps) {
       setSelectedItemId(null)
     }
   }, [selectedItemId, sortedInventory])
-
-  useEffect(() => () => clearHoverTimer(hoverTimeoutRef), [])
 
   return (
     <>
@@ -154,19 +138,15 @@ export function InventoryWorkspace({ inventory }: InventoryWorkspaceProps) {
                         key={item.id}
                         level={item.itemLevel}
                         name={item.itemDisplayName}
-                        onBlur={() => setHoverState((current) => (current?.id === item.id ? null : current))}
+                        onBlur={() => hover.clearIfTarget({ id: item.id })}
                         onClick={() => {
-                          clearHoverTimer(hoverTimeoutRef)
-                          setHoverState(null)
+                          hover.clear()
                           setSelectedItemId(item.id)
                         }}
-                        onFocus={() => setHoverState({ id: item.id, x: window.innerWidth / 2, y: 176 })}
-                        onMouseEnter={(event) => queueHover(item.id, event, hoverTimeoutRef, setHoverState)}
-                        onMouseLeave={() => {
-                          clearHoverTimer(hoverTimeoutRef)
-                          setHoverState((current) => (current?.id === item.id ? null : current))
-                        }}
-                        onMouseMove={(event) => updateHoverPosition(item.id, event, setHoverState)}
+                        onFocus={() => hover.showFromFocus({ id: item.id })}
+                        onMouseEnter={(event) => hover.queueFromPointer({ id: item.id }, event)}
+                        onMouseLeave={() => hover.clearIfTarget({ id: item.id })}
+                        onMouseMove={(event) => hover.updateFromPointer({ id: item.id }, event)}
                         rarity={item.rarity}
                         type={item.itemType}
                       />
@@ -207,8 +187,8 @@ export function InventoryWorkspace({ inventory }: InventoryWorkspaceProps) {
           aria-hidden="true"
           className="inventory-hover-card"
           style={{
-            left: `${Math.min(hoverState!.x + 18, window.innerWidth - 340)}px`,
-            top: `${Math.min(hoverState!.y + 18, window.innerHeight - 280)}px`,
+            left: `${Math.min(hover.hoverState!.x + 18, window.innerWidth - 340)}px`,
+            top: `${Math.min(hover.hoverState!.y + 18, window.innerHeight - 280)}px`,
           }}
         >
           <div className="inventory-hover-header">
@@ -253,32 +233,4 @@ function compareInventoryItems(left: ClientInventoryItem, right: ClientInventory
 
 function isEquipped(item: ClientInventoryItem) {
   return item.equippedTeamId != null
-}
-
-function queueHover(
-  id: string,
-  event: ReactMouseEvent<HTMLButtonElement>,
-  hoverTimeoutRef: MutableRefObject<number | null>,
-  setHoverState: Dispatch<SetStateAction<HoverState | null>>,
-) {
-  clearHoverTimer(hoverTimeoutRef)
-  const { clientX, clientY } = event
-  hoverTimeoutRef.current = window.setTimeout(() => {
-    setHoverState({ id, x: clientX, y: clientY })
-  }, HOVER_DELAY_MS)
-}
-
-function updateHoverPosition(
-  id: string,
-  event: ReactMouseEvent<HTMLButtonElement>,
-  setHoverState: Dispatch<SetStateAction<HoverState | null>>,
-) {
-  setHoverState((current) => (current?.id === id ? { id, x: event.clientX, y: event.clientY } : current))
-}
-
-function clearHoverTimer(hoverTimeoutRef: MutableRefObject<number | null>) {
-  if (hoverTimeoutRef.current != null) {
-    window.clearTimeout(hoverTimeoutRef.current)
-    hoverTimeoutRef.current = null
-  }
 }

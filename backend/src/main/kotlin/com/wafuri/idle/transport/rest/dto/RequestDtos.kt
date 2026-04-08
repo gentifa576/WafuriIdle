@@ -34,6 +34,18 @@ data class UnequipItemRequest(
   val slot: EquipmentSlot,
 )
 
+data class SaveTeamLoadoutRequest(
+  val slots: List<TeamSlotLoadoutRequest>,
+)
+
+data class TeamSlotLoadoutRequest(
+  val position: Int,
+  val characterKey: String?,
+  val weaponItemId: UUID?,
+  val armorItemId: UUID?,
+  val accessoryItemId: UUID?,
+)
+
 data class AuthResponse(
   val player: Player,
   val sessionToken: String,

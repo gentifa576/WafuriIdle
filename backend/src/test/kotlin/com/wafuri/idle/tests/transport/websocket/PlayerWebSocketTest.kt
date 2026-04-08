@@ -143,7 +143,18 @@ class PlayerWebSocketTest {
 
     given()
       .header("Authorization", "Bearer $token")
-      .post("/teams/$teamId/slots/1/characters/nimbus")
+      .contentType("application/json")
+      .body(
+        """
+        {
+          "slots":[
+            {"position":1,"characterKey":"nimbus","weaponItemId":null,"armorItemId":null,"accessoryItemId":null},
+            {"position":2,"characterKey":null,"weaponItemId":null,"armorItemId":null,"accessoryItemId":null},
+            {"position":3,"characterKey":null,"weaponItemId":null,"armorItemId":null,"accessoryItemId":null}
+          ]
+        }
+        """.trimIndent(),
+      ).post("/teams/$teamId/loadout")
       .then()
       .statusCode(200)
 
@@ -252,7 +263,18 @@ class PlayerWebSocketTest {
 
     given()
       .header("Authorization", "Bearer $token")
-      .post("/teams/$teamId/slots/1/characters/nimbus")
+      .contentType("application/json")
+      .body(
+        """
+        {
+          "slots":[
+            {"position":1,"characterKey":"nimbus","weaponItemId":null,"armorItemId":null,"accessoryItemId":null},
+            {"position":2,"characterKey":null,"weaponItemId":null,"armorItemId":null,"accessoryItemId":null},
+            {"position":3,"characterKey":null,"weaponItemId":null,"armorItemId":null,"accessoryItemId":null}
+          ]
+        }
+        """.trimIndent(),
+      ).post("/teams/$teamId/loadout")
       .then()
       .statusCode(200)
 

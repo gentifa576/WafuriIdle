@@ -24,6 +24,7 @@ import com.wafuri.idle.tests.support.swordItem
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -127,6 +128,70 @@ class EquipmentServiceTest : StringSpec() {
 
       savedItems.last().equippedTeamId.shouldBeNull()
       savedItems.last().equippedPosition.shouldBeNull()
+      verify(exactly = 1) { combatStatService.invalidatePlayer(playerId) }
+      verify(exactly = 1) { playerStateWorkQueue.markDirty(playerId) }
+    }
+
+    "equip swaps the existing item in the same slot without a separate unequip" {
+      val playerId = UUID.randomUUID()
+      val equippedItemId = UUID.randomUUID()
+      val replacementItemId = UUID.randomUUID()
+      val teamId = UUID.randomUUID()
+      val player = expectedPlayer(playerId, "Alice", ownedCharacterKeys = setOf("warrior"))
+      val team =
+        expectedTeam(
+          id = teamId,
+          playerId = playerId,
+          slots =
+            listOf(
+              TeamMemberSlot(1, "warrior", weaponItemId = equippedItemId),
+              TeamMemberSlot(2),
+              TeamMemberSlot(3),
+            ),
+        )
+      val equippedItem =
+        expectedInventoryItem(
+          id = equippedItemId,
+          playerId = playerId,
+          item = swordItem(),
+          equippedTeamId = teamId,
+          equippedPosition = 1,
+        )
+      val replacementItem =
+        expectedInventoryItem(
+          id = replacementItemId,
+          playerId = playerId,
+          item = swordItem(),
+        )
+      val savedItems = mutableListOf<InventoryItem>()
+      val savedTeams = mutableListOf<Team>()
+
+      every { inventoryRepository.require(replacementItemId) } returns replacementItem
+      every { teamRepository.require(teamId) } returns team
+      every { playerRepository.require(playerId) } returns player
+      every { inventoryRepository.findByTeamPositionAndSlot(teamId, 1, EquipmentSlot.WEAPON) } returns equippedItem
+      every { inventoryRepository.save(any()) } answers {
+        firstArg<InventoryItem>().also { savedItems += it }
+      }
+      every { teamRepository.save(any()) } answers { firstArg<Team>().also { savedTeams += it } }
+      every { combatStatService.invalidatePlayer(playerId) } just runs
+      every { playerStateWorkQueue.markDirty(playerId) } just runs
+
+      service.equip(teamId, 1, replacementItemId, EquipmentSlot.WEAPON)
+
+      savedItems.size.shouldBe(2)
+      savedItems.first().id.shouldBe(equippedItemId)
+      savedItems.first().equippedTeamId.shouldBeNull()
+      savedItems.first().equippedPosition.shouldBeNull()
+      savedItems.last().id.shouldBe(replacementItemId)
+      savedItems.last().equippedTeamId.shouldBe(teamId)
+      savedItems.last().equippedPosition.shouldBe(1)
+      savedTeams
+        .single()
+        .slots
+        .first()
+        .weaponItemId
+        .shouldBe(replacementItemId)
       verify(exactly = 1) { combatStatService.invalidatePlayer(playerId) }
       verify(exactly = 1) { playerStateWorkQueue.markDirty(playerId) }
     }
