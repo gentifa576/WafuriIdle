@@ -1,6 +1,7 @@
 package com.wafuri.idle.tests.domain
 
 import com.wafuri.idle.domain.model.CombatMemberState
+import com.wafuri.idle.domain.model.CombatSkillState
 import com.wafuri.idle.domain.model.CombatState
 import com.wafuri.idle.domain.model.CombatStatus
 import com.wafuri.idle.domain.model.DomainRuleViolationException
@@ -180,6 +181,81 @@ class DomainModelTest :
           enemyMaxHp = 10f,
           members = listOf(expectedCombatMemberState("warrior", 10f, 3f, 15f, 15f)),
         )
+    }
+
+    "combat skill cooldown ticks by elapsed time before a damage step resolves" {
+      val state =
+        CombatState.active(
+          playerId = UUID.randomUUID(),
+          status = CombatStatus.FIGHTING,
+          zoneId = "starter-plains",
+          activeTeamId = UUID.randomUUID(),
+          enemyId = "training-dummy",
+          enemyName = "Training Dummy",
+          enemyLevel = 1,
+          enemyBaseHp = 10f,
+          enemyAttack = 1f,
+          enemyHp = 10f,
+          enemyMaxHp = 10f,
+          members =
+            listOf(
+              CombatMemberState(
+                characterKey = "warrior",
+                attack = 1f,
+                hit = 1f,
+                currentHp = 15f,
+                maxHp = 15f,
+                skill = CombatSkillState(cooldownMillis = 2_000L, remainingMillis = 1_500L),
+              ),
+            ),
+        )
+
+      val buffered =
+        state.advance(200L, 1000L, 1000L, 30_000L, 0.5f)
+
+      buffered.pendingDamageMillis shouldBe 200L
+      buffered
+        .members
+        .single()
+        .skill
+        ?.remainingMillis shouldBe 1_300L
+    }
+
+    "combat skill cooldown ticks by one interval when a damage step resolves" {
+      val state =
+        CombatState.active(
+          playerId = UUID.randomUUID(),
+          status = CombatStatus.FIGHTING,
+          zoneId = "starter-plains",
+          activeTeamId = UUID.randomUUID(),
+          enemyId = "training-dummy",
+          enemyName = "Training Dummy",
+          enemyLevel = 1,
+          enemyBaseHp = 1_000f,
+          enemyAttack = 1f,
+          enemyHp = 1_000f,
+          enemyMaxHp = 1_000f,
+          members =
+            listOf(
+              CombatMemberState(
+                characterKey = "warrior",
+                attack = 1f,
+                hit = 1f,
+                currentHp = 15f,
+                maxHp = 15f,
+                skill = CombatSkillState(cooldownMillis = 5_000L, remainingMillis = 2_100L),
+              ),
+            ),
+        )
+
+      val advanced =
+        state.advance(1_000L, 1_000L, 1_000L, 30_000L, 0.5f)
+
+      advanced
+        .members
+        .single()
+        .skill
+        ?.remainingMillis shouldBe 1_100L
     }
 
     "combat state does not retaliate when the enemy dies in the same damage step" {

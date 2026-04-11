@@ -43,7 +43,11 @@ class InMemoryPlayerStateChangeTracker : PlayerStateChangeTracker {
       val repeatedDownTick =
         previousSnapshot?.status == CombatStatus.DOWN &&
           snapshot.status == CombatStatus.DOWN
-      if (!repeatedDownTick && previousSnapshot != snapshot) {
+      val cooldownReadyTransition =
+        previousSnapshot?.let { hasCooldownReadyTransition(it, snapshot) } ?: false
+      val nonCooldownContentChanged =
+        previousSnapshot == null || previousSnapshot.withoutCooldowns() != snapshot.withoutCooldowns()
+      if (!repeatedDownTick && (nonCooldownContentChanged || cooldownReadyTransition)) {
         shouldPublish.set(true)
       }
       snapshot
@@ -55,4 +59,26 @@ class InMemoryPlayerStateChangeTracker : PlayerStateChangeTracker {
     lastPublishedContent.remove(playerId)
     lastPublishedCombat.remove(playerId)
   }
+
+  private fun hasCooldownReadyTransition(
+    previousSnapshot: CombatSnapshot,
+    snapshot: CombatSnapshot,
+  ): Boolean {
+    val currentByCharacterKey =
+      snapshot.members.associateBy { it.characterKey }
+    return previousSnapshot.members.any { previousMember ->
+      val currentMember = currentByCharacterKey[previousMember.characterKey] ?: return@any false
+      val previousCooldown = previousMember.skillCooldownRemainingMillis ?: 0L
+      val currentCooldown = currentMember.skillCooldownRemainingMillis ?: 0L
+      previousCooldown > 0L && currentCooldown <= 0L
+    }
+  }
 }
+
+private fun CombatSnapshot.withoutCooldowns(): CombatSnapshot =
+  copy(
+    members =
+      members.map { member ->
+        member.copy(skillCooldownRemainingMillis = null)
+      },
+  )

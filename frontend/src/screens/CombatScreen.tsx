@@ -34,6 +34,7 @@ export function CombatScreen() {
     templates = [],
     starterTemplates = [],
     combat,
+    skillEvents,
     socketStatus,
     notifications,
     sessionExpiresAt,
@@ -63,6 +64,15 @@ export function CombatScreen() {
   const memberLabels = useMemo(() => Object.fromEntries(ownedCharacters.map((character) => [character.key, character.name])), [ownedCharacters])
   const memberImages = useMemo(
     () => Object.fromEntries(templates.filter((template) => template.image).map((template) => [template.key, template.image])),
+    [templates],
+  )
+  const skillByCharacterKey = useMemo(
+    () =>
+      new Map(
+        templates
+          .filter((template) => template.skill != null)
+          .map((template) => [template.key, { name: template.skill!.name, cooldownMillis: template.skill!.cooldownMillis }]),
+      ),
     [templates],
   )
   const topZone = zoneProgress[0] ?? null
@@ -123,6 +133,13 @@ export function CombatScreen() {
       window.clearInterval(intervalId)
     }
   }, [combat?.playerId, combat?.status, combat?.pendingReviveMillis])
+
+  useEffect(() => {
+    actions.setSkillEventStreaming(activeView === 'combat')
+    return () => {
+      actions.setSkillEventStreaming(false)
+    }
+  }, [activeView])
 
   if (!player) {
     return (
@@ -190,8 +207,10 @@ export function CombatScreen() {
           <CombatWorkspace
             hud={hud}
             combat={combat}
+            skillEvents={skillEvents}
             memberLabels={memberLabels}
             memberImages={memberImages}
+            skillByCharacterKey={skillByCharacterKey}
             topZone={topZone}
             activeTeam={activeTeam}
             combatMembersByKey={combatMembersByKey}

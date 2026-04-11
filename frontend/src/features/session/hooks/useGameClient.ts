@@ -293,6 +293,9 @@ export function useGameClient() {
         sendStopCombat(activeSocket)
         state.appendActivity(`Sent combat stop for ${state.player.name}`)
       },
+      setSkillEventStreaming(enabled: boolean) {
+        state.setSkillEventStreaming(enabled)
+      },
       dismissNotification: state.dismissNotification,
       clearError: state.clearError,
       async logout() {
@@ -327,6 +330,7 @@ export function useGameClient() {
     templates: state.templates,
     starterTemplates: state.starterTemplates,
     combat: state.combat,
+    skillEvents: state.skillEvents,
     socketStatus: socket.socketStatus,
     notifications: state.notifications,
     activity: state.activity,

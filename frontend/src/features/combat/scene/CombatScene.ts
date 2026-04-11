@@ -1,9 +1,11 @@
 import { Application, Assets, Container, Graphics, Sprite, Text, TextStyle, Texture } from 'pixi.js'
 import type { ClientCombat, ClientCombatMember } from '../../session/model/clientModels'
+import type { SkillEffectEvent } from '../../../core/types/api'
 import combatPresets from './combatPresets.json'
 
 interface CombatSceneRenderState {
   snapshot: ClientCombat | null
+  skillEvents: SkillEffectEvent[]
   memberLabels: Record<string, string>
   memberImages: Record<string, string | null | undefined>
 }
@@ -87,7 +89,7 @@ export class CombatScene {
   private app: Application | null = null
   private mounted = false
   private destroyed = false
-  private pendingState: CombatSceneRenderState = { snapshot: null, memberLabels: {}, memberImages: {} }
+  private pendingState: CombatSceneRenderState = { snapshot: null, skillEvents: [], memberLabels: {}, memberImages: {} }
   private stageRoot = new Container()
   private board = new Graphics()
   private rails = new Graphics()
@@ -105,6 +107,8 @@ export class CombatScene {
   })
   private memberNodes: MemberNode[] = []
   private floatingTexts: FloatingDamageText[] = []
+  private processedSkillEventIds = new Set<string>()
+  private skillEventBaselineInitialized = false
   private cycleElapsedMs = 0
   private previousProgress = 0
   private previousStatus: ClientCombat['status'] | null = null
@@ -171,11 +175,13 @@ export class CombatScene {
 
   render(
     snapshot: ClientCombat | null,
+    skillEvents: SkillEffectEvent[] = [],
     memberLabels: Record<string, string> = {},
     memberImages: Record<string, string | null | undefined> = {},
   ) {
     this.pendingState = {
       snapshot,
+      skillEvents,
       memberLabels,
       memberImages,
     }
@@ -206,6 +212,12 @@ export class CombatScene {
     }
 
     this.syncMemberNodes(this.pendingState.snapshot?.members ?? [])
+    if (!this.skillEventBaselineInitialized) {
+      // Avoid replaying buffered events when re-entering the combat view.
+      this.processedSkillEventIds = new Set(this.pendingState.skillEvents.map((event) => event.eventId))
+      this.skillEventBaselineInitialized = true
+    }
+    this.consumeSkillEvents(this.pendingState.skillEvents)
     this.updateBoardGeometry()
     if (this.activePathPreset == null || this.pathSizeKey !== this.boardSizeKey()) {
       const shouldResetBall = this.activePathPreset == null
@@ -556,6 +568,46 @@ export class CombatScene {
           velocityY: 0.04 + index * 0.004,
         })
       }
+    })
+  }
+
+  private consumeSkillEvents(skillEvents: SkillEffectEvent[]) {
+    for (const event of skillEvents) {
+      if (this.processedSkillEventIds.has(event.eventId)) {
+        continue
+      }
+      this.processedSkillEventIds.add(event.eventId)
+      if (event.effectType === 'DAMAGE' && event.targetType === 'ENEMY') {
+        this.spawnSkillDamageText(event)
+      }
+    }
+
+    if (this.processedSkillEventIds.size > 200) {
+      this.processedSkillEventIds = new Set(skillEvents.slice(-120).map((event) => event.eventId))
+    }
+  }
+
+  private spawnSkillDamageText(event: SkillEffectEvent) {
+    const damageText = new Text({
+      text: `${Math.max(0, event.value ?? 0).toFixed(0)}`,
+      style: new TextStyle({
+        fill: '#7a2f4f',
+        fontFamily: 'IBM Plex Sans, sans-serif',
+        fontSize: this.s(42),
+        fontWeight: '800',
+        stroke: { color: '#08050a', width: 6 },
+      }),
+    })
+    damageText.anchor.set(0.5)
+    damageText.position.set(
+      this.enemyAnchor.x + randomBetween(-34, 34),
+      this.enemyAnchor.y - this.s(52) + randomBetween(-18, 18),
+    )
+    this.stageRoot.addChild(damageText)
+    this.floatingTexts.push({
+      text: damageText,
+      lifetimeMs: 1_050,
+      velocityY: 0.06,
     })
   }
 

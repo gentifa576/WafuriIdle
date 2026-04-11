@@ -1,6 +1,7 @@
 package com.wafuri.idle.application.service.combat
 
 import com.wafuri.idle.application.exception.ValidationException
+import com.wafuri.idle.application.model.CharacterCombatSkillStats
 import com.wafuri.idle.application.model.CharacterCombatStats
 import com.wafuri.idle.application.model.TeamCombatStats
 import com.wafuri.idle.application.port.out.InventoryRepository
@@ -47,7 +48,7 @@ class CombatStatService(
     playerId: UUID,
     existingMembers: List<CombatMemberState> = emptyList(),
   ): TeamCombatStats? {
-    val cached = cachedPlayerBaseStats[playerId] ?: loadPlayerCombatBaseStats(playerId)?.also { cachedPlayerBaseStats[playerId] = it }
+    val cached = cachedCombatBaseStats(playerId)
     if (cached == null) {
       cachedPlayerBaseStats.remove(playerId)
       return null
@@ -61,9 +62,17 @@ class CombatStatService(
     return TeamCombatStats(cached.teamId, resolvedCharacterStats)
   }
 
+  fun teamSkillsForPlayerOrNull(playerId: UUID): Map<String, CharacterCombatSkillStats>? {
+    val cached = cachedCombatBaseStats(playerId) ?: return null
+    return cached.baseCharacterSkills
+  }
+
   fun invalidatePlayer(playerId: UUID) {
     cachedPlayerBaseStats.remove(playerId)
   }
+
+  private fun cachedCombatBaseStats(playerId: UUID): PlayerCombatBaseStats? =
+    cachedPlayerBaseStats[playerId] ?: loadPlayerCombatBaseStats(playerId)?.also { cachedPlayerBaseStats[playerId] = it }
 
   private fun loadPlayerCombatBaseStats(playerId: UUID): PlayerCombatBaseStats? {
     val player = playerRepository.require(playerId)
@@ -108,6 +117,22 @@ class CombatStatService(
           }
         }.filterNotNull()
 
+    val baseCharacterSkills =
+      occupiedSlots
+        .mapNotNull { teamSlot ->
+          val characterKey = teamSlot.characterKey ?: return@mapNotNull null
+          characterKey.takeIf { it in player.ownedCharacterKeys }?.let { ownedCharacterKey ->
+            characterTemplateCatalog.require(ownedCharacterKey).skill?.let { skill ->
+              ownedCharacterKey to
+                CharacterCombatSkillStats(
+                  key = skill.key,
+                  cooldownMillis = skill.cooldownMillis,
+                  effects = skill.effects,
+                )
+            }
+          }
+        }.toMap()
+
     if (baseCharacterStats.isEmpty()) {
       return null
     }
@@ -116,6 +141,7 @@ class CombatStatService(
       team.id,
       baseCharacterStats.map { it.characterKey },
       baseCharacterStats,
+      baseCharacterSkills,
     )
   }
 
@@ -143,5 +169,6 @@ class CombatStatService(
     val teamId: UUID,
     val teamCharacterKeys: List<String>,
     val baseCharacterStats: List<CharacterCombatStats>,
+    val baseCharacterSkills: Map<String, CharacterCombatSkillStats>,
   )
 }

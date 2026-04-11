@@ -151,7 +151,8 @@ function combatMembersEquals(left: ClientCombat['members'], right: ClientCombat[
         member.currentHp === right[index]?.currentHp &&
         member.maxHp === right[index]?.maxHp &&
         member.alive === right[index]?.alive &&
-        member.hpLabel === right[index]?.hpLabel,
+        member.hpLabel === right[index]?.hpLabel &&
+        member.skillCooldownRemainingMillis === right[index]?.skillCooldownRemainingMillis,
     )
   )
 }

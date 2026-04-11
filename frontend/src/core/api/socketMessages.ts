@@ -10,6 +10,8 @@ import type {
   PlayerSocketMessage,
   PlayerStateSnapshot,
   PlayerStateSyncMessage,
+  SkillEventsMessage,
+  SkillEffectEvent,
   Stat,
   ZoneLevelUpMessage,
   ZoneProgressSnapshot,
@@ -47,6 +49,8 @@ export function parsePlayerSocketMessage(raw: string): SocketMessageParseResult 
       return parsePlayerStateSyncMessage(parsed)
     case 'COMBAT_STATE_SYNC':
       return parseCombatStateSyncMessage(parsed)
+    case 'SKILL_EVENTS':
+      return parseSkillEventsMessage(parsed)
     case 'ZONE_LEVEL_UP':
       return parseZoneLevelUpMessage(parsed)
     case 'OFFLINE_PROGRESSION':
@@ -85,6 +89,52 @@ function parseCombatStateSyncMessage(message: Record<string, unknown>): SocketMe
       serverTime: message.serverTime,
     } satisfies CombatStateSyncMessage,
   }
+}
+
+function parseSkillEventsMessage(message: Record<string, unknown>): SocketMessageParseResult {
+  if (
+    !isString(message.playerId) ||
+    !isSkillEffectEventArray(message.events) ||
+    !isString(message.serverTime)
+  ) {
+    return invalidMessage('INVALID_MESSAGE_SHAPE', 'SKILL_EVENTS payload is missing required fields.')
+  }
+  return {
+    ok: true,
+    message: {
+      type: 'SKILL_EVENTS',
+      playerId: message.playerId,
+      events: message.events,
+      serverTime: message.serverTime,
+    } satisfies SkillEventsMessage,
+  }
+}
+
+function isSkillEffectEventArray(value: unknown): value is SkillEffectEvent[] {
+  return Array.isArray(value) && value.every(isSkillEffectEvent)
+}
+
+function isSkillEffectEvent(value: unknown): value is SkillEffectEvent {
+  return (
+    isRecord(value) &&
+    isString(value.eventId) &&
+    isString(value.characterKey) &&
+    isString(value.skillKey) &&
+    isSkillEffectType(value.effectType) &&
+    isSkillTargetType(value.targetType) &&
+    isNullableString(value.targetKey) &&
+    isNullableNumber(value.value) &&
+    isNullableString(value.statusKey) &&
+    isNullableNumber(value.durationMillis)
+  )
+}
+
+function isSkillEffectType(value: unknown): boolean {
+  return value === 'DAMAGE' || value === 'HEAL' || value === 'BUFF_APPLIED' || value === 'DEBUFF_APPLIED' || value === 'SHIELD'
+}
+
+function isSkillTargetType(value: unknown): boolean {
+  return value === 'ENEMY' || value === 'ALLY_TEAM' || value === 'ALLY_MEMBER' || value === 'SELF'
 }
 
 function parseZoneLevelUpMessage(message: Record<string, unknown>): SocketMessageParseResult {

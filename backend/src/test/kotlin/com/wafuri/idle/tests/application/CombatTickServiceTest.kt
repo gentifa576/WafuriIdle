@@ -3,6 +3,7 @@ package com.wafuri.idle.tests.application
 import com.wafuri.idle.application.config.GameConfig
 import com.wafuri.idle.application.port.out.ActivePlayerRegistry
 import com.wafuri.idle.application.port.out.CombatStateRepository
+import com.wafuri.idle.application.port.out.PlayerMessageQueue
 import com.wafuri.idle.application.port.out.PlayerStateWorkQueue
 import com.wafuri.idle.application.service.combat.CombatLootService
 import com.wafuri.idle.application.service.combat.CombatStatService
@@ -38,6 +39,7 @@ class CombatTickServiceTest : StringSpec() {
   private lateinit var activePlayerRegistry: ActivePlayerRegistry
   private lateinit var combatStateRepository: CombatStateRepository
   private lateinit var combatStatService: CombatStatService
+  private lateinit var playerMessageQueue: PlayerMessageQueue
   private lateinit var playerStateWorkQueue: PlayerStateWorkQueue
   private lateinit var combatLootService: CombatLootService
   private lateinit var progressionService: ProgressionService
@@ -52,6 +54,7 @@ class CombatTickServiceTest : StringSpec() {
       activePlayerRegistry = mockk()
       combatStateRepository = mockk()
       combatStatService = mockk()
+      playerMessageQueue = mockk(relaxed = true)
       playerStateWorkQueue = mockk()
       combatLootService = mockk()
       progressionService = mockk()
@@ -68,6 +71,7 @@ class CombatTickServiceTest : StringSpec() {
           activePlayerRegistry,
           combatStateRepository,
           combatStatService,
+          playerMessageQueue,
           playerStateWorkQueue,
           combatLootService,
           progressionService,
@@ -100,6 +104,7 @@ class CombatTickServiceTest : StringSpec() {
       every { combatStateRepository.findById(playerId) } returns current
       every { combatStatService.teamStatsForPlayerOrNull(playerId, current.members) } returns
         expectedSingleMemberTeamCombatStats(teamId = teamId, attack = 12f, hit = 7f, maxHp = 11f)
+      every { combatStatService.teamSkillsForPlayerOrNull(playerId) } returns emptyMap()
       every { combatStateRepository.save(any()) } answers {
         firstArg<CombatState>().also { savedState = it }
       }
@@ -166,6 +171,7 @@ class CombatTickServiceTest : StringSpec() {
       every { activePlayerRegistry.activePlayerIds() } returns setOf(playerId)
       every { combatStateRepository.findById(playerId) } returns current
       every { combatStatService.teamStatsForPlayerOrNull(playerId, current.members) } returns null
+      every { combatStatService.teamSkillsForPlayerOrNull(playerId) } returns emptyMap()
       every { combatStateRepository.save(any()) } answers {
         firstArg<CombatState>().also { savedState = it }
       }
@@ -212,6 +218,7 @@ class CombatTickServiceTest : StringSpec() {
       every { combatStateRepository.findById(playerId) } answers { currentState }
       every { combatStatService.teamStatsForPlayerOrNull(playerId, any()) } returns
         expectedSingleMemberTeamCombatStats(teamId = teamId, attack = 150f, hit = 1f, maxHp = 100f)
+      every { combatStatService.teamSkillsForPlayerOrNull(playerId) } returns emptyMap()
       every { combatStateRepository.save(any()) } answers {
         firstArg<CombatState>().also {
           currentState = it

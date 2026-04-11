@@ -135,6 +135,7 @@ class OfflineProgressionServiceTest : StringSpec() {
 
       every { combatStateRepository.findById(playerId) } returns state
       every { combatStatService.teamStatsForPlayerOrNull(playerId, state.members) } returns null
+      every { combatStatService.teamSkillsForPlayerOrNull(playerId) } returns emptyMap()
       every { combatStateRepository.save(any()) } answers { firstArg() }
       every { enemyTemplateCatalog.requireRandom(listOf("training-dummy"), randomSource) } returns trainingDummyEnemy(baseHp = 100f)
 
@@ -178,6 +179,7 @@ class OfflineProgressionServiceTest : StringSpec() {
       every { combatStateRepository.findById(playerId) } returns state
       every { combatStatService.teamStatsForPlayerOrNull(playerId, state.members) } returns
         expectedSingleMemberTeamCombatStats(teamId, attack = 10f, hit = 1f, maxHp = 1000f)
+      every { combatStatService.teamSkillsForPlayerOrNull(playerId) } returns emptyMap()
       every { progressionService.requirePlayer(playerId) } returnsMany listOf(beforePlayer, afterPlayer)
       every { progressionService.requireZoneProgress(playerId, zoneId) } returnsMany listOf(beforeZone, afterZone)
       every { progressionService.recordKill(playerId, zoneId, any()) } just runs
@@ -239,6 +241,7 @@ class OfflineProgressionServiceTest : StringSpec() {
       every { combatStateRepository.findById(playerId) } returns state
       every { combatStatService.teamStatsForPlayerOrNull(playerId, state.members) } returns
         expectedSingleMemberTeamCombatStats(teamId, attack = 10f, hit = 1f, maxHp = 1000f)
+      every { combatStatService.teamSkillsForPlayerOrNull(playerId) } returns emptyMap()
       every { progressionService.requirePlayer(playerId) } returnsMany listOf(beforePlayer, afterPlayer)
       every { progressionService.requireZoneProgress(playerId, zoneId) } returnsMany listOf(beforeZone, afterZone)
       every { progressionService.recordKill(playerId, zoneId, any()) } just runs
@@ -308,6 +311,7 @@ class OfflineProgressionServiceTest : StringSpec() {
       val liveActivePlayerRegistry = mockk<ActivePlayerRegistry>()
       val liveCombatStateRepository = mockk<CombatStateRepository>()
       val liveCombatStatService = mockk<CombatStatService>()
+      val livePlayerMessageQueue = mockk<PlayerMessageQueue>(relaxed = true)
       val livePlayerStateWorkQueue = mockk<PlayerStateWorkQueue>()
       val liveCombatLootService = mockk<CombatLootService>()
       val liveProgressionService = mockk<ProgressionService>()
@@ -319,6 +323,7 @@ class OfflineProgressionServiceTest : StringSpec() {
           liveActivePlayerRegistry,
           liveCombatStateRepository,
           liveCombatStatService,
+          livePlayerMessageQueue,
           livePlayerStateWorkQueue,
           liveCombatLootService,
           liveProgressionService,
@@ -342,6 +347,7 @@ class OfflineProgressionServiceTest : StringSpec() {
         firstArg<CombatState>().also { offlineSavedState = it }
       }
       every { offlineCombatStatService.teamStatsForPlayerOrNull(playerId, any()) } returns teamStats
+      every { offlineCombatStatService.teamSkillsForPlayerOrNull(playerId) } returns emptyMap()
       every { offlineProgressionServicePort.requirePlayer(playerId) } answers {
         Player(
           playerId,
@@ -386,6 +392,7 @@ class OfflineProgressionServiceTest : StringSpec() {
         firstArg<CombatState>().also { liveCurrentState = it }
       }
       every { liveCombatStatService.teamStatsForPlayerOrNull(playerId, any()) } returns teamStats
+      every { liveCombatStatService.teamSkillsForPlayerOrNull(playerId) } returns emptyMap()
       every { livePlayerStateWorkQueue.markDirty(playerId) } just runs
       every { liveProgressionService.requireZoneProgress(playerId, zoneId) } answers {
         PlayerZoneProgress(
@@ -457,6 +464,7 @@ class OfflineProgressionServiceTest : StringSpec() {
       every { combatStateRepository.findById(playerId) } returns state
       every { combatStatService.teamStatsForPlayerOrNull(playerId, state.members) } returns
         expectedSingleMemberTeamCombatStats(teamId, attack = 150f, hit = 1f, maxHp = 100f)
+      every { combatStatService.teamSkillsForPlayerOrNull(playerId) } returns emptyMap()
       every { progressionService.requirePlayer(playerId) } returnsMany
         listOf(expectedPlayer(playerId, "Alice"), expectedPlayer(playerId, "Alice"))
       every { progressionService.requireZoneProgress(playerId, zoneId) } returnsMany

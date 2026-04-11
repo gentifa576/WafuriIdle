@@ -26,6 +26,42 @@ data class CombatStateMessage(
   override val type: EventType = EventType.COMBAT_STATE_SYNC,
 ) : PlayerMessage
 
+data class SkillEventsMessage(
+  override val playerId: UUID,
+  val events: List<SkillEffectEvent>,
+  val serverTime: Instant? = null,
+  override val type: EventType = EventType.SKILL_EVENTS,
+) : PlayerMessage {
+  override fun publishAt(serverTime: Instant): PlayerMessage = copy(serverTime = serverTime)
+}
+
+data class SkillEffectEvent(
+  val eventId: UUID,
+  val characterKey: String,
+  val skillKey: String,
+  val effectType: SkillEffectType,
+  val targetType: SkillTargetType,
+  val targetKey: String? = null,
+  val value: Float? = null,
+  val statusKey: String? = null,
+  val durationMillis: Long? = null,
+)
+
+enum class SkillEffectType {
+  DAMAGE,
+  HEAL,
+  BUFF_APPLIED,
+  DEBUFF_APPLIED,
+  SHIELD,
+}
+
+enum class SkillTargetType {
+  ENEMY,
+  ALLY_TEAM,
+  ALLY_MEMBER,
+  SELF,
+}
+
 data class ZoneLevelUpMessage(
   override val playerId: UUID,
   val zoneId: String,

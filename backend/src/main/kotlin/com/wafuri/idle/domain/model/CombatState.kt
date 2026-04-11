@@ -206,17 +206,24 @@ data class CombatState(
     respawnDelayMillis: Long,
     reviveDelayMillis: Long,
     reviveHpRatio: Float,
+    skillDefinitions: Map<String, CombatSkillDefinition> = emptyMap(),
+    skillEvents: MutableList<CombatSkillDamageEvent>? = null,
   ): CombatState {
     require(elapsedMillis >= 0L) { "Combat elapsed millis must not be negative." }
     require(damageIntervalMillis > 0L) { "Combat damage interval must be positive." }
     require(respawnDelayMillis >= 0L) { "Combat respawn delay must not be negative." }
     require(reviveDelayMillis >= 0L) { "Combat revive delay must not be negative." }
     require(reviveHpRatio in 0f..1f) { "Combat revive HP ratio must be within 0 and 1." }
+    val totalPendingMillis = pendingDamageMillis + elapsedMillis
     if (status != CombatStatus.FIGHTING) {
       if (status == CombatStatus.WON) {
+        val cooledMembers = tickSkillCooldowns(members, elapsedMillis)
         val totalPendingRespawnMillis = pendingRespawnMillis + elapsedMillis
         if (totalPendingRespawnMillis < respawnDelayMillis) {
-          return copy(pendingRespawnMillis = totalPendingRespawnMillis)
+          return copy(
+            members = cooledMembers,
+            pendingRespawnMillis = totalPendingRespawnMillis,
+          )
         }
 
         val overflowMillis = totalPendingRespawnMillis - respawnDelayMillis
@@ -228,15 +235,28 @@ data class CombatState(
             pendingDamageMillis = 0L,
             pendingRespawnMillis = 0L,
             pendingReviveMillis = 0L,
+            members = cooledMembers,
           )
-        return restarted.advance(overflowMillis, damageIntervalMillis, respawnDelayMillis, reviveDelayMillis, reviveHpRatio)
+        return restarted.advance(
+          overflowMillis,
+          damageIntervalMillis,
+          respawnDelayMillis,
+          reviveDelayMillis,
+          reviveHpRatio,
+          skillDefinitions,
+          skillEvents,
+        )
       }
       if (status != CombatStatus.DOWN) {
         return this
       }
+      val cooledMembers = tickSkillCooldowns(members, elapsedMillis)
       val totalPendingReviveMillis = pendingReviveMillis + elapsedMillis
       if (totalPendingReviveMillis < reviveDelayMillis) {
-        return copy(pendingReviveMillis = totalPendingReviveMillis)
+        return copy(
+          members = cooledMembers,
+          pendingReviveMillis = totalPendingReviveMillis,
+        )
       }
 
       val overflowMillis = totalPendingReviveMillis - reviveDelayMillis
@@ -245,67 +265,231 @@ data class CombatState(
           status = CombatStatus.FIGHTING,
           zoneId = zoneId,
           enemyHp = enemyMaxHp,
-          members = members.map { it.revive(reviveHpRatio) },
+          members = cooledMembers.map { it.revive(reviveHpRatio) },
           pendingDamageMillis = 0L,
           pendingRespawnMillis = 0L,
           pendingReviveMillis = 0L,
         )
-      return revived.advance(overflowMillis, damageIntervalMillis, respawnDelayMillis, reviveDelayMillis, reviveHpRatio)
+      return revived.advance(
+        overflowMillis,
+        damageIntervalMillis,
+        respawnDelayMillis,
+        reviveDelayMillis,
+        reviveHpRatio,
+        skillDefinitions,
+        skillEvents,
+      )
     }
 
-    val totalPendingMillis = pendingDamageMillis + elapsedMillis
-    val damageSteps = totalPendingMillis / damageIntervalMillis
-    if (damageSteps == 0L) {
-      return copy(pendingDamageMillis = totalPendingMillis)
+    val firstStepDelayMillis =
+      if (pendingDamageMillis == 0L) {
+        damageIntervalMillis
+      } else {
+        damageIntervalMillis - pendingDamageMillis
+      }
+    if (elapsedMillis < firstStepDelayMillis) {
+      return copy(
+        members = tickSkillCooldowns(members, elapsedMillis),
+        pendingDamageMillis = totalPendingMillis,
+      )
     }
 
     val intervalSeconds = damageIntervalMillis / 1000f
-    val damagePerStep = teamDps * intervalSeconds
-    val playerDamage = damagePerStep * damageSteps
-    val nextEnemyHp = (enemyHp - playerDamage).coerceAtLeast(0f)
-    val retaliationSteps =
-      if (nextEnemyHp > 0f || damagePerStep <= 0f) {
-        damageSteps
-      } else {
-        kotlin.math
-          .ceil(enemyHp / damagePerStep)
-          .toLong()
-          .minus(1L)
-          .coerceAtLeast(0L)
+    var nextEnemyHp = enemyHp
+    var nextMembers = members
+    var consumedElapsedMillis = firstStepDelayMillis
+    var statusAfterStep = status
+    nextMembers = tickSkillCooldowns(nextMembers, firstStepDelayMillis)
+
+    while (statusAfterStep == CombatStatus.FIGHTING) {
+      val resolved = resolveDamageStep(nextMembers, nextEnemyHp, intervalSeconds, skillDefinitions)
+      nextEnemyHp = resolved.enemyHp
+      nextMembers = resolved.members
+      if (skillEvents != null) {
+        skillEvents.addAll(resolved.skillEvents)
       }
-    val updatedMembers =
-      applyRetaliationDamage(enemyAttack * retaliationSteps)
-    val nextStatus =
-      when {
-        updatedMembers.none { it.isAlive } -> CombatStatus.DOWN
-        nextEnemyHp == 0f -> CombatStatus.WON
-        else -> CombatStatus.FIGHTING
+      statusAfterStep =
+        when {
+          nextMembers.none { it.isAlive } -> CombatStatus.DOWN
+          nextEnemyHp == 0f -> CombatStatus.WON
+          else -> CombatStatus.FIGHTING
+        }
+      if (statusAfterStep != CombatStatus.FIGHTING) {
+        break
       }
+      if (consumedElapsedMillis + damageIntervalMillis > elapsedMillis) {
+        break
+      }
+      nextMembers = tickSkillCooldowns(nextMembers, damageIntervalMillis)
+      consumedElapsedMillis += damageIntervalMillis
+    }
+
+    val trailingElapsedMillis = (elapsedMillis - consumedElapsedMillis).coerceAtLeast(0L)
+    if (trailingElapsedMillis > 0L) {
+      nextMembers = tickSkillCooldowns(nextMembers, trailingElapsedMillis)
+    }
+
     return copy(
       enemyHp = nextEnemyHp,
-      status = nextStatus,
-      members = updatedMembers,
+      status = statusAfterStep,
+      members = nextMembers,
       pendingDamageMillis = totalPendingMillis % damageIntervalMillis,
-      pendingRespawnMillis = if (nextStatus == CombatStatus.WON) 0L else pendingRespawnMillis,
-      pendingReviveMillis = if (nextStatus == CombatStatus.DOWN) 0L else pendingReviveMillis,
+      pendingRespawnMillis = if (statusAfterStep == CombatStatus.WON) 0L else pendingRespawnMillis,
+      pendingReviveMillis = if (statusAfterStep == CombatStatus.DOWN) 0L else pendingReviveMillis,
     )
   }
 
-  private fun applyRetaliationDamage(damage: Float): List<CombatMemberState> {
-    if (damage <= 0f) {
-      return members
+  private fun resolveDamageStep(
+    currentMembers: List<CombatMemberState>,
+    currentEnemyHp: Float,
+    intervalSeconds: Float,
+    skillDefinitions: Map<String, CombatSkillDefinition>,
+  ): StepResolution {
+    val membersByCharacterKey =
+      currentMembers
+        .associateBy { it.characterKey }
+        .toMutableMap()
+    val livingMembers = currentMembers.filter { it.isAlive }
+    val skillEvents = mutableListOf<CombatSkillDamageEvent>()
+    val baseDamage = livingMembers.sumOf { (it.attack * it.hit).toDouble() }.toFloat() * intervalSeconds
+    val skillDamage =
+      livingMembers
+        .asReversed()
+        .sumOf { member ->
+          val memberState = membersByCharacterKey[member.characterKey] ?: return@sumOf 0.0
+          val skill = memberState.skill ?: return@sumOf 0.0
+          if (!skill.isReady()) {
+            return@sumOf 0.0
+          }
+          membersByCharacterKey[member.characterKey] = memberState.copy(skill = skill.consume())
+          val skillDefinition = skillDefinitions[member.characterKey] ?: CombatSkillDefinition()
+          val damage = skillDamageFor(memberState, skillDefinition, enemyMaxHp, currentEnemyHp)
+          damage.takeIf { it > 0f }?.let {
+            skillEvents.add(
+              CombatSkillDamageEvent(
+                characterKey = member.characterKey,
+                damage = it,
+              ),
+            )
+          }
+          damage.toDouble()
+        }.toFloat()
+    val updatedMembers = currentMembers.map { member -> membersByCharacterKey.getValue(member.characterKey) }
+    val totalPlayerDamage = baseDamage + skillDamage
+    val nextEnemyHp = (currentEnemyHp - totalPlayerDamage).coerceAtLeast(0f)
+    val nextMembers =
+      if (nextEnemyHp > 0f && enemyAttack > 0f) {
+        applyRetaliationDamageAllMembers(updatedMembers, enemyAttack)
+      } else {
+        updatedMembers
+      }
+    return StepResolution(
+      enemyHp = nextEnemyHp,
+      members = nextMembers,
+      skillEvents = skillEvents,
+    )
+  }
+
+  private fun applyRetaliationDamageAllMembers(
+    currentMembers: List<CombatMemberState>,
+    damagePerMember: Float,
+  ): List<CombatMemberState> {
+    if (damagePerMember <= 0f) {
+      return currentMembers
     }
 
-    var remainingDamage = damage
-    return members.map { member ->
-      if (!member.isAlive || remainingDamage <= 0f) {
+    return currentMembers.map { member ->
+      if (!member.isAlive) {
         member
       } else {
-        val appliedDamage = remainingDamage.coerceAtMost(member.currentHp)
-        remainingDamage -= appliedDamage
-        member.copy(currentHp = member.currentHp - appliedDamage)
+        member.copy(currentHp = (member.currentHp - damagePerMember).coerceAtLeast(0f))
       }
     }
+  }
+
+  fun maxPotentialDamagePerStep(skillDefinitions: Map<String, CombatSkillDefinition> = emptyMap()): Float {
+    val baseDamagePerStep = teamDps
+    val maxSkillDamage =
+      members
+        .sumOf { member ->
+          if (member.skill == null) {
+            0.0
+          } else {
+            val skillDefinition = skillDefinitions[member.characterKey] ?: CombatSkillDefinition()
+            skillDamageFor(member, skillDefinition, enemyMaxHp, enemyHp).toDouble()
+          }
+        }.toFloat()
+    return baseDamagePerStep + maxSkillDamage
+  }
+
+  private fun skillDamageFor(
+    member: CombatMemberState,
+    definition: CombatSkillDefinition,
+    enemyMaxHp: Float,
+    enemyCurrentHp: Float,
+  ): Float =
+    definition.effects
+      .filter { it.type == CombatEffectType.DAMAGE && it.target == CombatTargetType.ENEMY }
+      .sumOf { effect -> effectDamage(effect, member, enemyMaxHp, enemyCurrentHp).toDouble() }
+      .toFloat()
+
+  private fun effectDamage(
+    effect: CombatEffectDefinition,
+    member: CombatMemberState,
+    enemyMaxHp: Float,
+    enemyCurrentHp: Float,
+  ): Float {
+    val amount = effect.amount ?: return 0f
+    return when (amount.type) {
+      CombatValueFormulaType.FLAT -> (amount.value ?: 0f) + amount.flatBonus
+      CombatValueFormulaType.STAT_SCALING -> {
+        val scaledStat =
+          when (amount.stat) {
+            CombatStatType.ATTACK -> member.attack
+            CombatStatType.HIT -> member.hit
+            CombatStatType.MAX_HP -> member.maxHp
+            CombatStatType.CURRENT_HP -> member.currentHp
+            null -> 0f
+          }
+        (scaledStat * (amount.multiplier ?: 0f)) + amount.flatBonus
+      }
+      CombatValueFormulaType.PERCENT_OF_SELF_CURRENT_HP ->
+        (member.currentHp * ((amount.value ?: 0f) / 100f)) + amount.flatBonus
+      CombatValueFormulaType.PERCENT_OF_TARGET_MAX_HP ->
+        (enemyMaxHp * ((amount.value ?: 0f) / 100f)) + amount.flatBonus
+    }.coerceAtMost(enemyCurrentHp).coerceAtLeast(0f)
+  }
+
+  private fun tickSkillCooldowns(
+    currentMembers: List<CombatMemberState>,
+    elapsedMillis: Long,
+  ): List<CombatMemberState> {
+    if (elapsedMillis <= 0L || currentMembers.isEmpty()) {
+      return currentMembers
+    }
+    return currentMembers.map { member ->
+      if (member.skill == null) {
+        member
+      } else {
+        member.copy(skill = member.skill.tick(elapsedMillis))
+      }
+    }
+  }
+
+  private data class StepResolution(
+    val enemyHp: Float,
+    val members: List<CombatMemberState>,
+    val skillEvents: List<CombatSkillDamageEvent> = emptyList(),
+  )
+}
+
+data class CombatSkillDamageEvent(
+  val characterKey: String,
+  val damage: Float,
+) {
+  init {
+    require(characterKey.isNotBlank()) { "Combat skill event character key must not be blank." }
+    require(damage >= 0f) { "Combat skill event damage must not be negative." }
   }
 }
 
@@ -315,6 +499,7 @@ data class CombatMemberState(
   val hit: Float,
   val currentHp: Float,
   val maxHp: Float,
+  val skill: CombatSkillState? = null,
 ) {
   init {
     require(characterKey.isNotBlank()) { "Combat member character key must not be blank." }
@@ -340,3 +525,28 @@ enum class CombatStatus {
   WON,
   DOWN,
 }
+
+data class CombatSkillState(
+  val cooldownMillis: Long,
+  val remainingMillis: Long = 0L,
+) {
+  init {
+    require(cooldownMillis >= 0L) { "Combat skill cooldown must not be negative." }
+    require(remainingMillis >= 0L) { "Combat skill remaining cooldown must not be negative." }
+  }
+
+  fun isReady(): Boolean = remainingMillis <= 0L
+
+  fun consume(): CombatSkillState = copy(remainingMillis = cooldownMillis)
+
+  fun tick(elapsedMillis: Long): CombatSkillState =
+    if (remainingMillis <= 0L || elapsedMillis <= 0L) {
+      this
+    } else {
+      copy(remainingMillis = (remainingMillis - elapsedMillis).coerceAtLeast(0L))
+    }
+}
+
+data class CombatSkillDefinition(
+  val effects: List<CombatEffectDefinition> = emptyList(),
+)

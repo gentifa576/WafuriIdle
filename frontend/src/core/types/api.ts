@@ -125,6 +125,7 @@ export interface CombatMember {
   currentHp: number
   maxHp: number
   alive: boolean
+  skillCooldownRemainingMillis?: number | null
 }
 
 export interface CombatSnapshot {
@@ -188,6 +189,28 @@ export interface CombatStateSyncMessage {
   serverTime: string
 }
 
+export type SkillEffectType = 'DAMAGE' | 'HEAL' | 'BUFF_APPLIED' | 'DEBUFF_APPLIED' | 'SHIELD'
+export type SkillTargetType = 'ENEMY' | 'ALLY_TEAM' | 'ALLY_MEMBER' | 'SELF'
+
+export interface SkillEffectEvent {
+  eventId: string
+  characterKey: string
+  skillKey: string
+  effectType: SkillEffectType
+  targetType: SkillTargetType
+  targetKey?: string | null
+  value?: number | null
+  statusKey?: string | null
+  durationMillis?: number | null
+}
+
+export interface SkillEventsMessage {
+  type: 'SKILL_EVENTS'
+  playerId: string
+  events: SkillEffectEvent[]
+  serverTime: string
+}
+
 export interface ZoneLevelUpMessage {
   type: 'ZONE_LEVEL_UP'
   playerId: string
@@ -228,6 +251,7 @@ export interface CommandErrorMessage {
 export type PlayerSocketMessage =
   | PlayerStateSyncMessage
   | CombatStateSyncMessage
+  | SkillEventsMessage
   | ZoneLevelUpMessage
   | OfflineProgressionMessage
   | CommandErrorMessage

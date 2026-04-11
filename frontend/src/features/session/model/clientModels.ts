@@ -129,6 +129,7 @@ export interface ClientCombatMember {
   maxHp: number
   alive: boolean
   hpLabel: string
+  skillCooldownRemainingMillis: number | null
 }
 
 export interface ClientCombat {
@@ -282,6 +283,7 @@ export function mapCombat(snapshot: CombatSnapshot | null): ClientCombat | null 
     maxHp: member.maxHp,
     alive: member.alive,
     hpLabel: `${member.currentHp} / ${member.maxHp}`,
+    skillCooldownRemainingMillis: member.skillCooldownRemainingMillis ?? null,
   }))
 
   return {

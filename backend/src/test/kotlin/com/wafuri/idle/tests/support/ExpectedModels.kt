@@ -305,7 +305,17 @@ fun expectedCombatMemberSnapshot(
   currentHp: Float,
   maxHp: Float,
   alive: Boolean,
-): CombatMemberSnapshot = CombatMemberSnapshot(characterKey, attack, hit, currentHp, maxHp, alive)
+  skillCooldownRemainingMillis: Long? = null,
+): CombatMemberSnapshot =
+  CombatMemberSnapshot(
+    characterKey = characterKey,
+    attack = attack,
+    hit = hit,
+    currentHp = currentHp,
+    maxHp = maxHp,
+    alive = alive,
+    skillCooldownRemainingMillis = skillCooldownRemainingMillis,
+  )
 
 fun expectedCombatSnapshot(
   playerId: UUID,

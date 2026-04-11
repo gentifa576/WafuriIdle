@@ -6,6 +6,7 @@ import type {
   OfflineProgressionMessage,
   Player,
   PlayerSocketMessage,
+  SkillEffectEvent,
   Team,
   ZoneLevelUpMessage,
 } from '../../../core/types/api'
@@ -31,6 +32,8 @@ export function useGameClientState() {
   const [templates, setTemplates] = useState<ClientCharacterTemplate[]>([])
   const [starterTemplates, setStarterTemplates] = useState<ClientCharacterTemplate[]>([])
   const [combat, setCombat] = useState<ClientCombat | null>(null)
+  const [skillEvents, setSkillEvents] = useState<SkillEffectEvent[]>([])
+  const [skillEventStreamingEnabled, setSkillEventStreamingEnabled] = useState(false)
   const [notifications, setNotifications] = useState<HudNotification[]>([])
   const [activity, setActivity] = useState<ActivityEntry[]>([])
   const [loading, setLoading] = useState(false)
@@ -44,6 +47,7 @@ export function useGameClientState() {
     zoneProgress: [] as ClientZoneProgress[],
   })
   const activitySequenceRef = useRef(0)
+  const skillEventStreamingEnabledRef = useRef(skillEventStreamingEnabled)
 
   syncStateRef.current = {
     player,
@@ -51,6 +55,7 @@ export function useGameClientState() {
     ownedCharacters,
     zoneProgress,
   }
+  skillEventStreamingEnabledRef.current = skillEventStreamingEnabled
 
   function applyRefreshedPlayerState(reloadedPlayer: Player, playerTeams: Team[], playerInventory: InventoryItem[]) {
     setPlayer(mapPlayer(reloadedPlayer))
@@ -65,6 +70,7 @@ export function useGameClientState() {
     setOwnedCharacters([])
     setZoneProgress([])
     setCombat(null)
+    setSkillEvents([])
     setNotifications([])
     setLatestPullResult(null)
   }
@@ -91,6 +97,13 @@ export function useGameClientState() {
     setError(null)
   }
 
+  function setSkillEventStreaming(enabled: boolean) {
+    setSkillEventStreamingEnabled(enabled)
+    if (!enabled) {
+      setSkillEvents([])
+    }
+  }
+
   function applySocketMessage(message: PlayerSocketMessage) {
     const activityEntry = describeSocketEvent(message)
     if (activityEntry) {
@@ -111,7 +124,17 @@ export function useGameClientState() {
       return
     }
     if (message.type === 'COMBAT_STATE_SYNC') {
+      if (message.snapshot == null) {
+        setSkillEvents([])
+      }
       setCombat((current) => applyCombatStateSnapshot(current, message.snapshot))
+      return
+    }
+    if (message.type === 'SKILL_EVENTS') {
+      if (!skillEventStreamingEnabledRef.current) {
+        return
+      }
+      setSkillEvents((current) => [...current, ...message.events].slice(-160))
       return
     }
     if (message.type === 'ZONE_LEVEL_UP') {
@@ -153,6 +176,7 @@ export function useGameClientState() {
     templates,
     starterTemplates,
     combat,
+    skillEvents,
     notifications,
     activity,
     loading,
@@ -167,6 +191,8 @@ export function useGameClientState() {
     setTemplates: (value: CharacterTemplate[]) => setTemplates(mapCharacterTemplates(value)),
     setStarterTemplates: (value: CharacterTemplate[]) => setStarterTemplates(mapCharacterTemplates(value)),
     setCombat,
+    setSkillEvents,
+    setSkillEventStreaming,
     setLoading,
     setError,
     setSessionExpiresAt,
@@ -188,6 +214,8 @@ function describeSocketEvent(message: PlayerSocketMessage): string | null {
     case 'PLAYER_STATE_SYNC':
       return null
     case 'COMBAT_STATE_SYNC':
+      return null
+    case 'SKILL_EVENTS':
       return null
     case 'ZONE_LEVEL_UP':
       return `Zone level ${message.level} reached in ${message.zoneId}`

@@ -41,6 +41,49 @@ describe('parsePlayerSocketMessage', () => {
         },
       },
     })
+
+    const skillEventParsed = parsePlayerSocketMessage(
+      JSON.stringify({
+        type: 'SKILL_EVENTS',
+        playerId: 'player-1',
+        events: [
+          {
+            eventId: 'event-1',
+            characterKey: 'hero',
+            skillKey: 'power-slash',
+            effectType: 'DAMAGE',
+            targetType: 'ENEMY',
+            value: 128.5,
+            statusKey: null,
+            targetKey: null,
+            durationMillis: null,
+          },
+        ],
+        serverTime: '2099-01-01T00:00:01Z',
+      }),
+    )
+
+    expect(skillEventParsed).toEqual({
+      ok: true,
+      message: {
+        type: 'SKILL_EVENTS',
+        playerId: 'player-1',
+        events: [
+          {
+            eventId: 'event-1',
+            characterKey: 'hero',
+            skillKey: 'power-slash',
+            effectType: 'DAMAGE',
+            targetType: 'ENEMY',
+            value: 128.5,
+            statusKey: null,
+            targetKey: null,
+            durationMillis: null,
+          },
+        ],
+        serverTime: '2099-01-01T00:00:01Z',
+      },
+    })
   })
 
   it('rejects malformed or unsupported payloads', () => {

@@ -32,6 +32,7 @@ class CombatService(
   fun start(playerId: UUID): CombatSnapshot {
     playerRepository.require(playerId)
     val teamStats = combatStatService.teamStatsForPlayer(playerId)
+    val teamSkills = combatStatService.teamSkillsForPlayerOrNull(playerId).orEmpty()
     val zone = zoneTemplateCatalog.default()
     val zoneLevel = progressionService.requireZoneProgress(playerId, zone.id).level
     val enemy = enemyTemplateCatalog.requireRandom(zone.enemies, randomSource)
@@ -48,7 +49,7 @@ class CombatService(
         enemyBaseHp = enemy.baseHp,
         enemyAttack = enemyAttack,
         enemyMaxHp = scalingRule.enemyHpFor(zoneLevel, enemy.baseHp),
-        members = teamStats.toCombatMembers(),
+        members = teamStats.toCombatMembers(characterSkills = teamSkills),
       )
     val nextState = startedState.copy(lastSimulatedAt = Instant.now())
     val savedState = combatStateRepository.save(nextState)

@@ -66,4 +66,56 @@ class InMemoryPlayerStateChangeTrackerTest :
       tracker.shouldPublishCombatState(playerId, null) shouldBe true
       tracker.shouldPublishCombatState(playerId, null) shouldBe false
     }
+
+    "combat publish suppresses cooldown-only drift while cooldown remains above zero" {
+      val tracker = InMemoryPlayerStateChangeTracker()
+      val playerId = UUID.randomUUID()
+      val teamId = UUID.randomUUID()
+      val firstSnapshot =
+        expectedCombatSnapshot(
+          playerId,
+          CombatStatus.FIGHTING,
+          "starter-plains",
+          teamId,
+          "Training Slime",
+          1f,
+          20f,
+          20f,
+          5.5f,
+          members = listOf(expectedCombatMemberSnapshot("hero", 10f, 0.55f, 24f, 24f, true, skillCooldownRemainingMillis = 2_100L)),
+        )
+      val cooldownOnlySnapshot =
+        firstSnapshot.copy(
+          members = listOf(expectedCombatMemberSnapshot("hero", 10f, 0.55f, 24f, 24f, true, skillCooldownRemainingMillis = 1_900L)),
+        )
+
+      tracker.shouldPublishCombatState(playerId, firstSnapshot) shouldBe true
+      tracker.shouldPublishCombatState(playerId, cooldownOnlySnapshot) shouldBe false
+    }
+
+    "combat publish emits when cooldown becomes ready without other combat changes" {
+      val tracker = InMemoryPlayerStateChangeTracker()
+      val playerId = UUID.randomUUID()
+      val teamId = UUID.randomUUID()
+      val coolingSnapshot =
+        expectedCombatSnapshot(
+          playerId,
+          CombatStatus.FIGHTING,
+          "starter-plains",
+          teamId,
+          "Training Slime",
+          1f,
+          20f,
+          20f,
+          5.5f,
+          members = listOf(expectedCombatMemberSnapshot("hero", 10f, 0.55f, 24f, 24f, true, skillCooldownRemainingMillis = 300L)),
+        )
+      val readySnapshot =
+        coolingSnapshot.copy(
+          members = listOf(expectedCombatMemberSnapshot("hero", 10f, 0.55f, 24f, 24f, true, skillCooldownRemainingMillis = null)),
+        )
+
+      tracker.shouldPublishCombatState(playerId, coolingSnapshot) shouldBe true
+      tracker.shouldPublishCombatState(playerId, readySnapshot) shouldBe true
+    }
   })

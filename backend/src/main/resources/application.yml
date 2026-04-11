@@ -42,14 +42,14 @@ game:
       experience-per-level: 85
       kill-gold: 25
     zone:
-      kills-per-level: 9
-      progress-multiplier: 16.0
+      kills-per-level: 4
+      progress-multiplier: 2.0
     offline:
       notify-threshold: 5m
   gacha:
     character-pull:
-      gold-cost: 250
-      duplicate-essence: 15
+      gold-cost: 2500
+      duplicate-essence: 5
   team:
     initial-slots: 3
     starter-choices:
@@ -62,8 +62,8 @@ game:
     revive-delay: 30s
     revive-hp-ratio: 0.5
     zone-scaling:
-      hp-scaling-constant: 1.0
-      enemy-attack-scaling-exponent: 1.26
+      hp-scaling-constant: 2.5
+      enemy-attack-scaling-exponent: 8
       reward-scaling-exponent: 0.37
       tutorial-end-level: 19
       tutorial-growth-rate: 0.005

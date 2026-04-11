@@ -1,6 +1,9 @@
 package com.wafuri.idle.application.model
 
+import com.wafuri.idle.domain.model.CombatEffectDefinition
 import com.wafuri.idle.domain.model.CombatMemberState
+import com.wafuri.idle.domain.model.CombatSkillDefinition
+import com.wafuri.idle.domain.model.CombatSkillState
 import com.wafuri.idle.domain.model.CombatState
 import com.wafuri.idle.domain.model.CombatStatus
 import java.util.UUID
@@ -12,13 +15,22 @@ data class CharacterCombatStats(
   val maxHp: Float,
 )
 
+data class CharacterCombatSkillStats(
+  val key: String,
+  val cooldownMillis: Long,
+  val effects: List<CombatEffectDefinition> = emptyList(),
+)
+
 data class TeamCombatStats(
   val teamId: UUID,
   val characterStats: List<CharacterCombatStats>,
 ) {
   val dps: Float = characterStats.sumOf { (it.attack * it.hit).toDouble() }.toFloat()
 
-  fun toCombatMembers(existingMembers: List<CombatMemberState> = emptyList()): List<CombatMemberState> {
+  fun toCombatMembers(
+    existingMembers: List<CombatMemberState> = emptyList(),
+    characterSkills: Map<String, CharacterCombatSkillStats> = emptyMap(),
+  ): List<CombatMemberState> {
     val existingByCharacterKey = existingMembers.associateBy { it.characterKey }
     return characterStats.map { stats ->
       val existing = existingByCharacterKey[stats.characterKey]
@@ -28,10 +40,25 @@ data class TeamCombatStats(
         hit = stats.hit,
         currentHp = existing?.preserveHpRatio(stats.maxHp) ?: stats.maxHp,
         maxHp = stats.maxHp,
+        skill =
+          characterSkills[stats.characterKey]?.let { skill ->
+            val existingSkill = existing?.skill
+            CombatSkillState(
+              cooldownMillis = skill.cooldownMillis,
+              remainingMillis =
+                existingSkill
+                  ?.remainingMillis
+                  ?.coerceAtMost(skill.cooldownMillis)
+                  ?: 0L,
+            )
+          },
       )
     }
   }
 }
+
+fun Map<String, CharacterCombatSkillStats>.toCombatSkillDefinitions(): Map<String, CombatSkillDefinition> =
+  mapValues { (_, skill) -> CombatSkillDefinition(effects = skill.effects) }
 
 private fun CombatMemberState.preserveHpRatio(nextMaxHp: Float): Float {
   if (maxHp <= 0f) {
@@ -64,6 +91,7 @@ data class CombatMemberSnapshot(
   val currentHp: Float,
   val maxHp: Float,
   val alive: Boolean,
+  val skillCooldownRemainingMillis: Long? = null,
 )
 
 fun CombatState.toSnapshot(): CombatSnapshot =
@@ -88,6 +116,7 @@ fun CombatState.toSnapshot(): CombatSnapshot =
           currentHp = member.currentHp,
           maxHp = member.maxHp,
           alive = member.isAlive,
+          skillCooldownRemainingMillis = member.skill?.remainingMillis?.takeIf { it > 0L },
         )
       },
   )

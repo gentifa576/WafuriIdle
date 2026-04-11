@@ -89,6 +89,7 @@ class CombatServiceTest : StringSpec() {
 
       every { playerRepository.require(playerId) } returns player
       every { combatStatService.teamStatsForPlayer(playerId) } returns teamStats
+      every { combatStatService.teamSkillsForPlayerOrNull(playerId) } returns emptyMap()
       every { zoneTemplateCatalog.default() } returns zone
       every { enemyTemplateCatalog.requireRandom(zone.enemies, randomSource) } returns enemy
       every { progressionService.requireZoneProgress(playerId, zone.id) } returns mockk { every { level } returns 1 }
@@ -158,6 +159,7 @@ class CombatServiceTest : StringSpec() {
 
       every { playerRepository.require(playerId) } returns player
       every { combatStatService.teamStatsForPlayer(playerId) } returns teamStats
+      every { combatStatService.teamSkillsForPlayerOrNull(playerId) } returns emptyMap()
       every { zoneTemplateCatalog.default() } returns zone
       every { enemyTemplateCatalog.requireRandom(zone.enemies, randomSource) } returns strawGolemEnemy()
       every { progressionService.requireZoneProgress(playerId, zone.id) } returns mockk { every { level } returns 1 }

@@ -1,8 +1,14 @@
 package com.wafuri.idle.application.service.combat
 
 import com.wafuri.idle.application.config.GameConfig
+import com.wafuri.idle.application.model.SkillEffectEvent
+import com.wafuri.idle.application.model.SkillEffectType
+import com.wafuri.idle.application.model.SkillEventsMessage
+import com.wafuri.idle.application.model.SkillTargetType
+import com.wafuri.idle.application.model.toCombatSkillDefinitions
 import com.wafuri.idle.application.port.out.ActivePlayerRegistry
 import com.wafuri.idle.application.port.out.CombatStateRepository
+import com.wafuri.idle.application.port.out.PlayerMessageQueue
 import com.wafuri.idle.application.port.out.PlayerStateWorkQueue
 import com.wafuri.idle.application.service.enemy.EnemyTemplateCatalog
 import com.wafuri.idle.application.service.player.ProgressionService
@@ -25,6 +31,7 @@ class CombatTickService(
   private val activePlayerRegistry: ActivePlayerRegistry,
   private val combatStateRepository: CombatStateRepository,
   private val combatStatService: CombatStatService,
+  private val playerMessageQueue: PlayerMessageQueue,
   private val playerStateWorkQueue: PlayerStateWorkQueue,
   private val combatLootService: CombatLootService,
   private val progressionService: ProgressionService,
@@ -88,7 +95,15 @@ class CombatTickService(
           playerStateWorkQueue.markDirty(playerId)
           return
         }
-    val refreshedState = state.refreshTeam(teamStats.teamId, teamStats.toCombatMembers(state.members))
+    val teamSkills = combatStatService.teamSkillsForPlayerOrNull(playerId).orEmpty()
+    val skillKeyByCharacterKey = teamSkills.mapValues { (_, skill) -> skill.key }
+    val skillDefinitions = teamSkills.toCombatSkillDefinitions()
+    val skillEvents = mutableListOf<com.wafuri.idle.domain.model.CombatSkillDamageEvent>()
+    val refreshedState =
+      state.refreshTeam(
+        teamStats.teamId,
+        teamStats.toCombatMembers(state.members, teamSkills),
+      )
     val advancedState =
       refreshedState.advance(
         elapsed.toMillis(),
@@ -96,12 +111,34 @@ class CombatTickService(
         combatConfig.respawnDelay().toMillis(),
         combatConfig.reviveDelay().toMillis(),
         combatConfig.reviveHpRatio(),
+        skillDefinitions,
+        skillEvents,
       )
     val scaledState = refreshRespawnedEnemy(playerId, refreshedState, advancedState)
     val nextState = scaledState.copy(lastSimulatedAt = now)
 
     if (nextState != state) {
       combatStateRepository.save(nextState)
+      val effectEvents =
+        skillEvents.mapNotNull { skillEvent ->
+          val skillKey = skillKeyByCharacterKey[skillEvent.characterKey] ?: return@mapNotNull null
+          SkillEffectEvent(
+            eventId = UUID.randomUUID(),
+            characterKey = skillEvent.characterKey,
+            skillKey = skillKey,
+            effectType = SkillEffectType.DAMAGE,
+            targetType = SkillTargetType.ENEMY,
+            value = skillEvent.damage,
+          )
+        }
+      if (effectEvents.isNotEmpty()) {
+        playerMessageQueue.enqueue(
+          SkillEventsMessage(
+            playerId = playerId,
+            events = effectEvents,
+          ),
+        )
+      }
       if (state.enemyHp > 0f && nextState.enemyHp == 0f) {
         val zoneId = requireNotNull(nextState.zoneId) { "Won combat must retain a zone id." }
         progressionService.recordKill(playerId, zoneId, nextState.enemyLevel)

@@ -198,9 +198,13 @@ Current combat-content direction:
 - enemies are authored separately from zones with stable `id`, `name`, optional `image`, `baseHp`, and `attack`
 - skills are authored as cooldown-based definitions with ordered effects directly inside the character content
 - passives are authored as leader-owned team rules directly inside the character content
-- skill auto-use should be a player/runtime setting, not a character content field
+- skill execution now uses authored character skill definitions directly from content
+- while combat is `FIGHTING`, ready skills auto-fire in member order `3 -> 2 -> 1`
+- skill damage applies in addition to base team damage for each 1s combat damage step
+- skill cooldown is tracked in authoritative combat state and decremented by elapsed combat time, independent of the 1s damage-resolution cadence
+- skill-use damage presentation should consume dedicated skill events instead of inferring from combat-state HP deltas
 - aura passives are the first implemented passive mode
-- triggered passives and active skill execution are defined in content shape but not yet active in combat
+- triggered passives beyond aura are still not active
 
 Authoring reference:
 - `docs/combat-content.md`
@@ -212,7 +216,7 @@ Current loop direction:
 - when team stat refresh changes a combat member's max HP, current HP preserves the existing current-to-max ratio instead of keeping the old flat HP value
 - each 1s combat damage step applies team damage first and then immediate enemy retaliation in the same resolution only if the enemy survives that step
 - current enemy retaliation deals the selected enemy template's zone-scaled `attack` damage with no mitigation, but a killed enemy does not retaliate on its death step
-- retaliation currently consumes team HP across living members in team order
+- retaliation currently applies full enemy attack damage to every living team member
 - if every combat member reaches `0 HP`, the team enters a downed state for `30s`
 - while the team is downed, combat-relevant team edits are blocked; players cannot swap characters, activate another team, or equip and unequip items until combat leaves `DOWN`
 - after that down timer, the same team revives at `50%` HP and combat resumes against a fresh full-HP enemy unless the player explicitly stops combat first
@@ -340,7 +344,7 @@ Near-term systems to define more precisely:
 - player EXP curve
 - zone kill thresholds per level
 - how far zone level should expand beyond enemy HP, reward scaling, and item level into enemy damage or unlocks
-- full active skill execution model
+- broader active-skill effect coverage beyond current damage-first execution
 - triggered passive runtime and event counters
 
 ## Open Questions

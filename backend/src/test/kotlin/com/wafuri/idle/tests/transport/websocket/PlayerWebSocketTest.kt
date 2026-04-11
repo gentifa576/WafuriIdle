@@ -10,7 +10,6 @@ import com.wafuri.idle.domain.model.AuthScope
 import com.wafuri.idle.domain.model.CombatStatus
 import com.wafuri.idle.domain.model.Team
 import com.wafuri.idle.tests.support.expectedAuthResponse
-import com.wafuri.idle.tests.support.expectedCombatMemberState
 import com.wafuri.idle.tests.support.expectedCombatState
 import com.wafuri.idle.tests.support.expectedOwnedCharacterSnapshot
 import com.wafuri.idle.tests.support.expectedPlayer
@@ -207,7 +206,7 @@ class PlayerWebSocketTest {
           enemyName = "Training Dummy",
           enemyHp = 1000f,
           enemyMaxHp = 1000f,
-          members = listOf(expectedCombatMemberState("nimbus", 23.975f, 3.1304953f, 465f, 465f)),
+          members = combatState.members,
           pendingDamageMillis = combatState.pendingDamageMillis,
           lastSimulatedAt = combatState.lastSimulatedAt,
         )

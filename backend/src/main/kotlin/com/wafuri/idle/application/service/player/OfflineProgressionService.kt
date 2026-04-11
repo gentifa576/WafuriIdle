@@ -3,6 +3,7 @@ package com.wafuri.idle.application.service.player
 import com.wafuri.idle.application.config.GameConfig
 import com.wafuri.idle.application.model.OfflineProgressionMessage
 import com.wafuri.idle.application.model.OfflineRewardSummary
+import com.wafuri.idle.application.model.toCombatSkillDefinitions
 import com.wafuri.idle.application.port.out.CombatStateRepository
 import com.wafuri.idle.application.port.out.PlayerMessageQueue
 import com.wafuri.idle.application.service.combat.CombatLootService
@@ -110,7 +111,11 @@ class OfflineProgressionService(
     state: CombatState,
   ): CombatState? {
     val teamStats = combatStatService.teamStatsForPlayerOrNull(playerId, state.members) ?: return null
-    return state.refreshTeam(teamStats.teamId, teamStats.toCombatMembers(state.members))
+    val teamSkills = combatStatService.teamSkillsForPlayerOrNull(playerId).orEmpty()
+    return state.refreshTeam(
+      teamStats.teamId,
+      teamStats.toCombatMembers(state.members, teamSkills),
+    )
   }
 
   private fun projectOfflineCombat(
@@ -162,6 +167,7 @@ class OfflineProgressionService(
     params: OfflineCombatParams,
   ): MutableOfflineCombatProjection {
     val elapsedMillis = minOf(projection.remainingMillis, waitMillis)
+    val skillDefinitions = combatStatService.teamSkillsForPlayerOrNull(projection.state.playerId).orEmpty().toCombatSkillDefinitions()
     val advanced =
       projection.state.advance(
         elapsedMillis,
@@ -169,6 +175,7 @@ class OfflineProgressionService(
         params.respawnDelayMillis,
         params.reviveDelayMillis,
         params.reviveHpRatio,
+        skillDefinitions,
       )
     val recovered =
       if (elapsedMillis == waitMillis && advanced.status == CombatStatus.FIGHTING) {
@@ -190,6 +197,7 @@ class OfflineProgressionService(
         projection.remainingMillis < killTimeMillis -> projection.remainingMillis
         else -> killTimeMillis
       }
+    val skillDefinitions = combatStatService.teamSkillsForPlayerOrNull(projection.state.playerId).orEmpty().toCombatSkillDefinitions()
     val advanced =
       projection.state.advance(
         elapsedMillis,
@@ -197,6 +205,7 @@ class OfflineProgressionService(
         params.respawnDelayMillis,
         params.reviveDelayMillis,
         params.reviveHpRatio,
+        skillDefinitions,
       )
     val defeatedEnemy = projection.state.enemyHp > 0f && advanced.enemyHp == 0f
     return if (!defeatedEnemy) {
@@ -225,7 +234,8 @@ class OfflineProgressionService(
     state: CombatState,
     damageIntervalMillis: Long,
   ): Long {
-    val damagePerStep = state.teamDps * (damageIntervalMillis / 1000f)
+    val skillDefinitions = combatStatService.teamSkillsForPlayerOrNull(state.playerId).orEmpty().toCombatSkillDefinitions()
+    val damagePerStep = state.maxPotentialDamagePerStep(skillDefinitions) * (damageIntervalMillis / 1000f)
     if (damagePerStep <= 0f) {
       return Long.MAX_VALUE
     }
