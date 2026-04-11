@@ -22,9 +22,9 @@ export function applyPlayerStateSnapshot(
   const mapped = mapPlayerSnapshot(snapshot)
   return {
     player: currentPlayer == null ? null : updatePlayerFromSnapshot(currentPlayer, mapped.player),
-    inventory: inventoryEquals(currentInventory, mapped.inventory) ? currentInventory : mapped.inventory,
-    ownedCharacters: ownedCharactersEquals(currentOwnedCharacters, mapped.ownedCharacters) ? currentOwnedCharacters : mapped.ownedCharacters,
-    zoneProgress: zoneProgressEquals(currentZoneProgress, mapped.zoneProgress) ? currentZoneProgress : mapped.zoneProgress,
+    inventory: reuseIfEqual(currentInventory, mapped.inventory, inventoryItemEquals),
+    ownedCharacters: reuseIfEqual(currentOwnedCharacters, mapped.ownedCharacters, ownedCharacterEquals),
+    zoneProgress: reuseIfEqual(currentZoneProgress, mapped.zoneProgress, zoneProgressEntryEquals),
   }
 }
 
@@ -36,14 +36,8 @@ export function applyCombatStateSnapshot(currentCombat: ClientCombat | null, sna
 function updatePlayerFromSnapshot(player: ClientPlayer, snapshot: ClientPlayer) {
   const nextOwnedCharacterKeys = snapshot.ownedCharacterKeys
   if (
-    player.id === snapshot.id &&
-    player.name === snapshot.name &&
-    player.experience === snapshot.experience &&
-    player.level === snapshot.level &&
-    player.gold === snapshot.gold &&
-    player.essence === snapshot.essence &&
-    player.hasStarterChoice === snapshot.hasStarterChoice &&
-    stringArrayEquals(player.ownedCharacterKeys, nextOwnedCharacterKeys)
+    playerEquals(player, snapshot) &&
+    arrayEquals(player.ownedCharacterKeys, nextOwnedCharacterKeys, primitiveEquals)
   ) {
     return player
   }
@@ -61,56 +55,45 @@ function updatePlayerFromSnapshot(player: ClientPlayer, snapshot: ClientPlayer) 
   }
 }
 
-function stringArrayEquals(left: string[], right: string[]) {
-  return left.length === right.length && left.every((value, index) => value === right[index])
-}
-
-function ownedCharactersEquals(left: ClientOwnedCharacter[], right: ClientOwnedCharacter[]) {
+function playerEquals(left: ClientPlayer, right: ClientPlayer) {
   return (
-    left.length === right.length &&
-    left.every(
-      (character, index) =>
-        character.key === right[index]?.key &&
-        character.name === right[index]?.name &&
-        character.level === right[index]?.level &&
-        character.label === right[index]?.label,
-    )
+    left.id === right.id &&
+    left.name === right.name &&
+    left.experience === right.experience &&
+    left.level === right.level &&
+    left.gold === right.gold &&
+    left.essence === right.essence &&
+    left.hasStarterChoice === right.hasStarterChoice
   )
 }
 
-function zoneProgressEquals(left: ClientZoneProgress[], right: ClientZoneProgress[]) {
+function ownedCharacterEquals(left: ClientOwnedCharacter, right: ClientOwnedCharacter) {
+  return left.key === right.key && left.name === right.name && left.level === right.level && left.label === right.label
+}
+
+function zoneProgressEntryEquals(left: ClientZoneProgress, right: ClientZoneProgress) {
   return (
-    left.length === right.length &&
-    left.every(
-      (zone, index) =>
-        zone.zoneId === right[index]?.zoneId &&
-        zone.killCount === right[index]?.killCount &&
-        zone.level === right[index]?.level &&
-        zone.label === right[index]?.label,
-    )
+    left.zoneId === right.zoneId &&
+    left.killCount === right.killCount &&
+    left.level === right.level &&
+    left.label === right.label
   )
 }
 
-function inventoryEquals(left: ClientInventoryItem[], right: ClientInventoryItem[]) {
+function inventoryItemEquals(left: ClientInventoryItem, right: ClientInventoryItem) {
   return (
-    left.length === right.length &&
-    left.every((item, index) => {
-      const other = right[index]
-      return (
-        item.id === other?.id &&
-        item.itemName === other?.itemName &&
-        item.itemDisplayName === other?.itemDisplayName &&
-        item.itemType === other?.itemType &&
-        statEquals(item.itemBaseStat, other?.itemBaseStat) &&
-        stringArrayEquals(item.itemSubStatPool, other?.itemSubStatPool ?? []) &&
-        statsEquals(item.subStats, other?.subStats ?? []) &&
-        item.rarity === other?.rarity &&
-        item.upgrade === other?.upgrade &&
-        item.equippedTeamId === other?.equippedTeamId &&
-        item.equippedPosition === other?.equippedPosition &&
-        item.assignmentLabel === other?.assignmentLabel
-      )
-    })
+    left.id === right.id &&
+    left.itemName === right.itemName &&
+    left.itemDisplayName === right.itemDisplayName &&
+    left.itemType === right.itemType &&
+    statEquals(left.itemBaseStat, right.itemBaseStat) &&
+    arrayEquals(left.itemSubStatPool, right.itemSubStatPool, primitiveEquals) &&
+    arrayEquals(left.subStats, right.subStats, statEquals) &&
+    left.rarity === right.rarity &&
+    left.upgrade === right.upgrade &&
+    left.equippedTeamId === right.equippedTeamId &&
+    left.equippedPosition === right.equippedPosition &&
+    left.assignmentLabel === right.assignmentLabel
   )
 }
 
@@ -136,31 +119,35 @@ function combatEquals(left: ClientCombat | null, right: ClientCombat | null) {
     left.pendingReviveMillis === right.pendingReviveMillis &&
     left.teamCurrentHp === right.teamCurrentHp &&
     left.teamMaxHp === right.teamMaxHp &&
-    combatMembersEquals(left.members, right.members)
+    arrayEquals(left.members, right.members, combatMemberEquals)
   )
 }
 
-function combatMembersEquals(left: ClientCombat['members'], right: ClientCombat['members']) {
+function combatMemberEquals(left: ClientCombat['members'][number], right: ClientCombat['members'][number]) {
   return (
-    left.length === right.length &&
-    left.every(
-      (member, index) =>
-        member.characterKey === right[index]?.characterKey &&
-        member.attack === right[index]?.attack &&
-        member.hit === right[index]?.hit &&
-        member.currentHp === right[index]?.currentHp &&
-        member.maxHp === right[index]?.maxHp &&
-        member.alive === right[index]?.alive &&
-        member.hpLabel === right[index]?.hpLabel &&
-        member.skillCooldownRemainingMillis === right[index]?.skillCooldownRemainingMillis,
-    )
+    left.characterKey === right.characterKey &&
+    left.attack === right.attack &&
+    left.hit === right.hit &&
+    left.currentHp === right.currentHp &&
+    left.maxHp === right.maxHp &&
+    left.alive === right.alive &&
+    left.hpLabel === right.hpLabel &&
+    left.skillCooldownRemainingMillis === right.skillCooldownRemainingMillis
   )
 }
 
-function statsEquals(left: ClientStat[], right: ClientStat[]) {
-  return left.length === right.length && left.every((stat, index) => statEquals(stat, right[index]))
+function arrayEquals<T>(left: readonly T[], right: readonly T[], equals: (left: T, right: T) => boolean) {
+  return left.length === right.length && left.every((value, index) => equals(value, right[index] as T))
 }
 
-function statEquals(left: ClientStat, right: ClientStat | undefined) {
-  return left.type === right?.type && left.value === right?.value
+function reuseIfEqual<T>(current: T[], next: T[], equals: (left: T, right: T) => boolean) {
+  return arrayEquals(current, next, equals) ? current : next
+}
+
+function primitiveEquals<T>(left: T, right: T) {
+  return left === right
+}
+
+function statEquals(left: ClientStat, right: ClientStat) {
+  return left.type === right.type && left.value === right.value
 }

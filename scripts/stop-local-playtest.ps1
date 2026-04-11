@@ -5,6 +5,7 @@ $RootDir = Split-Path -Parent $PSScriptRoot
 $BackendDir = Join-Path $RootDir "backend"
 $FrontendDir = Join-Path $RootDir "frontend"
 $ClientPidFile = Join-Path $FrontendDir ".playtest-client.pid"
+$BackendGradleUserHome = Join-Path $BackendDir ".gradle-user-home"
 
 function Stop-TrackedClientIfRunning {
   if (-not (Test-Path $ClientPidFile)) {
@@ -29,6 +30,7 @@ function Stop-TrackedClientIfRunning {
 Stop-TrackedClientIfRunning
 
 Write-Host "Stopping backend..."
+$env:GRADLE_USER_HOME = $BackendGradleUserHome
 & (Join-Path $BackendDir "gradlew.bat") stopServer | Out-Null
 
 Write-Host "Local playtest services stopped."

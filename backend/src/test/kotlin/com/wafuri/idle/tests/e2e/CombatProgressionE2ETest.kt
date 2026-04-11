@@ -6,7 +6,9 @@ import com.wafuri.idle.domain.model.CombatStatus
 import com.wafuri.idle.domain.model.InventoryItem
 import com.wafuri.idle.domain.model.Player
 import com.wafuri.idle.domain.model.PlayerZoneProgress
+import com.wafuri.idle.tests.support.MessageCollector
 import com.wafuri.idle.tests.support.TestTickWarpService
+import com.wafuri.idle.tests.support.connectPlayerWebSocket
 import com.wafuri.idle.tests.support.expectedCombatState
 import com.wafuri.idle.tests.support.expectedPlayer
 import com.wafuri.idle.tests.support.expectedZoneProgress
@@ -20,14 +22,9 @@ import io.restassured.RestAssured.given
 import io.restassured.common.mapper.TypeRef
 import io.restassured.specification.RequestSpecification
 import jakarta.inject.Inject
-import jakarta.websocket.ClientEndpointConfig
-import jakarta.websocket.ContainerProvider
-import jakarta.websocket.Endpoint
-import jakarta.websocket.EndpointConfig
 import org.junit.jupiter.api.Test
 import java.net.URI
 import java.util.UUID
-import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
 
 @QuarkusTest
@@ -290,16 +287,8 @@ class CombatProgressionE2ETest {
     token: String,
     teamId: String,
   ) {
-    val client = ContainerProvider.getWebSocketContainer()
     val collector = MessageCollector()
-    val endpointUri =
-      URI.create(
-        wsBaseUri
-          .toString()
-          .replaceFirst("http", "ws")
-          .trimEnd('/') + "/$playerId",
-      )
-    val session = client.connectToServer(clientEndpoint(collector), clientConfig(token), endpointUri)
+    val session = connectPlayerWebSocket(wsBaseUri, playerId, token, collector)
     try {
       session.asyncRemote.sendText("""{"type":"START_COMBAT"}""")
       collector.messages.poll(5, TimeUnit.SECONDS).shouldNotBeNull()
@@ -328,35 +317,6 @@ class CombatProgressionE2ETest {
       Thread.sleep(200)
     }
     error("Timed out waiting for combat state for player $playerId.")
-  }
-
-  private fun clientConfig(token: String): ClientEndpointConfig =
-    ClientEndpointConfig
-      .Builder
-      .create()
-      .preferredSubprotocols(
-        listOf(
-          "bearer-token-carrier",
-          "quarkus-http-upgrade#Authorization#Bearer%20$token",
-        ),
-      ).build()
-
-  private fun clientEndpoint(collector: MessageCollector): Endpoint =
-    object : Endpoint() {
-      override fun onOpen(
-        session: jakarta.websocket.Session,
-        config: EndpointConfig,
-      ) {
-        session.addMessageHandler(String::class.java) { message -> collector.onMessage(message) }
-      }
-    }
-
-  class MessageCollector {
-    val messages = LinkedBlockingQueue<String>()
-
-    fun onMessage(message: String) {
-      messages.offer(message)
-    }
   }
 }
 

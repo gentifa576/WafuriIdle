@@ -1,6 +1,8 @@
 package com.wafuri.idle.application.service.zone
 
-import com.wafuri.idle.application.port.out.ZoneFetcher
+import com.wafuri.idle.application.service.loadFirstNonEmpty
+import com.wafuri.idle.application.service.logLoadedContent
+import com.wafuri.idle.application.service.optionalFetcher
 import io.quarkus.runtime.Startup
 import jakarta.annotation.PostConstruct
 import jakarta.enterprise.context.ApplicationScoped
@@ -18,29 +20,19 @@ class ZoneTemplateBootstrap(
 
   @PostConstruct
   fun load() {
-    val fetchers: List<ZoneFetcher> =
-      buildList {
-        if (resourceZoneFetcherInstance.isResolvable) {
-          add(resourceZoneFetcherInstance.get())
-        }
-        add(databaseZoneFetcher)
-      }
     val zones =
-      fetchers
-        .asSequence()
-        .map { it.fetch() }
-        .firstOrNull { it.isNotEmpty() }
-        .orEmpty()
+      loadFirstNonEmpty(
+        optionalFetcher(resourceZoneFetcherInstance) { it.fetch() } +
+          listOf({ databaseZoneFetcher.fetch() }),
+      )
 
     zoneTemplateCatalog.replace(zones.toSet())
-
-    if (zones.isEmpty()) {
-      logger.warn("No zone templates were loaded during startup.")
-    } else {
-      logger
-        .atInfo()
-        .addKeyValue("zoneCount", zones.size)
-        .log("Loaded zone templates.")
-    }
+    logLoadedContent(
+      logger = logger,
+      content = zones,
+      emptyMessage = "No zone templates were loaded during startup.",
+      countKey = "zoneCount",
+      loadedMessage = "Loaded zone templates.",
+    )
   }
 }

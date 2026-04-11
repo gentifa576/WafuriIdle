@@ -4,6 +4,7 @@ $ErrorActionPreference = "Stop"
 $RootDir = Split-Path -Parent $PSScriptRoot
 $BackendDir = Join-Path $RootDir "backend"
 $FrontendDir = Join-Path $RootDir "frontend"
+$BackendGradleUserHome = Join-Path $BackendDir ".gradle-user-home"
 $BackendHealthUrl = "http://127.0.0.1:8080/health"
 $ClientUrl = "http://127.0.0.1:5173"
 $ClientPidFile = Join-Path $FrontendDir ".playtest-client.pid"
@@ -76,6 +77,7 @@ function Start-Client {
 }
 
 Write-Host "Stopping backend if it is already running..."
+$env:GRADLE_USER_HOME = $BackendGradleUserHome
 & (Join-Path $BackendDir "gradlew.bat") stopServer | Out-Null
 
 Write-Host "Starting backend..."

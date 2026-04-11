@@ -10,21 +10,30 @@ import type { EquipmentSlot } from '../../../core/types/api'
 import { FeedbackState } from '../../workspace/components/FeedbackState'
 import type {
   ClientCharacterTemplate,
-  ClientCombatConditionDefinition,
   ClientInventoryItem,
   ClientOwnedCharacter,
-  ClientPassiveDefinition,
-  ClientStatGrowth,
   ClientTeam,
   ClientTeamSlot,
 } from '../../session/model/clientModels'
+import {
+  describePassive,
+  formatGrowth,
+  growthAtLevel,
+  mapCharacterDisplayModels,
+  numericGrowthAtLevel,
+  type CharacterDisplayModel,
+} from '../../session/model/characterDisplay'
 import { InventoryTile } from '../../inventory/components/InventoryTile'
+import { equipmentSlotLabel, itemTypeAbbreviation } from '../../inventory/model/itemPresentation'
 import { CharacterRosterTile } from '../../roster/components/CharacterRosterTile'
 import { ActionButton } from '../../../shared/ui/ActionButton'
 import { CollectionTile } from '../../../shared/ui/CollectionTile'
+import { HoverPreviewCard } from '../../../shared/ui/HoverPreviewCard'
 import { SectionHeader } from '../../../shared/ui/SectionHeader'
 import { SurfaceCard } from '../../../shared/ui/SurfaceCard'
+import { createHoverTileHandlers, hoverPreviewStyle } from '../../../shared/ui/hoverPreview'
 import { useDelayedHover } from '../../../shared/ui/useDelayedHover'
+import { cloneSlots, currentEquipmentForSlot, emptySlots, orderedCharactersForSlot, orderedItemsForSlot, setEquipmentOnSlot, slotsEqual } from './teamLoadout'
 import './team.css'
 
 interface TeamWorkspaceProps {
@@ -85,7 +94,7 @@ export function TeamWorkspace({
     () => new Map(ownedCharacters.map((character) => [character.key, `/assets/characters/${character.key}/front.png`])),
     [ownedCharacters],
   )
-  const rosterCharacters = useMemo(() => mapRosterCharacters(ownedCharacters, templates), [ownedCharacters, templates])
+  const rosterCharacters = useMemo(() => mapCharacterDisplayModels(ownedCharacters, templates), [ownedCharacters, templates])
 
   useEffect(() => {
     if (editingTeamId && !teams.some((team) => team.id === editingTeamId)) {
@@ -390,21 +399,13 @@ export function TeamWorkspace({
       </aside>
 
       {hoveredCharacter && hoverState?.type === 'character' ? (
-        <div
-          aria-hidden="true"
+        <HoverPreviewCard
           className="team-hover-card"
-          style={{
-            left: `${Math.min(hoverState.x + 18, window.innerWidth - 340)}px`,
-            top: `${Math.min(hoverState.y + 18, window.innerHeight - 280)}px`,
-          }}
+          headerClassName="team-hover-header"
+          style={hoverPreviewStyle(hoverState)}
+          title={hoveredCharacter.name}
+          badge={`Lv ${hoveredCharacter.level}`}
         >
-          <div className="team-hover-header">
-            <div>
-              <span className="label">Preview</span>
-              <h3>{hoveredCharacter.name}</h3>
-            </div>
-            <span className="header-chip">Lv {hoveredCharacter.level}</span>
-          </div>
           <p className="muted">{hoveredCharacter.key}</p>
           <div className="team-hover-tags">
             {hoveredCharacter.tags.length > 0 ? (
@@ -425,25 +426,17 @@ export function TeamWorkspace({
             Skill: {hoveredCharacter.skill?.name ?? 'None'} | Passive: {hoveredCharacter.passive?.name ?? 'None'}
           </p>
           {hoveredCharacter.passive ? <p className="muted">{describePassive(hoveredCharacter.passive)}</p> : null}
-        </div>
+        </HoverPreviewCard>
       ) : null}
 
       {hoveredItem && hoverState?.type === 'item' ? (
-        <div
-          aria-hidden="true"
+        <HoverPreviewCard
           className="team-hover-card"
-          style={{
-            left: `${Math.min(hoverState.x + 18, window.innerWidth - 340)}px`,
-            top: `${Math.min(hoverState.y + 18, window.innerHeight - 280)}px`,
-          }}
+          headerClassName="team-hover-header"
+          style={hoverPreviewStyle(hoverState)}
+          title={hoveredItem.itemDisplayName}
+          badge={`Lv ${hoveredItem.itemLevel}`}
         >
-          <div className="team-hover-header">
-            <div>
-              <span className="label">Preview</span>
-              <h3>{hoveredItem.itemDisplayName}</h3>
-            </div>
-            <span className="header-chip">Lv {hoveredItem.itemLevel}</span>
-          </div>
           <p className="muted">
             {hoveredItem.rarity} | {hoveredItem.itemType}
           </p>
@@ -452,7 +445,7 @@ export function TeamWorkspace({
           </p>
           <p className="muted">{hoveredItem.assignmentLabel}</p>
           {hoveredItem.subStats.length > 0 ? <p>{hoveredItem.subStats.map((stat) => `${stat.type} ${stat.value}`).join(' · ')}</p> : null}
-        </div>
+        </HoverPreviewCard>
       ) : null}
     </>
   )
@@ -523,17 +516,13 @@ function SelectionView({
                 image={`/assets/characters/${character.key}/front.png`}
                 key={character.key}
                 name={character.name}
-                onBlur={() => hover.clearIfTarget({ type: 'character', key: character.key })}
                 onClick={() => {
                   setDraftSlots((current) =>
                     current.map((entry) => (entry.position === slot.position ? { ...entry, characterKey: character.key } : entry)),
                   )
                   closeSelection()
                 }}
-                onFocus={() => hover.showFromFocus({ type: 'character', key: character.key })}
-                onMouseEnter={(event) => hover.queueFromPointer({ type: 'character', key: character.key }, event)}
-                onMouseLeave={() => hover.clearIfTarget({ type: 'character', key: character.key })}
-                onMouseMove={(event) => hover.updateFromPointer({ type: 'character', key: character.key }, event)}
+                {...createHoverTileHandlers(hover, { type: 'character', key: character.key })}
                 selected={slot.characterKey === character.key}
               />
             ))}
@@ -590,15 +579,11 @@ function SelectionView({
             key={item.id}
             level={item.itemLevel}
             name={item.itemDisplayName}
-            onBlur={() => hover.clearIfTarget({ type: 'item', id: item.id })}
             onClick={() => {
               setDraftSlots((current) => current.map((entry) => setEquipmentOnSlot(entry, slot.position, selectionState.equipmentSlot, item.id)))
               closeSelection()
             }}
-            onFocus={() => hover.showFromFocus({ type: 'item', id: item.id })}
-            onMouseEnter={(event) => hover.queueFromPointer({ type: 'item', id: item.id }, event)}
-            onMouseLeave={() => hover.clearIfTarget({ type: 'item', id: item.id })}
-            onMouseMove={(event) => hover.updateFromPointer({ type: 'item', id: item.id }, event)}
+            {...createHoverTileHandlers(hover, { type: 'item', id: item.id })}
             rarity={item.rarity}
             selected={currentItem?.id === item.id}
             type={item.itemType}
@@ -615,21 +600,6 @@ interface EquipmentSlotButtonProps {
   item: ClientInventoryItem | null
   disabled: boolean
   onClick: () => void
-}
-
-interface RosterCharacter {
-  key: string
-  name: string
-  level: number
-  image?: string | null
-  tags: string[]
-  strength: ClientStatGrowth
-  agility: ClientStatGrowth
-  intelligence: ClientStatGrowth
-  wisdom: ClientStatGrowth
-  vitality: ClientStatGrowth
-  skill?: ClientCharacterTemplate['skill']
-  passive?: ClientPassiveDefinition | null
 }
 
 interface DisplayStat {
@@ -659,21 +629,7 @@ function EquipmentSlotButton({ slot, position, item, disabled, onClick }: Equipm
   )
 }
 
-function orderedCharactersForSlot(position: number, slots: ClientTeamSlot[], ownedCharacters: ClientOwnedCharacter[]) {
-  const available = availableCharactersForSlot(position, slots, ownedCharacters)
-  const current = slots.find((slot) => slot.position === position)?.characterKey ?? null
-  return [...available].sort((left, right) => {
-    if (left.key === current) {
-      return -1
-    }
-    if (right.key === current) {
-      return 1
-    }
-    return left.name.localeCompare(right.name)
-  })
-}
-
-function combinedSlotStats(character: RosterCharacter, inventory: ClientInventoryItem[], slot: ClientTeamSlot): DisplayStat[] {
+function combinedSlotStats(character: CharacterDisplayModel, inventory: ClientInventoryItem[], slot: ClientTeamSlot): DisplayStat[] {
   const totals = new Map<string, number>([
     ['STR', numericGrowthAtLevel(character.strength, character.level)],
     ['AGI', numericGrowthAtLevel(character.agility, character.level)],
@@ -700,113 +656,6 @@ function combinedSlotStats(character: RosterCharacter, inventory: ClientInventor
     .filter(([, value]) => value !== 0)
     .sort(([left], [right]) => statPriority(left) - statPriority(right) || left.localeCompare(right))
     .map(([label, value]) => ({ label, value: formatGrowth(value) }))
-}
-
-function orderedItemsForSlot(
-  inventory: ClientInventoryItem[],
-  slots: ClientTeamSlot[],
-  teamId: string,
-  position: number,
-  equipmentSlot: EquipmentSlot,
-  currentItem: ClientInventoryItem | null,
-) {
-  const available = availableItemsForSlot(inventory, slots, teamId, position, equipmentSlot)
-  const rest = available
-    .filter((item) => item.id !== currentItem?.id)
-    .sort((left, right) => right.itemLevel - left.itemLevel || left.itemDisplayName.localeCompare(right.itemDisplayName))
-  return currentItem ? [currentItem, ...rest] : rest
-}
-
-function currentEquipmentForSlot(inventory: ClientInventoryItem[], slot: ClientTeamSlot, equipmentSlot: EquipmentSlot) {
-  const itemId =
-    equipmentSlot === 'WEAPON'
-      ? slot.weaponItemId
-      : equipmentSlot === 'ARMOR'
-        ? slot.armorItemId
-        : slot.accessoryItemId
-  return inventory.find((item) => item.id === itemId) ?? null
-}
-
-function equipmentSlotLabel(slot: EquipmentSlot) {
-  switch (slot) {
-    case 'WEAPON':
-      return 'Weapon'
-    case 'ARMOR':
-      return 'Armor'
-    case 'ACCESSORY':
-      return 'Accessory'
-  }
-}
-
-function itemTypeAbbreviation(type: EquipmentSlot) {
-  switch (type) {
-    case 'WEAPON':
-      return 'WP'
-    case 'ARMOR':
-      return 'AR'
-    case 'ACCESSORY':
-      return 'AC'
-  }
-}
-
-function availableCharactersForSlot(position: number, slots: ClientTeamSlot[], ownedCharacters: ClientOwnedCharacter[]) {
-  const assignedKeys = new Set(
-    slots
-      .filter((slot) => slot.position !== position)
-      .map((slot) => slot.characterKey)
-      .filter((key): key is string => key != null),
-  )
-  return ownedCharacters.filter((character) => !assignedKeys.has(character.key))
-}
-
-function setEquipmentOnSlot(slot: ClientTeamSlot, position: number, equipmentSlot: EquipmentSlot, itemId: string | null): ClientTeamSlot {
-  if (slot.position !== position) {
-    return slot
-  }
-  if (equipmentSlot === 'WEAPON') {
-    return { ...slot, weaponItemId: itemId }
-  }
-  if (equipmentSlot === 'ARMOR') {
-    return { ...slot, armorItemId: itemId }
-  }
-  return { ...slot, accessoryItemId: itemId }
-}
-
-function mapRosterCharacters(ownedCharacters: ClientOwnedCharacter[], templates: ClientCharacterTemplate[]): RosterCharacter[] {
-  const templatesByKey = new Map(templates.map((template) => [template.key, template]))
-  return ownedCharacters.map((character) => {
-    const template = templatesByKey.get(character.key)
-    return {
-      key: character.key,
-      name: character.name,
-      level: character.level,
-      image: template?.image,
-      tags: template?.tags ?? [],
-      strength: template?.strength ?? emptyGrowth(),
-      agility: template?.agility ?? emptyGrowth(),
-      intelligence: template?.intelligence ?? emptyGrowth(),
-      wisdom: template?.wisdom ?? emptyGrowth(),
-      vitality: template?.vitality ?? emptyGrowth(),
-      skill: template?.skill,
-      passive: template?.passive ?? null,
-    }
-  })
-}
-
-function growthAtLevel(growth: ClientStatGrowth, level: number) {
-  return formatGrowth(numericGrowthAtLevel(growth, level))
-}
-
-function numericGrowthAtLevel(growth: ClientStatGrowth, level: number) {
-  return growth.base + growth.increment * Math.max(0, level - 1)
-}
-
-function formatGrowth(value: number) {
-  return Number.isInteger(value) ? value.toString() : value.toFixed(1)
-}
-
-function emptyGrowth(): ClientStatGrowth {
-  return { base: 0, increment: 0 }
 }
 
 function addStatTotal(totals: Map<string, number>, statType: string, value: number) {
@@ -856,75 +705,4 @@ function statPriority(label: string) {
     default:
       return 99
   }
-}
-
-function describePassive(passive: ClientPassiveDefinition) {
-  const scope = passive.leaderOnly ? 'Leader only' : 'Teamwide'
-  const trigger = passive.trigger.toLowerCase().replaceAll('_', ' ')
-  const condition = describeCondition(passive.condition)
-  return `${scope} passive. Trigger: ${trigger}. ${condition}`
-}
-
-function describeCondition(condition: ClientCombatConditionDefinition) {
-  switch (condition.type) {
-    case 'ALIVE_ALLIES_WITH_TAG_AT_LEAST':
-      return `Requires at least ${condition.minimumCount ?? 0} ally${condition.minimumCount === 1 ? '' : 'ies'} with ${condition.tag ?? 'a tag'}.`
-    case 'ANY_ALLY_HP_BELOW_PERCENT':
-    case 'SELF_HP_BELOW_PERCENT':
-      return `Activates below ${condition.percent ?? 0}% HP.`
-    default:
-      return 'Always available.'
-  }
-}
-
-function availableItemsForSlot(
-  inventory: ClientInventoryItem[],
-  slots: ClientTeamSlot[],
-  teamId: string,
-  position: number,
-  equipmentSlot: EquipmentSlot,
-) {
-  const assignedInOtherSlots = new Set(
-    slots
-      .filter((slot) => slot.position !== position)
-      .flatMap((slot) => [slot.weaponItemId, slot.armorItemId, slot.accessoryItemId])
-      .filter((itemId): itemId is string => itemId != null),
-  )
-  return inventory.filter(
-    (item) =>
-      typeof item.itemType === 'string' &&
-      item.itemType === equipmentSlot &&
-      (item.equippedTeamId == null || item.equippedTeamId === teamId) &&
-      !assignedInOtherSlots.has(item.id),
-  )
-}
-
-function cloneSlots(slots: ClientTeamSlot[]): ClientTeamSlot[] {
-  return slots.map((slot) => ({ ...slot }))
-}
-
-function slotsEqual(left: ClientTeamSlot[], right: ClientTeamSlot[]): boolean {
-  if (left.length !== right.length) {
-    return false
-  }
-  const sortedLeft = [...left].sort((a, b) => a.position - b.position)
-  const sortedRight = [...right].sort((a, b) => a.position - b.position)
-  return sortedLeft.every((slot, index) => {
-    const other = sortedRight[index]
-    return (
-      slot.position === other.position &&
-      slot.characterKey === other.characterKey &&
-      slot.weaponItemId === other.weaponItemId &&
-      slot.armorItemId === other.armorItemId &&
-      slot.accessoryItemId === other.accessoryItemId
-    )
-  })
-}
-
-function emptySlots(): ClientTeamSlot[] {
-  return [
-    { position: 1, characterKey: null, weaponItemId: null, armorItemId: null, accessoryItemId: null },
-    { position: 2, characterKey: null, weaponItemId: null, armorItemId: null, accessoryItemId: null },
-    { position: 3, characterKey: null, weaponItemId: null, armorItemId: null, accessoryItemId: null },
-  ]
 }

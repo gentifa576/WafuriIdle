@@ -6,6 +6,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BACKEND_DIR="$ROOT_DIR/backend"
 FRONTEND_DIR="$ROOT_DIR/frontend"
 CLIENT_PID_FILE="$FRONTEND_DIR/.playtest-client.pid"
+BACKEND_GRADLE_USER_HOME="$BACKEND_DIR/.gradle-user-home"
 
 gradle_wrapper_command() {
   case "$(uname -s)" in
@@ -40,6 +41,6 @@ stop_tracked_client_if_running() {
 stop_tracked_client_if_running
 
 echo "Stopping backend..."
-(cd "$BACKEND_DIR" && "$(gradle_wrapper_command)" stopServer >/dev/null)
+(cd "$BACKEND_DIR" && GRADLE_USER_HOME="$BACKEND_GRADLE_USER_HOME" "$(gradle_wrapper_command)" stopServer >/dev/null)
 
 echo "Local playtest services stopped."

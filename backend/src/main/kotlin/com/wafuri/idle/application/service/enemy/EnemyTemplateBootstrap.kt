@@ -1,6 +1,8 @@
 package com.wafuri.idle.application.service.enemy
 
-import com.wafuri.idle.application.port.out.EnemyFetcher
+import com.wafuri.idle.application.service.loadFirstNonEmpty
+import com.wafuri.idle.application.service.logLoadedContent
+import com.wafuri.idle.application.service.optionalFetcher
 import io.quarkus.runtime.Startup
 import jakarta.annotation.PostConstruct
 import jakarta.enterprise.context.ApplicationScoped
@@ -18,29 +20,19 @@ class EnemyTemplateBootstrap(
 
   @PostConstruct
   fun load() {
-    val fetchers: List<EnemyFetcher> =
-      buildList {
-        if (resourceEnemyFetcherInstance.isResolvable) {
-          add(resourceEnemyFetcherInstance.get())
-        }
-        add(databaseEnemyFetcher)
-      }
     val enemies =
-      fetchers
-        .asSequence()
-        .map { it.fetch() }
-        .firstOrNull { it.isNotEmpty() }
-        .orEmpty()
+      loadFirstNonEmpty(
+        optionalFetcher(resourceEnemyFetcherInstance) { it.fetch() } +
+          listOf({ databaseEnemyFetcher.fetch() }),
+      )
 
     enemyTemplateCatalog.replace(enemies.toSet())
-
-    if (enemies.isEmpty()) {
-      logger.warn("No enemy templates were loaded during startup.")
-    } else {
-      logger
-        .atInfo()
-        .addKeyValue("enemyCount", enemies.size)
-        .log("Loaded enemy templates.")
-    }
+    logLoadedContent(
+      logger = logger,
+      content = enemies,
+      emptyMessage = "No enemy templates were loaded during startup.",
+      countKey = "enemyCount",
+      loadedMessage = "Loaded enemy templates.",
+    )
   }
 }

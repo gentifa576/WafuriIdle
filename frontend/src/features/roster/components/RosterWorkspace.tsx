@@ -1,13 +1,17 @@
 import { useEffect, useMemo, useState } from 'react'
-import type {
-  ClientCharacterTemplate,
-  ClientOwnedCharacter,
-  ClientPassiveDefinition,
-  ClientStatGrowth,
-} from '../../session/model/clientModels'
+import type { ClientCharacterTemplate, ClientOwnedCharacter, ClientStatGrowth } from '../../session/model/clientModels'
+import {
+  describePassive,
+  formatGrowth,
+  growthAtLevel,
+  mapCharacterDisplayModels,
+  type CharacterDisplayModel,
+} from '../../session/model/characterDisplay'
 import { ActionButton } from '../../../shared/ui/ActionButton'
+import { HoverPreviewCard } from '../../../shared/ui/HoverPreviewCard'
 import { SectionHeader } from '../../../shared/ui/SectionHeader'
 import { SurfaceCard } from '../../../shared/ui/SurfaceCard'
+import { createHoverTileHandlers, hoverPreviewStyle } from '../../../shared/ui/hoverPreview'
 import { useDelayedHover } from '../../../shared/ui/useDelayedHover'
 import { CharacterRosterTile } from './CharacterRosterTile'
 import './roster.css'
@@ -17,27 +21,12 @@ interface RosterWorkspaceProps {
   templates: ClientCharacterTemplate[]
 }
 
-interface RosterCharacter {
-  key: string
-  name: string
-  level: number
-  image?: string | null
-  tags: string[]
-  strength: ClientStatGrowth
-  agility: ClientStatGrowth
-  intelligence: ClientStatGrowth
-  wisdom: ClientStatGrowth
-  vitality: ClientStatGrowth
-  skill?: ClientCharacterTemplate['skill']
-  passive?: ClientPassiveDefinition | null
-}
-
 export function RosterWorkspace({ ownedCharacters, templates }: RosterWorkspaceProps) {
   const [selectedCharacterKey, setSelectedCharacterKey] = useState<string | null>(null)
   const hover = useDelayedHover<{ key: string }>({
     matches: (current, target) => current.key === target.key,
   })
-  const roster = useMemo(() => mapRoster(ownedCharacters, templates), [ownedCharacters, templates])
+  const roster = useMemo(() => mapCharacterDisplayModels(ownedCharacters, templates), [ownedCharacters, templates])
   const selectedCharacter = roster.find((character) => character.key === selectedCharacterKey) ?? null
   const hoveredCharacter = roster.find((character) => character.key === hover.hoverState?.key) ?? null
 
@@ -149,15 +138,11 @@ export function RosterWorkspace({ ownedCharacters, templates }: RosterWorkspaceP
                         image={character.image}
                         key={character.key}
                         name={character.name}
-                        onBlur={() => hover.clearIfTarget({ key: character.key })}
                         onClick={() => {
                           hover.clear()
                           setSelectedCharacterKey(character.key)
                         }}
-                        onFocus={() => hover.showFromFocus({ key: character.key })}
-                        onMouseEnter={(event) => hover.queueFromPointer({ key: character.key }, event)}
-                        onMouseLeave={() => hover.clearIfTarget({ key: character.key })}
-                        onMouseMove={(event) => hover.updateFromPointer({ key: character.key }, event)}
+                        {...createHoverTileHandlers(hover, { key: character.key })}
                       />
                     ))}
                   </div>
@@ -193,21 +178,13 @@ export function RosterWorkspace({ ownedCharacters, templates }: RosterWorkspaceP
       </aside>
 
       {hoveredCharacter ? (
-        <div
-          aria-hidden="true"
+        <HoverPreviewCard
           className="roster-hover-card"
-          style={{
-            left: `${Math.min(hover.hoverState!.x + 18, window.innerWidth - 340)}px`,
-            top: `${Math.min(hover.hoverState!.y + 18, window.innerHeight - 280)}px`,
-          }}
+          headerClassName="roster-hover-header"
+          style={hoverPreviewStyle(hover.hoverState!)}
+          title={hoveredCharacter.name}
+          badge={`Lv ${hoveredCharacter.level}`}
         >
-          <div className="roster-hover-header">
-            <div>
-              <span className="label">Preview</span>
-              <h3>{hoveredCharacter.name}</h3>
-            </div>
-            <span className="header-chip">Lv {hoveredCharacter.level}</span>
-          </div>
           <p className="muted">{hoveredCharacter.key}</p>
           <div className="roster-tags">
             {hoveredCharacter.tags.length > 0 ? (
@@ -227,34 +204,13 @@ export function RosterWorkspace({ ownedCharacters, templates }: RosterWorkspaceP
           <p className="muted">
             Skill: {hoveredCharacter.skill?.name ?? 'None'} | Passive: {hoveredCharacter.passive?.name ?? 'None'}
           </p>
-        </div>
+        </HoverPreviewCard>
       ) : null}
     </>
   )
 }
 
-function mapRoster(ownedCharacters: ClientOwnedCharacter[], templates: ClientCharacterTemplate[]): RosterCharacter[] {
-  const templatesByKey = new Map(templates.map((template) => [template.key, template]))
-  return ownedCharacters.map((character) => {
-    const template = templatesByKey.get(character.key)
-    return {
-      key: character.key,
-      name: character.name,
-      level: character.level,
-      image: template?.image,
-      tags: template?.tags ?? [],
-      strength: template?.strength ?? emptyGrowth(),
-      agility: template?.agility ?? emptyGrowth(),
-      intelligence: template?.intelligence ?? emptyGrowth(),
-      wisdom: template?.wisdom ?? emptyGrowth(),
-      vitality: template?.vitality ?? emptyGrowth(),
-      skill: template?.skill,
-      passive: template?.passive ?? null,
-    }
-  })
-}
-
-function statEntries(character: RosterCharacter) {
+function statEntries(character: CharacterDisplayModel) {
   return [
     toStatEntry('Strength', character.strength, character.level),
     toStatEntry('Agility', character.agility, character.level),
@@ -270,36 +226,5 @@ function toStatEntry(label: string, growth: ClientStatGrowth, level: number) {
     base: formatGrowth(growth.base),
     increment: formatGrowth(growth.increment),
     value: growthAtLevel(growth, level),
-  }
-}
-
-function growthAtLevel(growth: ClientStatGrowth, level: number) {
-  return formatGrowth(growth.base + growth.increment * Math.max(0, level - 1))
-}
-
-function formatGrowth(value: number) {
-  return Number.isInteger(value) ? value.toString() : value.toFixed(1)
-}
-
-function emptyGrowth(): ClientStatGrowth {
-  return { base: 0, increment: 0 }
-}
-
-function describePassive(passive: ClientPassiveDefinition) {
-  const scope = passive.leaderOnly ? 'Leader only' : 'Teamwide'
-  const trigger = passive.trigger.toLowerCase().replaceAll('_', ' ')
-  const condition = describeCondition(passive.condition)
-  return `${scope} passive. Trigger: ${trigger}. ${condition}`
-}
-
-function describeCondition(condition: ClientPassiveDefinition['condition']) {
-  switch (condition.type) {
-    case 'ALIVE_ALLIES_WITH_TAG_AT_LEAST':
-      return `Requires at least ${condition.minimumCount ?? 0} ally${condition.minimumCount === 1 ? '' : 'ies'} with ${condition.tag ?? 'a tag'}.`
-    case 'ANY_ALLY_HP_BELOW_PERCENT':
-    case 'SELF_HP_BELOW_PERCENT':
-      return `Activates below ${condition.percent ?? 0}% HP.`
-    default:
-      return 'Always available.'
   }
 }

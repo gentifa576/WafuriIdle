@@ -63,49 +63,53 @@ export function parsePlayerSocketMessage(raw: string): SocketMessageParseResult 
 }
 
 function parsePlayerStateSyncMessage(message: Record<string, unknown>): SocketMessageParseResult {
-  if (!isString(message.playerId) || !isPlayerStateSnapshot(message.snapshot)) {
+  if (!hasFields(message, { playerId: isString, snapshot: isPlayerStateSnapshot })) {
     return invalidMessage('INVALID_MESSAGE_SHAPE', 'PLAYER_STATE_SYNC payload is missing required player snapshot fields.')
   }
+  const playerId = message.playerId as string
+  const snapshot = message.snapshot as PlayerStateSnapshot
   return {
     ok: true,
     message: {
       type: 'PLAYER_STATE_SYNC',
-      playerId: message.playerId,
-      snapshot: message.snapshot,
+      playerId,
+      snapshot,
     } satisfies PlayerStateSyncMessage,
   }
 }
 
 function parseCombatStateSyncMessage(message: Record<string, unknown>): SocketMessageParseResult {
-  if (!isString(message.playerId) || !isString(message.serverTime) || !isNullableCombatSnapshot(message.snapshot)) {
+  if (!hasFields(message, { playerId: isString, serverTime: isString, snapshot: isNullableCombatSnapshot })) {
     return invalidMessage('INVALID_MESSAGE_SHAPE', 'COMBAT_STATE_SYNC payload is missing required combat snapshot fields.')
   }
+  const playerId = message.playerId as string
+  const serverTime = message.serverTime as string
+  const snapshot = message.snapshot as CombatSnapshot | null
   return {
     ok: true,
     message: {
       type: 'COMBAT_STATE_SYNC',
-      playerId: message.playerId,
-      snapshot: message.snapshot,
-      serverTime: message.serverTime,
+      playerId,
+      snapshot,
+      serverTime,
     } satisfies CombatStateSyncMessage,
   }
 }
 
 function parseSkillEventsMessage(message: Record<string, unknown>): SocketMessageParseResult {
-  if (
-    !isString(message.playerId) ||
-    !isSkillEffectEventArray(message.events) ||
-    !isString(message.serverTime)
-  ) {
+  if (!hasFields(message, { playerId: isString, events: isSkillEffectEventArray, serverTime: isString })) {
     return invalidMessage('INVALID_MESSAGE_SHAPE', 'SKILL_EVENTS payload is missing required fields.')
   }
+  const playerId = message.playerId as string
+  const events = message.events as SkillEffectEvent[]
+  const serverTime = message.serverTime as string
   return {
     ok: true,
     message: {
       type: 'SKILL_EVENTS',
-      playerId: message.playerId,
-      events: message.events,
-      serverTime: message.serverTime,
+      playerId,
+      events,
+      serverTime,
     } satisfies SkillEventsMessage,
   }
 }
@@ -115,111 +119,129 @@ function isSkillEffectEventArray(value: unknown): value is SkillEffectEvent[] {
 }
 
 function isSkillEffectEvent(value: unknown): value is SkillEffectEvent {
-  return (
-    isRecord(value) &&
-    isString(value.eventId) &&
-    isString(value.characterKey) &&
-    isString(value.skillKey) &&
-    isSkillEffectType(value.effectType) &&
-    isSkillTargetType(value.targetType) &&
-    isNullableString(value.targetKey) &&
-    isNullableNumber(value.value) &&
-    isNullableString(value.statusKey) &&
-    isNullableNumber(value.durationMillis)
-  )
+  return isRecord(value) && hasFields(value, {
+    eventId: isString,
+    characterKey: isString,
+    skillKey: isString,
+    effectType: isSkillEffectType,
+    targetType: isSkillTargetType,
+    targetKey: isNullableString,
+    value: isNullableNumber,
+    statusKey: isNullableString,
+    durationMillis: isNullableNumber,
+  })
 }
 
 function isSkillEffectType(value: unknown): boolean {
-  return value === 'DAMAGE' || value === 'HEAL' || value === 'BUFF_APPLIED' || value === 'DEBUFF_APPLIED' || value === 'SHIELD'
+  return isOneOf(value, ['DAMAGE', 'HEAL', 'BUFF_APPLIED', 'DEBUFF_APPLIED', 'SHIELD'])
 }
 
 function isSkillTargetType(value: unknown): boolean {
-  return value === 'ENEMY' || value === 'ALLY_TEAM' || value === 'ALLY_MEMBER' || value === 'SELF'
+  return isOneOf(value, ['ENEMY', 'ALLY_TEAM', 'ALLY_MEMBER', 'SELF'])
 }
 
 function parseZoneLevelUpMessage(message: Record<string, unknown>): SocketMessageParseResult {
-  if (!isString(message.playerId) || !isString(message.zoneId) || !isNumber(message.level) || !isNullableString(message.serverTime)) {
+  if (!hasFields(message, { playerId: isString, zoneId: isString, level: isNumber, serverTime: isNullableString })) {
     return invalidMessage('INVALID_MESSAGE_SHAPE', 'ZONE_LEVEL_UP payload is missing required fields.')
   }
+  const playerId = message.playerId as string
+  const zoneId = message.zoneId as string
+  const level = message.level as number
+  const serverTime = message.serverTime as string | null
   return {
     ok: true,
     message: {
       type: 'ZONE_LEVEL_UP',
-      playerId: message.playerId,
-      zoneId: message.zoneId,
-      level: message.level,
-      serverTime: message.serverTime,
+      playerId,
+      zoneId,
+      level,
+      serverTime,
     } satisfies ZoneLevelUpMessage,
   }
 }
 
 function parseOfflineProgressionMessage(message: Record<string, unknown>): SocketMessageParseResult {
-  if (
-    !isString(message.playerId) ||
-    !isNumber(message.offlineDurationMillis) ||
-    !isNumber(message.kills) ||
-    !isNumber(message.experienceGained) ||
-    !isNumber(message.goldGained) ||
-    !isNumber(message.playerLevel) ||
-    !isNumber(message.playerLevelsGained) ||
-    !isString(message.zoneId) ||
-    !isNumber(message.zoneLevel) ||
-    !isNumber(message.zoneLevelsGained) ||
-    !isOfflineRewardSummaryArray(message.rewards) ||
-    !isNullableString(message.serverTime)
-  ) {
+  if (!hasFields(message, {
+    playerId: isString,
+    offlineDurationMillis: isNumber,
+    kills: isNumber,
+    experienceGained: isNumber,
+    goldGained: isNumber,
+    playerLevel: isNumber,
+    playerLevelsGained: isNumber,
+    zoneId: isString,
+    zoneLevel: isNumber,
+    zoneLevelsGained: isNumber,
+    rewards: isOfflineRewardSummaryArray,
+    serverTime: isNullableString,
+  })) {
     return invalidMessage('INVALID_MESSAGE_SHAPE', 'OFFLINE_PROGRESSION payload is missing required fields.')
   }
+  const playerId = message.playerId as string
+  const offlineDurationMillis = message.offlineDurationMillis as number
+  const kills = message.kills as number
+  const experienceGained = message.experienceGained as number
+  const goldGained = message.goldGained as number
+  const playerLevel = message.playerLevel as number
+  const playerLevelsGained = message.playerLevelsGained as number
+  const zoneId = message.zoneId as string
+  const zoneLevel = message.zoneLevel as number
+  const zoneLevelsGained = message.zoneLevelsGained as number
+  const rewards = message.rewards as OfflineRewardSummary[]
+  const serverTime = message.serverTime as string | null
   return {
     ok: true,
     message: {
       type: 'OFFLINE_PROGRESSION',
-      playerId: message.playerId,
-      offlineDurationMillis: message.offlineDurationMillis,
-      kills: message.kills,
-      experienceGained: message.experienceGained,
-      goldGained: message.goldGained,
-      playerLevel: message.playerLevel,
-      playerLevelsGained: message.playerLevelsGained,
-      zoneId: message.zoneId,
-      zoneLevel: message.zoneLevel,
-      zoneLevelsGained: message.zoneLevelsGained,
-      rewards: message.rewards,
-      serverTime: message.serverTime,
+      playerId,
+      offlineDurationMillis,
+      kills,
+      experienceGained,
+      goldGained,
+      playerLevel,
+      playerLevelsGained,
+      zoneId,
+      zoneLevel,
+      zoneLevelsGained,
+      rewards,
+      serverTime,
     } satisfies OfflineProgressionMessage,
   }
 }
 
 function parseCommandErrorMessage(message: Record<string, unknown>): SocketMessageParseResult {
-  if (!isString(message.playerId) || !isString(message.commandType) || !isString(message.message) || !isString(message.serverTime)) {
+  if (!hasFields(message, { playerId: isString, commandType: isString, message: isString, serverTime: isString })) {
     return invalidMessage('INVALID_MESSAGE_SHAPE', 'COMMAND_ERROR payload is missing required fields.')
   }
+  const playerId = message.playerId as string
+  const commandType = message.commandType as string
+  const errorMessage = message.message as string
+  const serverTime = message.serverTime as string
   return {
     ok: true,
     message: {
       type: 'COMMAND_ERROR',
-      playerId: message.playerId,
-      commandType: message.commandType,
-      message: message.message,
-      serverTime: message.serverTime,
+      playerId,
+      commandType,
+      message: errorMessage,
+      serverTime,
     } satisfies CommandErrorMessage,
   }
 }
 
 function isPlayerStateSnapshot(value: unknown): value is PlayerStateSnapshot {
-  return (
-    isRecord(value) &&
-    isString(value.playerId) &&
-    isString(value.playerName) &&
-    isNumber(value.playerExperience) &&
-    isNumber(value.playerLevel) &&
-    isNumber(value.playerGold) &&
-    isNumber(value.playerEssence) &&
-    isOwnedCharacterSnapshotArray(value.ownedCharacters) &&
-    isZoneProgressSnapshotArray(value.zoneProgress) &&
-    isInventoryItemSnapshotArray(value.inventory) &&
-    isString(value.serverTime)
-  )
+  return isRecord(value) && hasFields(value, {
+    playerId: isString,
+    playerName: isString,
+    playerExperience: isNumber,
+    playerLevel: isNumber,
+    playerGold: isNumber,
+    playerEssence: isNumber,
+    ownedCharacters: isOwnedCharacterSnapshotArray,
+    zoneProgress: isZoneProgressSnapshotArray,
+    inventory: isInventoryItemSnapshotArray,
+    serverTime: isString,
+  })
 }
 
 function isNullableCombatSnapshot(value: unknown): value is CombatSnapshot | null {
@@ -227,21 +249,20 @@ function isNullableCombatSnapshot(value: unknown): value is CombatSnapshot | nul
 }
 
 function isCombatSnapshot(value: unknown): value is CombatSnapshot {
-  return (
-    isRecord(value) &&
-    isString(value.playerId) &&
-    isString(value.status) &&
-    isNullableString(value.zoneId) &&
-    isNullableString(value.activeTeamId) &&
-    isNullableString(value.enemyName) &&
-    isNullableString(value.enemyImage) &&
-    isNumber(value.enemyAttack) &&
-    isNumber(value.enemyHp) &&
-    isNumber(value.enemyMaxHp) &&
-    isNumber(value.teamDps) &&
-    isNumber(value.pendingReviveMillis) &&
-    isCombatMemberArray(value.members)
-  )
+  return isRecord(value) && hasFields(value, {
+    playerId: isString,
+    status: isString,
+    zoneId: isNullableString,
+    activeTeamId: isNullableString,
+    enemyName: isNullableString,
+    enemyImage: isNullableString,
+    enemyAttack: isNumber,
+    enemyHp: isNumber,
+    enemyMaxHp: isNumber,
+    teamDps: isNumber,
+    pendingReviveMillis: isNumber,
+    members: isCombatMemberArray,
+  })
 }
 
 function isOwnedCharacterSnapshotArray(value: unknown): value is OwnedCharacterSnapshot[] {
@@ -249,7 +270,7 @@ function isOwnedCharacterSnapshotArray(value: unknown): value is OwnedCharacterS
 }
 
 function isOwnedCharacterSnapshot(value: unknown): value is OwnedCharacterSnapshot {
-  return isRecord(value) && isString(value.key) && isString(value.name) && isNumber(value.level)
+  return isRecord(value) && hasFields(value, { key: isString, name: isString, level: isNumber })
 }
 
 function isZoneProgressSnapshotArray(value: unknown): value is ZoneProgressSnapshot[] {
@@ -257,7 +278,7 @@ function isZoneProgressSnapshotArray(value: unknown): value is ZoneProgressSnaps
 }
 
 function isZoneProgressSnapshot(value: unknown): value is ZoneProgressSnapshot {
-  return isRecord(value) && isString(value.zoneId) && isNumber(value.killCount) && isNumber(value.level)
+  return isRecord(value) && hasFields(value, { zoneId: isString, killCount: isNumber, level: isNumber })
 }
 
 function isInventoryItemSnapshotArray(value: unknown): value is InventoryItemSnapshot[] {
@@ -265,21 +286,20 @@ function isInventoryItemSnapshotArray(value: unknown): value is InventoryItemSna
 }
 
 function isInventoryItemSnapshot(value: unknown): value is InventoryItemSnapshot {
-  return (
-    isRecord(value) &&
-    isString(value.id) &&
-    isString(value.itemName) &&
-    isString(value.itemDisplayName) &&
-    isString(value.itemType) &&
-    isNumber(value.itemLevel) &&
-    isStat(value.itemBaseStat) &&
-    isStringArray(value.itemSubStatPool) &&
-    isStatArray(value.subStats) &&
-    isString(value.rarity) &&
-    isNumber(value.upgrade) &&
-    isNullableString(value.equippedTeamId) &&
-    isNullableNumber(value.equippedPosition)
-  )
+  return isRecord(value) && hasFields(value, {
+    id: isString,
+    itemName: isString,
+    itemDisplayName: isString,
+    itemType: isString,
+    itemLevel: isNumber,
+    itemBaseStat: isStat,
+    itemSubStatPool: isStringArray,
+    subStats: isStatArray,
+    rarity: isString,
+    upgrade: isNumber,
+    equippedTeamId: isNullableString,
+    equippedPosition: isNullableNumber,
+  })
 }
 
 function isCombatMemberArray(value: unknown): value is CombatMember[] {
@@ -287,15 +307,14 @@ function isCombatMemberArray(value: unknown): value is CombatMember[] {
 }
 
 function isCombatMember(value: unknown): value is CombatMember {
-  return (
-    isRecord(value) &&
-    isString(value.characterKey) &&
-    isNumber(value.attack) &&
-    isNumber(value.hit) &&
-    isNumber(value.currentHp) &&
-    isNumber(value.maxHp) &&
-    isBoolean(value.alive)
-  )
+  return isRecord(value) && hasFields(value, {
+    characterKey: isString,
+    attack: isNumber,
+    hit: isNumber,
+    currentHp: isNumber,
+    maxHp: isNumber,
+    alive: isBoolean,
+  })
 }
 
 function isOfflineRewardSummaryArray(value: unknown): value is OfflineRewardSummary[] {
@@ -303,7 +322,7 @@ function isOfflineRewardSummaryArray(value: unknown): value is OfflineRewardSumm
 }
 
 function isOfflineRewardSummary(value: unknown): value is OfflineRewardSummary {
-  return isRecord(value) && isString(value.itemName) && isNumber(value.count)
+  return isRecord(value) && hasFields(value, { itemName: isString, count: isNumber })
 }
 
 function isStatArray(value: unknown): value is Stat[] {
@@ -311,7 +330,7 @@ function isStatArray(value: unknown): value is Stat[] {
 }
 
 function isStat(value: unknown): value is Stat {
-  return isRecord(value) && isString(value.type) && isNumber(value.value)
+  return isRecord(value) && hasFields(value, { type: isString, value: isNumber })
 }
 
 function isStringArray(value: unknown): value is string[] {
@@ -340,6 +359,17 @@ function isNullableNumber(value: unknown): value is number | null {
 
 function isBoolean(value: unknown): value is boolean {
   return typeof value === 'boolean'
+}
+
+function hasFields(
+  value: Record<string, unknown>,
+  validators: Record<string, (field: unknown) => boolean>,
+) {
+  return Object.entries(validators).every(([key, validate]) => validate(value[key]))
+}
+
+function isOneOf(value: unknown, allowed: readonly string[]) {
+  return isString(value) && allowed.includes(value)
 }
 
 function invalidMessage(code: SocketMessageParseError['code'], message: string): SocketMessageParseResult {

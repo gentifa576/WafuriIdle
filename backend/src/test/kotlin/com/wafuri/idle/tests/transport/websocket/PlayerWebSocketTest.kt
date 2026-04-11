@@ -9,6 +9,8 @@ import com.wafuri.idle.application.service.character.CharacterTemplateCatalog
 import com.wafuri.idle.domain.model.AuthScope
 import com.wafuri.idle.domain.model.CombatStatus
 import com.wafuri.idle.domain.model.Team
+import com.wafuri.idle.tests.support.MessageCollector
+import com.wafuri.idle.tests.support.connectPlayerWebSocket
 import com.wafuri.idle.tests.support.expectedAuthResponse
 import com.wafuri.idle.tests.support.expectedCombatState
 import com.wafuri.idle.tests.support.expectedOwnedCharacterSnapshot
@@ -27,17 +29,11 @@ import io.restassured.RestAssured.given
 import io.restassured.common.mapper.TypeRef
 import io.smallrye.jwt.build.Jwt
 import jakarta.inject.Inject
-import jakarta.websocket.ClientEndpointConfig
-import jakarta.websocket.ContainerProvider
-import jakarta.websocket.Endpoint
-import jakarta.websocket.EndpointConfig
 import jakarta.websocket.Session
 import org.junit.jupiter.api.Test
 import java.net.URI
 import java.time.Instant
 import java.util.UUID
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
 
 @QuarkusTest
@@ -107,15 +103,7 @@ class PlayerWebSocketTest {
       )
 
     val collector = MessageCollector()
-    val client = ContainerProvider.getWebSocketContainer()
-    val endpointUri =
-      URI.create(
-        wsBaseUri
-          .toString()
-          .replaceFirst("http", "ws")
-          .trimEnd('/') + "/$playerId",
-      )
-    val session: Session = client.connectToServer(clientEndpoint(collector), clientConfig(token), endpointUri)
+    val session: Session = connectPlayerWebSocket(wsBaseUri, playerId, token, collector)
     try {
       collector.opened.await(5, TimeUnit.SECONDS) shouldBe true
       session.isOpen shouldBe true
@@ -296,7 +284,7 @@ class PlayerWebSocketTest {
 
       session.asyncRemote.sendText("""{"type":"STOP_COMBAT"}""")
 
-      val stopMessage = collector.messages.poll(5, TimeUnit.SECONDS)
+      val stopMessage = waitForMessageOfType(collector, EventType.COMBAT_STATE_SYNC)
       stopMessage.shouldNotBeNull()
       val combatMessage = objectMapper.readValue(stopMessage, com.wafuri.idle.application.model.CombatStateMessage::class.java)
       combatMessage.type shouldBe EventType.COMBAT_STATE_SYNC
@@ -387,17 +375,7 @@ class PlayerWebSocketTest {
     collector: MessageCollector,
     playerId: String,
     token: String?,
-  ): Session {
-    val client = ContainerProvider.getWebSocketContainer()
-    val endpointUri =
-      URI.create(
-        wsBaseUri
-          .toString()
-          .replaceFirst("http", "ws")
-          .trimEnd('/') + "/$playerId",
-      )
-    return client.connectToServer(clientEndpoint(collector), clientConfig(token), endpointUri)
-  }
+  ): Session = connectPlayerWebSocket(wsBaseUri, playerId, token, collector)
 
   private fun assertUnauthorizedSocket(
     playerId: String,
@@ -417,30 +395,6 @@ class PlayerWebSocketTest {
     } finally {
       attemptedSession?.close()
     }
-  }
-
-  private fun clientEndpoint(collector: MessageCollector): Endpoint =
-    object : Endpoint() {
-      override fun onOpen(
-        session: Session,
-        config: EndpointConfig,
-      ) {
-        collector.onOpen()
-        session.addMessageHandler(String::class.java) { message -> collector.onMessage(message) }
-      }
-    }
-
-  private fun clientConfig(token: String?): ClientEndpointConfig {
-    val builder = ClientEndpointConfig.Builder.create()
-    if (token != null) {
-      builder.preferredSubprotocols(
-        listOf(
-          "bearer-token-carrier",
-          "quarkus-http-upgrade#Authorization#Bearer%20$token",
-        ),
-      )
-    }
-    return builder.build()
   }
 
   private fun waitForCombatState(playerId: String): com.wafuri.idle.domain.model.CombatState {
@@ -489,16 +443,20 @@ class PlayerWebSocketTest {
       .sign()
   }
 
-  class MessageCollector {
-    val opened = CountDownLatch(1)
-    val messages = LinkedBlockingQueue<String>()
-
-    fun onOpen() {
-      opened.countDown()
+  private fun waitForMessageOfType(
+    collector: MessageCollector,
+    eventType: EventType,
+    timeoutSeconds: Long = 5,
+  ): String? {
+    val deadlineNanos = System.nanoTime() + TimeUnit.SECONDS.toNanos(timeoutSeconds)
+    while (System.nanoTime() < deadlineNanos) {
+      val remainingNanos = deadlineNanos - System.nanoTime()
+      val message = collector.messages.poll(remainingNanos.coerceAtLeast(1), TimeUnit.NANOSECONDS) ?: return null
+      val parsedType = objectMapper.readTree(message).path("type").asText(null)
+      if (parsedType == eventType.name) {
+        return message
+      }
     }
-
-    fun onMessage(message: String) {
-      messages.offer(message)
-    }
+    return null
   }
 }

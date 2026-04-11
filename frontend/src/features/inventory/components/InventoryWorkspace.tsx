@@ -2,8 +2,10 @@ import { useEffect, useMemo, useState } from 'react'
 import type { ClientInventoryItem } from '../../session/model/clientModels'
 import { FeedbackState } from '../../workspace/components/FeedbackState'
 import { ActionButton } from '../../../shared/ui/ActionButton'
+import { HoverPreviewCard } from '../../../shared/ui/HoverPreviewCard'
 import { SectionHeader } from '../../../shared/ui/SectionHeader'
 import { SurfaceCard } from '../../../shared/ui/SurfaceCard'
+import { createHoverTileHandlers, hoverPreviewStyle } from '../../../shared/ui/hoverPreview'
 import { useDelayedHover } from '../../../shared/ui/useDelayedHover'
 import { InventoryTile } from './InventoryTile'
 import './inventory.css'
@@ -138,15 +140,11 @@ export function InventoryWorkspace({ inventory }: InventoryWorkspaceProps) {
                         key={item.id}
                         level={item.itemLevel}
                         name={item.itemDisplayName}
-                        onBlur={() => hover.clearIfTarget({ id: item.id })}
                         onClick={() => {
                           hover.clear()
                           setSelectedItemId(item.id)
                         }}
-                        onFocus={() => hover.showFromFocus({ id: item.id })}
-                        onMouseEnter={(event) => hover.queueFromPointer({ id: item.id }, event)}
-                        onMouseLeave={() => hover.clearIfTarget({ id: item.id })}
-                        onMouseMove={(event) => hover.updateFromPointer({ id: item.id }, event)}
+                        {...createHoverTileHandlers(hover, { id: item.id })}
                         rarity={item.rarity}
                         type={item.itemType}
                       />
@@ -183,21 +181,13 @@ export function InventoryWorkspace({ inventory }: InventoryWorkspaceProps) {
       </aside>
 
       {hoveredItem ? (
-        <div
-          aria-hidden="true"
+        <HoverPreviewCard
           className="inventory-hover-card"
-          style={{
-            left: `${Math.min(hover.hoverState!.x + 18, window.innerWidth - 340)}px`,
-            top: `${Math.min(hover.hoverState!.y + 18, window.innerHeight - 280)}px`,
-          }}
+          headerClassName="inventory-hover-header"
+          style={hoverPreviewStyle(hover.hoverState!)}
+          title={hoveredItem.itemDisplayName}
+          badge={`Lv ${hoveredItem.itemLevel}`}
         >
-          <div className="inventory-hover-header">
-            <div>
-              <span className="label">Preview</span>
-              <h3>{hoveredItem.itemDisplayName}</h3>
-            </div>
-            <span className="header-chip">Lv {hoveredItem.itemLevel}</span>
-          </div>
           <p className="muted">
             {hoveredItem.rarity} | {hoveredItem.itemType}
           </p>
@@ -206,7 +196,7 @@ export function InventoryWorkspace({ inventory }: InventoryWorkspaceProps) {
           </p>
           <p className="muted">{hoveredItem.assignmentLabel}</p>
           {hoveredItem.subStats.length > 0 ? <p>{hoveredItem.subStats.map((stat) => `${stat.type} ${stat.value}`).join(' · ')}</p> : null}
-        </div>
+        </HoverPreviewCard>
       ) : null}
     </>
   )

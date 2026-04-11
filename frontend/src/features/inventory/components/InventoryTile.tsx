@@ -1,4 +1,5 @@
 import type { MouseEvent } from 'react'
+import { itemTypeAbbreviation } from '../model/itemPresentation'
 import { CollectionTile } from '../../../shared/ui/CollectionTile'
 
 interface InventoryTileProps {
@@ -47,7 +48,7 @@ export function InventoryTile({
       portrait={
         <>
           <div aria-hidden="true" className={`item-tile__placeholder item-tile__placeholder--${type.toLowerCase()}`}>
-            <span>{typeAbbreviation(type)}</span>
+            <span>{itemTypeAbbreviation(type)}</span>
           </div>
           <span className="item-tile__badge">Lv {level}</span>
           <span className="item-tile__rarity">{rarity}</span>
@@ -56,17 +57,4 @@ export function InventoryTile({
       selected={selected}
     />
   )
-}
-
-function typeAbbreviation(type: string) {
-  switch (type) {
-    case 'WEAPON':
-      return 'WP'
-    case 'ARMOR':
-      return 'AR'
-    case 'ACCESSORY':
-      return 'AC'
-    default:
-      return type.slice(0, 2).toUpperCase()
-  }
 }

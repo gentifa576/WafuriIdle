@@ -1,6 +1,8 @@
 package com.wafuri.idle.application.service.item
 
-import com.wafuri.idle.application.port.out.ItemFetcher
+import com.wafuri.idle.application.service.loadFirstNonEmpty
+import com.wafuri.idle.application.service.logLoadedContent
+import com.wafuri.idle.application.service.optionalFetcher
 import io.quarkus.runtime.Startup
 import jakarta.annotation.PostConstruct
 import jakarta.enterprise.context.ApplicationScoped
@@ -18,29 +20,19 @@ class ItemTemplateBootstrap(
 
   @PostConstruct
   fun load() {
-    val fetchers: List<ItemFetcher> =
-      buildList {
-        if (resourceItemFetcherInstance.isResolvable) {
-          add(resourceItemFetcherInstance.get())
-        }
-        add(databaseItemFetcher)
-      }
     val items =
-      fetchers
-        .asSequence()
-        .map { it.fetch() }
-        .firstOrNull { it.isNotEmpty() }
-        .orEmpty()
+      loadFirstNonEmpty(
+        optionalFetcher(resourceItemFetcherInstance) { it.fetch() } +
+          listOf({ databaseItemFetcher.fetch() }),
+      )
 
     itemTemplateCatalog.replace(items.toSet())
-
-    if (items.isEmpty()) {
-      logger.warn("No item templates were loaded during startup.")
-    } else {
-      logger
-        .atInfo()
-        .addKeyValue("itemCount", items.size)
-        .log("Loaded item templates.")
-    }
+    logLoadedContent(
+      logger = logger,
+      content = items,
+      emptyMessage = "No item templates were loaded during startup.",
+      countKey = "itemCount",
+      loadedMessage = "Loaded item templates.",
+    )
   }
 }

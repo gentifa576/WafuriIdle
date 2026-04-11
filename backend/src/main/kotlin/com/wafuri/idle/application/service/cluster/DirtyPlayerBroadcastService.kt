@@ -49,8 +49,14 @@ class DirtyPlayerBroadcastService(
         .map { playerId ->
           async {
             try {
-              peers.forEach { peer ->
-                internalDirtyNotificationClient.notifyDirty(peer.internalBaseUrl, playerId)
+              val failures =
+                peers
+                  .map { peer ->
+                    async { runCatching { internalDirtyNotificationClient.notifyDirty(peer.internalBaseUrl, playerId) } }
+                  }.awaitAll()
+                  .mapNotNull { it.exceptionOrNull() }
+              if (failures.isNotEmpty()) {
+                throw failures.first()
               }
               pendingAttempts.remove(playerId)
             } catch (exception: Exception) {

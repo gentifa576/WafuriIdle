@@ -1,6 +1,8 @@
 package com.wafuri.idle.application.service.character
 
-import com.wafuri.idle.application.port.out.CharacterFetcher
+import com.wafuri.idle.application.service.loadFirstNonEmpty
+import com.wafuri.idle.application.service.logLoadedContent
+import com.wafuri.idle.application.service.optionalFetcher
 import io.quarkus.runtime.Startup
 import jakarta.annotation.PostConstruct
 import jakarta.enterprise.context.ApplicationScoped
@@ -18,29 +20,19 @@ class CharacterTemplateBootstrap(
 
   @PostConstruct
   fun load() {
-    val fetchers: List<CharacterFetcher> =
-      buildList {
-        if (localCharacterFetcherInstance.isResolvable) {
-          add(localCharacterFetcherInstance.get())
-        }
-        add(databaseCharacterFetcher)
-      }
     val templates =
-      fetchers
-        .asSequence()
-        .map { it.fetch() }
-        .firstOrNull { it.isNotEmpty() }
-        .orEmpty()
+      loadFirstNonEmpty(
+        optionalFetcher(localCharacterFetcherInstance) { it.fetch() } +
+          listOf({ databaseCharacterFetcher.fetch() }),
+      )
 
     characterTemplateCatalog.replace(templates.toSet())
-
-    if (templates.isEmpty()) {
-      logger.warn("No character templates were loaded during startup.")
-    } else {
-      logger
-        .atInfo()
-        .addKeyValue("templateCount", templates.size)
-        .log("Loaded character templates.")
-    }
+    logLoadedContent(
+      logger = logger,
+      content = templates,
+      emptyMessage = "No character templates were loaded during startup.",
+      countKey = "templateCount",
+      loadedMessage = "Loaded character templates.",
+    )
   }
 }
